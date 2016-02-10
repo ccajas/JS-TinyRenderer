@@ -29,7 +29,7 @@ function drawFunc(model, ctx)
 
 		console.log("Canvas loaded");
 
-		var r = 0;
+		var th = 0;
 
 		var intervalID = window.setInterval(function()
 		{
@@ -37,6 +37,9 @@ function drawFunc(model, ctx)
 			img.clear(0x0);
 
 			start = new Date();
+
+			const cos_th = Math.cos(th);
+			const sin_th = Math.sin(th);
 
 			//for (var i = 0; i < 100; i++)
 			{
@@ -58,9 +61,8 @@ function drawFunc(model, ctx)
 						var y1 = v1[0];
 
 						// Rotate it!
-						const th = r;
-						y0 = y0 * Math.cos(th) - v0[2] * Math.sin(th);
-						y1 = y1 * Math.cos(th) - v1[2] * Math.sin(th);
+						y0 = y0 * cos_th - v0[2] * sin_th;
+						y1 = y1 * cos_th - v1[2] * sin_th;
 
 						x0 = Math.floor((x0 / 2 + 0.5) * img.h); 
 						y0 = Math.floor((y0 / 2 + 0.5) * img.w); 
@@ -81,7 +83,7 @@ function drawFunc(model, ctx)
 			document.getElementById('info').innerHTML = execTime;
 			//console.log(execTime);
 
-			r += 0.01;
+			th += 0.01;
 
 		}, 10);
 	}
@@ -104,6 +106,7 @@ Img.init = function(ctx)
 	this.ctx = ctx;
 	this.util = Object.create(Util);
 	this.calls = 0;
+	this.overdraw = 0;
 	var bufWidth = ctx.canvas.clientWidth;
 
 	// Get next highest 2^pow for width
@@ -142,6 +145,14 @@ Img.set = function(x, y, color)
 {
 	const index = ((this.h - y) << this.log2width) + x;
 	this.buf32[index] = (color << 8) + 255;
+}
+
+// Get a pixel
+
+Img.get = function(x, y)
+{
+	const index = ((this.h - y) << this.log2width) + x;
+	return this.buf32[index];
 }
 
 // Draw a line
@@ -197,5 +208,8 @@ Img.flush = function()
 {
 	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
-	console.log("Pixel draw calls: "+ this.calls);
+
+	console.log("Pixel draw calls: "+ this.calls +" overdraw: "+ this.overdraw);
+	this.calls = 0;
+	this.overdraw = 0;
 }
