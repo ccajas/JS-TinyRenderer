@@ -48,7 +48,7 @@ var Img = new Object();
 
 // Img properties
 
-Img.ctx = 'test_ctx';
+Img.ctx = null;
 Img.imgData = null;
 Img.util = null;
 

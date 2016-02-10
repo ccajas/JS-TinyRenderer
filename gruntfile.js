@@ -28,7 +28,7 @@ module.exports = function(grunt)
 		}
 	});
 
-	grunt.registerTask('minify', ['watch:first']); 
+	grunt.registerTask('watch', ['watch:first']); 
 
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
