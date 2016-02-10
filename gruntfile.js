@@ -15,7 +15,7 @@ module.exports = function(grunt)
 
 			js: {
 				files: { 'renderer.js': [
-					'src/renderer.js'
+					'src/*.js'
 				]}
 			}
 		},

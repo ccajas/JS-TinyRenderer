@@ -2,33 +2,61 @@
 function drawInit()
 {
 	var canvas = document.getElementById('render');
+	var model = Object.create(OBJmodel);
 
 	if (canvas.getContext)
 	{
 		var ctx = canvas.getContext('2d');
-		var img = Object.create(Img);
-		var model = Object.create(OBJmodel);
-
-		img.init(ctx);
-		console.log("canvas loaded");
-
-		// "Clear" canvas to black
-		img.clear();
+		var draw = drawFunc(model, ctx);
 
 		// Test load model
-		model.load("obj/head.obj");
+		model.load("obj/head.obj", draw);
+	}
+	else
+	{
+		console.error("Canvas context not supported!");
+	}
+}
 
-		// Draw a point
-		img.set(52, 141, 0xffffff);
+// Draw model called in deferred request
+
+function drawFunc(model, ctx)
+{
+	return function()
+	{
+		var img = Object.create(Img);
+		img.init(ctx)
+
+		console.log("Canvas loaded");
+
+		// "Clear" canvas to black
+		img.clear(0x0);
 
 		start = new Date();
 
-		for (var i = 0; i < 1000000; i++)
+		for (var i = 0; i < 100; i++)
 		{
 			// A few lines
 			img.line(13, 20, 80, 40, 0xffffff);
-			img.line(20, 13, 40, 80, 0xff0000);
-			img.line(80, 40, 13, 20, 0xff0000);
+			img.line(20, 13, 40, 80, 0xffffff);
+	
+			for (var f = 0; f < model.faces.length; f++)
+			{
+				var face = model.faces[f];
+
+				for (var v = 0; v < 3; v++) 
+				{
+					var v0 = model.verts[face[v] - 1]; 
+					var v1 = model.verts[face[(v+1)%3] - 1]; 
+
+					var x0 = Math.floor((v0[1] / 2 + 0.5) * img.h); 
+					var y0 = Math.floor((v0[0] / 2 + 0.5) * img.w); 
+					var x1 = Math.floor((v1[1] / 2 + 0.5) * img.h); 
+					var y1 = Math.floor((v1[0] / 2 + 0.5) * img.w); 
+
+					img.line(x0, y0, x1, y1, 0xffffff); 
+				}
+			}
 		}
 
 		end = new Date();
@@ -39,10 +67,6 @@ function drawInit()
 
 		document.getElementById('info').innerHTML = execTime;
 		console.log(execTime);
-	}
-	else
-	{
-		console.error("Canvas context not supported!");
 	}
 }
 
@@ -69,12 +93,13 @@ Img.init = function(ctx)
 	this.log2width = 1;
 	while (bufWidth >>= 1) this.log2width++;
 
-	this.w = 1 << this.log2width;
+	bufWidth = 1 << this.log2width;
+	this.w = ctx.canvas.clientWidth;
 	this.h = ctx.canvas.clientHeight;
 
 	// create buffers for data manipulation
 
-	this.imgData = ctx.createImageData(this.w, this.h);
+	this.imgData = ctx.createImageData(bufWidth, this.h);
 	this.buf = new ArrayBuffer(this.imgData.data.length);
 
 	this.buf8 = new Uint8ClampedArray(this.buf);
@@ -91,18 +116,16 @@ Img.clear = function(color)
 {
 	const len = this.buf32.length;
 	for (var i = 0; i < len; i++)
-		this.buf32[i] = 0xff000000;
+		this.buf32[i] = color + (255 << 24);
 }
 
 // Set a pixel
 
-Img.set = function(x, y, c)
+Img.set = function(x, y, color)
 {
+	y = this.h - y;
 	const index = (y << this.log2width) + x;
-	this.buf32[index] = (c << 8) + 255;
-
-	// Increment draw calls
-	this.calls++;
+	this.buf32[index] = (color << 8) + 255;
 }
 
 // Draw a line
@@ -147,6 +170,9 @@ Img.line = function(x0, y0, x1, y1, color)
 			error--;
 		} 
 	}
+
+	// Increment draw calls
+	this.calls += (x1 - x0 + 1);
 }
 
 // Put image data on the canvas
@@ -157,28 +183,3 @@ Img.flush = function()
 	this.ctx.putImageData(this.imgData, 0, 0);
 	console.log("Pixel draw calls: "+ this.calls);
 }
-
-// Utility functions
-
-var Util = new Object();
-
-// OBJ Model functions
-
-var OBJmodel = new Object();
-
-OBJmodel.load = function(file)
-{
-	var request = new XMLHttpRequest();
-	request.open("GET", file, true);
-
-	request.onload = function() 
-	{
-		if(request.status === 200 || request.status == 0)
-		{
-			var response = request.responseText;
-			//console.log(response);
-		}
-	}
-	request.send(null);
-}
-
