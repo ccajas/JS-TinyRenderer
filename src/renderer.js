@@ -29,44 +29,61 @@ function drawFunc(model, ctx)
 
 		console.log("Canvas loaded");
 
-		// "Clear" canvas to black
-		img.clear(0x0);
+		var r = 0;
 
-		start = new Date();
-
-		for (var i = 0; i < 100; i++)
+		var intervalID = window.setInterval(function()
 		{
-			// A few lines
-			img.line(13, 20, 80, 40, 0xffffff);
-			img.line(20, 13, 40, 80, 0xffffff);
-	
-			for (var f = 0; f < model.faces.length; f++)
+			// "Clear" canvas to black
+			img.clear(0x0);
+
+			start = new Date();
+
+			//for (var i = 0; i < 100; i++)
 			{
-				var face = model.faces[f];
-
-				for (var v = 0; v < 3; v++) 
+				// A few lines
+				img.line(13, 20, 80, 40, 0xffffff);
+				img.line(20, 13, 40, 80, 0xffffff);
+		
+				for (var f = 0; f < model.faces.length; f++)
 				{
-					var v0 = model.verts[face[v] - 1]; 
-					var v1 = model.verts[face[(v+1)%3] - 1]; 
+					var face = model.faces[f];
 
-					var x0 = Math.floor((v0[1] / 2 + 0.5) * img.h); 
-					var y0 = Math.floor((v0[0] / 2 + 0.5) * img.w); 
-					var x1 = Math.floor((v1[1] / 2 + 0.5) * img.h); 
-					var y1 = Math.floor((v1[0] / 2 + 0.5) * img.w); 
+					for (var v = 0; v < 3; v++) 
+					{
+						var v0 = model.verts[face[v] - 1]; 
+						var v1 = model.verts[face[(v+1)%3] - 1];
+						var x0 = v0[1];
+						var y0 = v0[0];
+						var x1 = v1[1];
+						var y1 = v1[0];
 
-					img.line(x0, y0, x1, y1, 0xffffff); 
+						// Rotate it!
+						const th = r;
+						y0 = y0 * Math.cos(th) - v0[2] * Math.sin(th);
+						y1 = y1 * Math.cos(th) - v1[2] * Math.sin(th);
+
+						x0 = Math.floor((x0 / 2 + 0.5) * img.h); 
+						y0 = Math.floor((y0 / 2 + 0.5) * img.w); 
+						x1 = Math.floor((x1 / 2 + 0.5) * img.h); 
+						y1 = Math.floor((y1 / 2 + 0.5) * img.w); 
+
+						img.line(x0, y0, x1, y1, 0xffffff); 
+					}
 				}
 			}
-		}
 
-		end = new Date();
-		var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+			end = new Date();
+			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
 
-		// Finally put image data onto canvas
-		img.flush();
+			// Finally put image data onto canvas
+			img.flush();
 
-		document.getElementById('info').innerHTML = execTime;
-		console.log(execTime);
+			document.getElementById('info').innerHTML = execTime;
+			//console.log(execTime);
+
+			r += 0.01;
+
+		}, 10);
 	}
 }
 
@@ -123,8 +140,7 @@ Img.clear = function(color)
 
 Img.set = function(x, y, color)
 {
-	y = this.h - y;
-	const index = (y << this.log2width) + x;
+	const index = ((this.h - y) << this.log2width) + x;
 	this.buf32[index] = (color << 8) + 255;
 }
 
