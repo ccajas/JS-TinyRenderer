@@ -6,22 +6,26 @@ function drawInit()
 	if (canvas.getContext)
 	{
 		var ctx = canvas.getContext('2d');
+		var img = Object.create(Img);
+		var model = Object.create(OBJmodel);
 
-		img = Object.create(Img);
 		img.init(ctx);
+		console.log("canvas loaded");
 
 		// "Clear" canvas to black
 		img.clear();
-		console.log("canvas loaded");
+
+		// Test load model
+		model.load("obj/head.obj");
 
 		// Draw a point
-		img.set(52, 141, 255, 0, 0);
+		img.set(52, 141, 0xffffff);
 
 		start = new Date();
 
 		for (var i = 0; i < 1000000; i++)
 		{
-			// A line?
+			// A few lines
 			img.line(13, 20, 80, 40, 0xffffff);
 			img.line(20, 13, 40, 80, 0xff0000);
 			img.line(80, 40, 13, 20, 0xff0000);
@@ -85,9 +89,9 @@ Img.init = function(ctx)
 
 Img.clear = function(color)
 {
-	const len = this.imgData.data.length;
-	for (var i = 0; i < len; i += 4)
-		this.imgData.data[i + 3] = 255;	
+	const len = this.buf32.length;
+	for (var i = 0; i < len; i++)
+		this.buf32[i] = 0xff000000;
 }
 
 // Set a pixel
@@ -165,14 +169,14 @@ var OBJmodel = new Object();
 OBJmodel.load = function(file)
 {
 	var request = new XMLHttpRequest();
-	request.open("GET", file, false);
+	request.open("GET", file, true);
 
 	request.onload = function() 
 	{
 		if(request.status === 200 || request.status == 0)
 		{
-			var response = rawFile.responseText;
-			console.log(response);
+			var response = request.responseText;
+			//console.log(response);
 		}
 	}
 	request.send(null);
