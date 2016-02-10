@@ -22,9 +22,9 @@ function drawInit()
 		for (var i = 0; i < 1000000; i++)
 		{
 			// A line?
-			img.line(13, 20, 80, 40, 255, 255, 255);
-			img.line(20, 13, 40, 80, 255, 0, 0);
-			img.line(80, 40, 13, 20, 255, 0, 0);
+			img.line(13, 20, 80, 40, 0xffffff);
+			img.line(20, 13, 40, 80, 0xff0000);
+			img.line(80, 40, 13, 20, 0xff0000);
 		}
 
 		end = new Date();
@@ -68,10 +68,13 @@ Img.init = function(ctx)
 	this.w = 1 << this.log2width;
 	this.h = ctx.canvas.clientHeight;
 
-	console.log(this);
+	// create buffers for data manipulation
 
-	// create a new batch of pixels with the same dimensions as the image
-    this.imgData = ctx.createImageData(this.w, this.h);
+	this.imgData = ctx.createImageData(this.w, this.h);
+	this.buf = new ArrayBuffer(this.imgData.data.length);
+
+	this.buf8 = new Uint8ClampedArray(this.buf);
+	this.buf32 = new Uint32Array(this.buf);
 
 	// Translate and flip canvas vertically to have the origin at the bottom left
 	ctx.translate(0, this.h);
@@ -89,21 +92,18 @@ Img.clear = function(color)
 
 // Set a pixel
 
-Img.set = function(x, y, r, g, b)
+Img.set = function(x, y, c)
 {
-	const index = ((y << this.log2width) + x) << 2;
-	this.imgData.data[index] = r;
-    this.imgData.data[index + 1] = g;
-    this.imgData.data[index + 2] = b;
-    this.imgData.data[index + 3] = 255;
+	const index = (y << this.log2width) + x;
+	this.buf32[index] = (c << 8) + 255;
 
-    // Increment draw calls
-    this.calls++;
+	// Increment draw calls
+	this.calls++;
 }
 
 // Draw a line
 
-Img.line = function(x0, y0, x1, y1, r, g, b) 
+Img.line = function(x0, y0, x1, y1, color) 
 { 
 	var steep = false;
 
@@ -124,24 +124,24 @@ Img.line = function(x0, y0, x1, y1, r, g, b)
 
 	const dx = x1 - x0;
 	const dy = y1 - y0;
-
-	const derror = Math.abs(dy / dx); 
-    var error = 0;
-    var y = y0; 
+	const derror = Math.abs(dy / dx);
+	
+	var error = 0;
+	var y = y0; 
 
 	for (var x = x0; x <= x1; x++) 
 	{
 		if (steep)
-			this.set(x, y, r, g, b)
+			this.set(x, y, color)
 		else
-			this.set(y, x, r, g, b)
+			this.set(y, x, color)
 
-        error += derror; 
+		error += derror;
 
-        if (error > 0.5) { 
-            y += (y1 > y0) ? 1 : -1; 
-            error--;
-        } 
+		if (error > 0.5) { 
+			y += (y1 > y0) ? 1 : -1; 
+			error--;
+		} 
 	}
 }
 
@@ -149,6 +149,7 @@ Img.line = function(x0, y0, x1, y1, r, g, b)
 
 Img.flush = function()
 {
+	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
 	console.log("Pixel draw calls: "+ this.calls);
 }
@@ -163,17 +164,17 @@ var OBJmodel = new Object();
 
 OBJmodel.load = function(file)
 {
-    var request = new XMLHttpRequest();
-    request.open("GET", file, false);
+	var request = new XMLHttpRequest();
+	request.open("GET", file, false);
 
-    request.onload = function() 
+	request.onload = function() 
 	{
-        if(request.status === 200 || request.status == 0)
-        {
-            var response = rawFile.responseText;
-            console.log(response);
-        }
-    }
-    request.send(null);
+		if(request.status === 200 || request.status == 0)
+		{
+			var response = rawFile.responseText;
+			console.log(response);
+		}
+	}
+	request.send(null);
 }
 
