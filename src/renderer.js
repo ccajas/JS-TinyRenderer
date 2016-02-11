@@ -80,11 +80,7 @@ function drawFunc(model, ctx)
 				}
 			}
 
-			img.triangle([[200, 200], [100, 238], [80, 60]], 0xffffff);
-
-			img.line(200, 200, 100, 238, 0xff0000);
-			img.line(200, 200, 80, 60, 0xff0000);
-			img.line(100, 238, 80, 60, 0xff0000);
+			img.triangle([[20, 20], [33, 150], [160, 160]], 0xffffff77);
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
@@ -137,8 +133,8 @@ Img.init = function(ctx)
 	this.buf32 = new Uint32Array(this.buf);
 
 	// Translate and flip canvas vertically to have the origin at the bottom left
-	ctx.translate(0, this.h);
-	ctx.scale(1, -1);
+	//ctx.translate(0, this.h);
+	//ctx.scale(1, -1);
 }
 
 // Clear canvas
@@ -218,22 +214,21 @@ Img.line = function(x0, y0, x1, y1, color)
 Img.triangle = function(points, color) 
 { 
 	const bbox = this.util.findBbox(points, [this.w, this.h]);
-	//for (each pixel in the bounding box) 
 
-	console.log("bbox and points", bbox, points);
-
+	var pts = 0;
 	var point = [-1, -1];
 	for (point[0] = bbox[0][0]; point[0] <= bbox[1][0]; point[0]++) 
 	{ 
 		for (point[1] = bbox[0][1]; point[1] <= bbox[1][1]; point[1]++) 
-		{ 
-			const bc_screen = this.util.barycentric(points, point);
+		{
+			var bc_screen = this.util.barycentric(points, point);
 
 			// Pixel is outside of barycentric coords
 			if (bc_screen[0] < 0 || bc_screen[1] < 0 || bc_screen[2] < 0) 
 				continue;
 
 			this.set(point[0], point[1], color); 
+			this.calls++;
 		}
 	}
 }

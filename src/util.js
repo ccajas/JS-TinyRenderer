@@ -26,10 +26,9 @@ Util.findBbox = function(points, img_dims)
 
 // cross product of two 3D vectors
 
-Util.cross = function(pts)
+Util.cross = function(a, b)
 {
 	// (a.x, a.y, a.z) x (b.x, b.y, b.z)
-	const a = pts[0], b = pts[1];
 	return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
 
@@ -45,6 +44,6 @@ Util.barycentric = function(pts, point)
     // triangle is degenerate, return a position with negative coordinates 
     if (Math.abs(u[2]) < 1) return [-1, 1, 1];
 
-    var coords = [1 - (u[0] + u[1]), u[1], u[0]]; // (1 - (u.x + u.y), u.y, u.x)
-    return coords.map(function(n) { return n / u[2]; });
+	// (1 - (u.x + u.y), u.y, u.x)
+    return [1 - ((u[0] + u[1]) / u[2]), u[1] / u[2], u[0] / u[2]];
 } 
