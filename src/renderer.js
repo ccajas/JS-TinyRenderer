@@ -254,13 +254,13 @@ Img.flush = function()
 			if (this.zbuffer[index] < 1e-5) continue;
 
 			var total = 0;
-			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 4) 
+			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 6) 
 			{
-				total += Math.PI / 1.65 - max_elevation_angle(
-					this.zbuffer, index, [x, y], [this.w, this.h], [Math.cos(a), Math.sin(a)], this.log2width);
+				total += Math.PI / 2 - max_elevation_angle(
+					this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2width);
 			}
-			total /= (Math.PI / 2) * 8;
-			total = Math.pow(total, 1.5);
+			total /= (Math.PI / 2) * 12;
+			//total = Math.pow(total, 1.5);
 
 			this.set(x, y, (255 * total) + ((255 * total) << 8) + ((255 * total) << 16));
 			this.calls++;
