@@ -41,6 +41,8 @@ function drawImage(model, ctx)
 			const cos_th = Math.cos(th);
 			const sin_th = Math.sin(th);
 
+			var ratio = img.h / img.w;
+
 			//for (var i = 0; i < 100; i++)
 			{	
 				for (var f = 0; f < model.faces.length; f++)
@@ -53,8 +55,8 @@ function drawImage(model, ctx)
 					for (var j = 0; j < 3; j++)
 					{
 						var v = model.verts[face[j][0] - 1];
-						var x = Math.floor((v[0] / 2 + 0.5) * img.h); 
-						var y = Math.floor((v[1] / 2 + 0.5) * img.w);
+						var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
+						var y = Math.floor((v[1] / 2 + 0.5) * img.h);
 						var z = Math.floor((v[2] / 2 + 0.5) * 32768);
 
 						screen_coords[j] = [x, y, z];
