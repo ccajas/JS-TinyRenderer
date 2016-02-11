@@ -5,6 +5,7 @@ var OBJmodel = new Object();
 
 OBJmodel.verts = [];
 OBJmodel.faces = [];
+OBJmodel.normals = [];
 
 OBJmodel.request = function(file)
 {
@@ -55,13 +56,20 @@ OBJmodel.parse = function(lines)
 			this.verts.push(coords);
 		}
 
+		// Find vertex normals
+		/*if (lines[i].indexOf('vn ') == 0)
+		{
+			var coords = lines[i].split(' ').splice(1, 3);
+			this.normals.push(coords);
+		}*/
+
 		// Find face indices
 		if (lines[i].indexOf('f ') == 0)
 		{
 			var indices = lines[i].split(' ').splice(1, 3);
 			
 			for (var j = 0; j < 3; j++)
-				indices[j] = indices[j].split('/')[0];
+				indices[j] = indices[j].split('/');
 
 			this.faces.push(indices);
 		}

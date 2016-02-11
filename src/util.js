@@ -24,9 +24,20 @@ Util.findBbox = function(points, img_dims)
 	return [boxMin, boxMax];
 }
 
+// Add two vectors
+
+Util.vecAdd = function(a, b)
+{
+	var diff = [];
+	for (var i = 0; i < a.length; i++)
+		diff[i] = a[i] + b[i];
+
+	return diff;
+}
+
 // Subtract two vectors
 
-Util.vecSubtract = function(a, b)
+Util.vecSub = function(a, b)
 {
 	var diff = [];
 	for (var i = 0; i < a.length; i++)

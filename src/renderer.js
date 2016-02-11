@@ -25,7 +25,10 @@ function drawFunc(model, ctx)
 	var draw = function()
 	{
 		var img = Object.create(Img);
-		img.init(ctx)
+		var zbuffer = Object.create(Img);
+
+		img.init(ctx);
+		zbuffer.init(ctx);
 
 		console.log("Canvas loaded");
 
@@ -42,42 +45,17 @@ function drawFunc(model, ctx)
 			const sin_th = Math.sin(th);
 
 			//for (var i = 0; i < 100; i++)
-			{
-				// A few lines
-				//img.line(13, 20, 80, 40, 0xffffff);
-				//img.line(20, 13, 40, 80, 0xffffff);
-		
+			{	
 				for (var f = 0; f < model.faces.length; f++)
 				{
 					var face = model.faces[f];
-
-					/*for (var v = 0; v < 3; v++) 
-					{
-						var v0 = model.verts[face[v] - 1]; 
-						var v1 = model.verts[face[(v+1)%3] - 1];
-						var x0 = v0[1];
-						var y0 = v0[0];
-						var x1 = v1[1];
-						var y1 = v1[0];
-
-						// Rotate it!
-						y0 = y0 * cos_th - v0[2] * sin_th;
-						y1 = y1 * cos_th - v1[2] * sin_th;
-
-						x0 = Math.floor((x0 / 2 + 0.5) * img.h); 
-						y0 = Math.floor((y0 / 2 + 0.5) * img.w); 
-						x1 = Math.floor((x1 / 2 + 0.5) * img.h); 
-						y1 = Math.floor((y1 / 2 + 0.5) * img.w); 
-
-						img.line(x0, y0, x1, y1, 0xffffff);
-					}*/
 
 					var world_coords = [];
 					var screen_coords = [];
 
 					for (var j = 0; j < 3; j++)
 					{
-						var v = model.verts[face[j] - 1];
+						var v = model.verts[face[j][0] - 1];
 						var x = Math.floor((v[0] / 2 + 0.5) * img.h); 
 						var y = Math.floor((v[1] / 2 + 0.5) * img.w);
 
@@ -86,8 +64,8 @@ function drawFunc(model, ctx)
 					}
 
 					var n = img.util.cross(
-						img.util.vecSubtract(world_coords[2], world_coords[0]), 
-						img.util.vecSubtract(world_coords[1], world_coords[0])
+						img.util.vecSub(world_coords[2], world_coords[0]), 
+						img.util.vecSub(world_coords[1], world_coords[0])
 					);
 
 					var intensity = img.util.dot(img.util.normalize(n), [0, 0, 1]);
@@ -102,11 +80,12 @@ function drawFunc(model, ctx)
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+			var calls = "<br/>Pixel draw calls: "+ img.calls;
 
 			// Finally put image data onto canvas
 			img.flush();
 
-			document.getElementById('info').innerHTML = execTime;
+			document.getElementById('info').innerHTML = execTime + calls;
 			//console.log(execTime);
 
 			th += 0.01;
@@ -237,10 +216,10 @@ Img.triangle = function(points, color)
 	{ 
 		for (point[1] = bbox[0][1]; point[1] <= bbox[1][1]; point[1]++) 
 		{
-			var bc_screen = this.util.barycentric(points, point);
+			var b_coords = this.util.barycentric(points, point);
 
 			// Pixel is outside of barycentric coords
-			if (bc_screen[0] < 0 || bc_screen[1] < 0 || bc_screen[2] < 0) 
+			if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 				continue;
 
 			this.set(point[0], point[1], color); 
