@@ -35,13 +35,15 @@ OBJmodel.load = function(file, func)
 		var lines = response.split('\n');
 		self.parse(lines);
 		func();
-	};
+	}
 
-	self.request(file).then(success, 
-	function (e) {
-		// handle errors
-		console.error("request failed!");
-	});
+	// handle errors
+	var error = function(response)
+	{
+		console.error("request failed!");	
+	}
+
+	self.request(file).then(success, error);
 }
 
 OBJmodel.parse = function(lines)
