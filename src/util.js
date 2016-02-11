@@ -44,6 +44,13 @@ Util.vecSub = function(a, b)
 	return diff;
 }
 
+// Clamp between two values
+
+Util.clamp = function(x, a, b) 
+{
+	return Math.min(Math.max(x, a), b);
+}
+
 // Dot product of two 3D vectors
 
 Util.dot = function(a, b)
