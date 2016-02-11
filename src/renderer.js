@@ -55,7 +55,7 @@ function drawImage(model, ctx)
 						var v = model.verts[face[j][0] - 1];
 						var x = Math.floor((v[0] / 2 + 0.5) * img.h); 
 						var y = Math.floor((v[1] / 2 + 0.5) * img.w);
-						var z = Math.floor((v[2] / 2 + 0.5) * img.w);
+						var z = Math.floor((v[2] / 2 + 0.5) * 256);
 
 						screen_coords[j] = [x, y, z];
 						world_coords[j] = v;
@@ -219,17 +219,18 @@ Img.triangle = function(points, color)
 	const bbox = this.util.findBbox(points, [this.w, this.h]);
 
 	var pts = 0;
-	var p = [-1, -1];
+	var p = [-1, -1, 0];
 	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
 		for (p[1] = bbox[0][1]; p[1] <= bbox[1][1]; p[1]++) 
 		{
 			var b_coords = this.util.barycentric(points, p);
+			p[2] = 0;
 
 			// Pixel is outside of barycentric coords
 			if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 				continue;
 
-			p[2] = 0;
+			// Get pixel depth
 			for (var i=0; i<3; i++) 
 				p[2] += points[i][2] * b_coords[i];
 
@@ -238,7 +239,7 @@ Img.triangle = function(points, color)
 			
 			if (this.zbuffer[index] < p[2])
 			{
-				this.zbuffer[index] = p[2];
+				this.zbuffer[index] = p[2];		
 				this.set(p[0], p[1], p[2] + (p[2] << 8) + (p[2] << 16));//color); 
 				this.calls++;
 			}
@@ -249,6 +250,26 @@ Img.triangle = function(points, color)
 
 Img.flush = function()
 {
+	for (var x = 0; x < this.w; x++) {
+		for (var y = 0; y < this.h; y++) {
+
+			// Get buffer index
+			var index = ((this.h - y) << this.log2width) + x;
+			if (this.zbuffer[index] < 1e-5) continue;
+
+			var total = 0;
+			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 4) 
+			{
+				total += Math.PI / 2 - this.util.max_elevation_angle(
+					this.zbuffer, index, [x, y], [this.w, this.h], [Math.cos(a), Math.sin(a)], this.log2width);
+			}
+			total /= (Math.PI / 2) * 8;
+			total = Math.pow(total, 1);
+
+			this.set(x, y, (255 * total) + ((255 * total) << 8) + ((255 * total) << 16));
+		}
+	}
+
 	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
 
