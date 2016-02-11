@@ -10,7 +10,7 @@ function drawInit()
 		var draw = drawFunc(model, ctx);
 
 		// Test load model
-		model.load("obj/head.obj", draw);
+		model.load("obj/diablo3.obj", draw);
 	}
 	else
 	{
@@ -41,11 +41,11 @@ function drawFunc(model, ctx)
 			const cos_th = Math.cos(th);
 			const sin_th = Math.sin(th);
 
-			for (var i = 0; i < 100; i++)
+			//for (var i = 0; i < 100; i++)
 			{
 				// A few lines
-				img.line(13, 20, 80, 40, 0xffffff);
-				img.line(20, 13, 40, 80, 0xffffff);
+				//img.line(13, 20, 80, 40, 0xffffff);
+				//img.line(20, 13, 40, 80, 0xffffff);
 		
 				for (var f = 0; f < model.faces.length; f++)
 				{
@@ -72,20 +72,29 @@ function drawFunc(model, ctx)
 						img.line(x0, y0, x1, y1, 0xffffff);
 					}*/
 
-					var v = [];
-					v[0] = model.verts[face[0] - 1]; 
-					v[1] = model.verts[face[1] - 1];
-					v[2] = model.verts[face[2] - 1];
+					var world_coords = [];
+					var screen_coords = [];
 
 					for (var j = 0; j < 3; j++)
 					{
-						var x = Math.floor((v[j][0] / 2 + 0.5) * img.h); 
-						var y = Math.floor((v[j][1] / 2 + 0.5) * img.w);
+						var v = model.verts[face[j] - 1];
+						var x = Math.floor((v[0] / 2 + 0.5) * img.h); 
+						var y = Math.floor((v[1] / 2 + 0.5) * img.w);
 
-						v[j] = [x, y];
+						screen_coords[j] = [x, y];
+						world_coords[j] = v;
 					}
 
-					img.triangle(v, 0xffffff);
+					var n = img.util.cross(
+						img.util.vecSubtract(world_coords[2], world_coords[0]), 
+						img.util.vecSubtract(world_coords[1], world_coords[0])
+					);
+
+					var intensity = img.util.dot(img.util.normalize(n), [0, 0, 1]);
+					var color = 255 * intensity;
+
+					if (intensity > 0) 
+						img.triangle(screen_coords, color + (color << 8) + (color << 16));
 				}
 			}
 

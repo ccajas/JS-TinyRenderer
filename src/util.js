@@ -24,15 +24,46 @@ Util.findBbox = function(points, img_dims)
 	return [boxMin, boxMax];
 }
 
-// cross product of two 3D vectors
+// Subtract two vectors
+
+Util.vecSubtract = function(a, b)
+{
+	var diff = [];
+	for (var i = 0; i < a.length; i++)
+		diff[i] = a[i] - b[i];
+
+	return diff;
+}
+
+// Dot product of two 3D vectors
+
+Util.dot = function(a, b)
+{
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+// Cross product of two 3D vectors
 
 Util.cross = function(a, b)
 {
 	// (a.x, a.y, a.z) x (b.x, b.y, b.z)
-	return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+	return [
+		a[1] * b[2] - a[2] * b[1], 
+		a[2] * b[0] - a[0] * b[2], 
+		a[0] * b[1] - a[1] * b[0]
+	];
 }
 
-// Get barycentric coordinates from three points
+// Normalized 3D vector
+
+Util.normalize = function(v)
+{
+	var length = Math.sqrt((v[0] * v[0]) + (v[1] * v[1]) + (v[2] * v[2]));
+
+	return [v[0] / length, v[1] / length, v[2] / length];
+}
+
+// Barycentric coordinates from three points
 
 Util.barycentric = function(pts, point) 
 {

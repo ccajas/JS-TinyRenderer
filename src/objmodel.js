@@ -29,14 +29,14 @@ OBJmodel.request = function(file)
 OBJmodel.load = function(file, func)
 {
 	var self = this;
-
-	self.request(file)
-	.then(function(response)
+	var success = function(response)
 	{
 		var lines = response.split('\n');
 		self.parse(lines);
 		func();
-	}, 
+	};
+
+	self.request(file).then(success, 
 	function (e) {
 		// handle errors
 		console.error("request failed!");
