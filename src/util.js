@@ -70,13 +70,28 @@ Util.cross = function(a, b)
 	];
 }
 
-// Normalized 3D vector
+// Distance of a vector
+
+Util.dist = function(v)
+{
+	var sum = 0;
+	for (var i = 0; i < v.length; i++)
+		sum += (v[i] * v[i]);
+
+	return Math.sqrt(sum);
+}
+
+// Normalize a vector
 
 Util.normalize = function(v)
 {
-	var length = Math.sqrt((v[0] * v[0]) + (v[1] * v[1]) + (v[2] * v[2]));
+	var length = this.dist(v);
+	var res = [];
 
-	return [v[0] / length, v[1] / length, v[2] / length];
+	for (var i = 0; i < v.length; i++)
+		res[i] = v[i] / length;
+
+	return res;
 }
 
 // Barycentric coordinates from three points
@@ -94,3 +109,24 @@ Util.barycentric = function(pts, point)
 	// (1 - (u.x + u.y), u.y, u.x)
 	return [1 - ((u[0] + u[1]) / u[2]), u[1] / u[2], u[0] / u[2]];
 } 
+
+Util.max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
+{
+	var maxangle = 0;
+	for (var t = 0; t < 50; t++) 
+	{
+		var cur = this.vecAdd(p, [ray[0] * t, ray[1] * t]);
+		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
+
+		var distance = this.dist(this.vecSub(p, cur));
+		if (distance < 1) continue;
+
+		// buffer index
+		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);
+		var elevation = zbuffer[curIndex] - zbuffer[index];
+		
+		maxangle = Math.max(maxangle, Math.atan(elevation / distance));
+	}
+
+	return maxangle;
+}
