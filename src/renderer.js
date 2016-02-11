@@ -31,7 +31,7 @@ function drawFunc(model, ctx)
 
 		var th = 0;
 
-		var intervalID = window.setInterval(function()
+		//var intervalID = window.setInterval(function()
 		{
 			// "Clear" canvas to black
 			img.clear(0x0);
@@ -44,14 +44,14 @@ function drawFunc(model, ctx)
 			//for (var i = 0; i < 100; i++)
 			{
 				// A few lines
-				img.line(13, 20, 80, 40, 0xffffff);
-				img.line(20, 13, 40, 80, 0xffffff);
+				//img.line(13, 20, 80, 40, 0xffffff);
+				//img.line(20, 13, 40, 80, 0xffffff);
 		
 				for (var f = 0; f < model.faces.length; f++)
 				{
 					var face = model.faces[f];
 
-					for (var v = 0; v < 3; v++) 
+					/*for (var v = 0; v < 3; v++) 
 					{
 						var v0 = model.verts[face[v] - 1]; 
 						var v1 = model.verts[face[(v+1)%3] - 1];
@@ -69,10 +69,22 @@ function drawFunc(model, ctx)
 						x1 = Math.floor((x1 / 2 + 0.5) * img.h); 
 						y1 = Math.floor((y1 / 2 + 0.5) * img.w); 
 
-						img.line(x0, y0, x1, y1, 0xffffff); 
-					}
+						img.line(x0, y0, x1, y1, 0xffffff);
+					}*/
+
+					var v0 = model.verts[face[0] - 1]; 
+					var v1 = model.verts[face[1] - 1];
+					var v2 = model.verts[face[2] - 1];
+
+					//img.triangle([v0, v1, v2], 0xffffff);
 				}
 			}
+
+			img.triangle([[200, 200], [100, 238], [80, 60]], 0xffffff);
+
+			img.line(200, 200, 100, 238, 0xff0000);
+			img.line(200, 200, 80, 60, 0xff0000);
+			img.line(100, 238, 80, 60, 0xff0000);
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
@@ -85,7 +97,7 @@ function drawFunc(model, ctx)
 
 			th += 0.01;
 
-		}, 10);
+		}//, 1000);
 	}
 }
 
@@ -106,7 +118,6 @@ Img.init = function(ctx)
 	this.ctx = ctx;
 	this.util = Object.create(Util);
 	this.calls = 0;
-	this.overdraw = 0;
 	var bufWidth = ctx.canvas.clientWidth;
 
 	// Get next highest 2^pow for width
@@ -144,7 +155,7 @@ Img.clear = function(color)
 Img.set = function(x, y, color)
 {
 	const index = ((this.h - y) << this.log2width) + x;
-	this.buf32[index] = (color << 8) + 255;
+	this.buf32[index] = color + (255 << 24);
 }
 
 // Get a pixel
@@ -202,6 +213,31 @@ Img.line = function(x0, y0, x1, y1, color)
 	this.calls += (x1 - x0 + 1);
 }
 
+// Draw a triangle from 2D points
+
+Img.triangle = function(points, color) 
+{ 
+	const bbox = this.util.findBbox(points, [this.w, this.h]);
+	//for (each pixel in the bounding box) 
+
+	console.log("bbox and points", bbox, points);
+
+	var point = [-1, -1];
+	for (point[0] = bbox[0][0]; point[0] <= bbox[1][0]; point[0]++) 
+	{ 
+		for (point[1] = bbox[0][1]; point[1] <= bbox[1][1]; point[1]++) 
+		{ 
+			const bc_screen = this.util.barycentric(points, point);
+
+			// Pixel is outside of barycentric coords
+			if (bc_screen[0] < 0 || bc_screen[1] < 0 || bc_screen[2] < 0) 
+				continue;
+
+			this.set(point[0], point[1], color); 
+		}
+	}
+}
+
 // Put image data on the canvas
 
 Img.flush = function()
@@ -209,7 +245,6 @@ Img.flush = function()
 	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
 
-	console.log("Pixel draw calls: "+ this.calls +" overdraw: "+ this.overdraw);
+	console.log("Pixel draw calls: "+ this.calls);
 	this.calls = 0;
-	this.overdraw = 0;
 }

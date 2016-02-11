@@ -1,6 +1,3 @@
-// Utility functions
-
-var Util = new Object();
 
 // OBJ Model functions
 
@@ -67,7 +64,6 @@ OBJmodel.parse = function(lines)
 				indices[j] = indices[j].split('/')[0];
 
 			this.faces.push(indices);
-			//console.log(indices); 
 		}
 	}
 
