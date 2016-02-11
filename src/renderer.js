@@ -22,7 +22,7 @@ function drawInit()
 
 function drawFunc(model, ctx)
 {
-	return function()
+	var draw = function()
 	{
 		var img = Object.create(Img);
 		img.init(ctx)
@@ -41,11 +41,11 @@ function drawFunc(model, ctx)
 			const cos_th = Math.cos(th);
 			const sin_th = Math.sin(th);
 
-			//for (var i = 0; i < 100; i++)
+			for (var i = 0; i < 100; i++)
 			{
 				// A few lines
-				//img.line(13, 20, 80, 40, 0xffffff);
-				//img.line(20, 13, 40, 80, 0xffffff);
+				img.line(13, 20, 80, 40, 0xffffff);
+				img.line(20, 13, 40, 80, 0xffffff);
 		
 				for (var f = 0; f < model.faces.length; f++)
 				{
@@ -72,11 +72,20 @@ function drawFunc(model, ctx)
 						img.line(x0, y0, x1, y1, 0xffffff);
 					}*/
 
-					var v0 = model.verts[face[0] - 1]; 
-					var v1 = model.verts[face[1] - 1];
-					var v2 = model.verts[face[2] - 1];
+					var v = [];
+					v[0] = model.verts[face[0] - 1]; 
+					v[1] = model.verts[face[1] - 1];
+					v[2] = model.verts[face[2] - 1];
 
-					//img.triangle([v0, v1, v2], 0xffffff);
+					for (var j = 0; j < 3; j++)
+					{
+						var x = Math.floor((v[j][0] / 2 + 0.5) * img.h); 
+						var y = Math.floor((v[j][1] / 2 + 0.5) * img.w);
+
+						v[j] = [x, y];
+					}
+
+					img.triangle(v, 0xffffff);
 				}
 			}
 
@@ -93,8 +102,10 @@ function drawFunc(model, ctx)
 
 			th += 0.01;
 
-		}//, 1000);
+		}//, 100);
 	}
+
+	return draw;
 }
 
 // Image drawing utility functions
@@ -131,10 +142,6 @@ Img.init = function(ctx)
 
 	this.buf8 = new Uint8ClampedArray(this.buf);
 	this.buf32 = new Uint32Array(this.buf);
-
-	// Translate and flip canvas vertically to have the origin at the bottom left
-	//ctx.translate(0, this.h);
-	//ctx.scale(1, -1);
 }
 
 // Clear canvas
@@ -143,7 +150,7 @@ Img.clear = function(color)
 {
 	const len = this.buf32.length;
 	for (var i = 0; i < len; i++)
-		this.buf32[i] = color + (255 << 24);
+		this.buf32[i] = color + 0xff000000;
 }
 
 // Set a pixel
@@ -151,7 +158,7 @@ Img.clear = function(color)
 Img.set = function(x, y, color)
 {
 	const index = ((this.h - y) << this.log2width) + x;
-	this.buf32[index] = color + (255 << 24);
+	this.buf32[index] = color + 0xff000000;
 }
 
 // Get a pixel
