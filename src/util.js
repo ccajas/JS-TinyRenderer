@@ -25,11 +25,11 @@ findBbox = function(points, img_dims)
 
 vecAdd = function(a, b)
 {
-	var diff = [];
+	var sum = [];
 	for (var i = 0; i < a.length; i++)
-		diff[i] = a[i] + b[i];
+		sum.push(a[i] + b[i]);
 
-	return diff;
+	return sum;
 }
 
 // Subtract two vectors
@@ -38,7 +38,7 @@ vecSub = function(a, b)
 {
 	var diff = [];
 	for (var i = 0; i < a.length; i++)
-		diff[i] = a[i] - b[i];
+		diff.push(a[i] - b[i]);
 
 	return diff;
 }

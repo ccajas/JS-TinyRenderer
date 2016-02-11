@@ -60,8 +60,8 @@ function drawImage(model, ctx)
 						var y = Math.floor((v[1] / 2 + 0.5) * img.h);
 						var z = Math.floor((v[2] / 2 + 0.5) * 32768);
 
-						screen_coords[j] = [x, y, z];
-						world_coords[j] = v;
+						screen_coords.push([x, y, z]);
+						world_coords.push(v);
 					}
 
 					var n = cross(
