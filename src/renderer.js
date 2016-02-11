@@ -74,17 +74,15 @@ function drawImage(model, ctx)
 				}
 			}
 
-			//img.triangle([[20, 20], [33, 150], [160, 160]], 0xffff77);
+			// Finally put image data onto canvas
+			img.flush();
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
 			var calls = "<br/>Pixel draw calls: "+ img.calls;
 
-			// Finally put image data onto canvas
-			img.flush();
-
 			document.getElementById('info').innerHTML = execTime + calls;
-			//console.log(execTime);
+			img.calls = 0;
 
 			th += 0.01;
 
@@ -260,19 +258,17 @@ Img.flush = function()
 			var total = 0;
 			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 4) 
 			{
-				total += Math.PI / 2 - this.util.max_elevation_angle(
+				total += Math.PI / 1.65 - this.util.max_elevation_angle(
 					this.zbuffer, index, [x, y], [this.w, this.h], [Math.cos(a), Math.sin(a)], this.log2width);
 			}
 			total /= (Math.PI / 2) * 8;
-			total = Math.pow(total, 1);
+			total = Math.pow(total, 1.5);
 
 			this.set(x, y, (255 * total) + ((255 * total) << 8) + ((255 * total) << 16));
+			this.calls++;
 		}
 	}
 
 	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
-
-	console.log("Pixel draw calls: "+ this.calls);
-	this.calls = 0;
 }
