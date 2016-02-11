@@ -66,15 +66,15 @@ function drawImage(model, ctx)
 						img.util.vecSub(world_coords[1], world_coords[0])
 					);
 
-					var intensity = img.util.dot(img.util.normalize(n), [0, 0, 1]);
+					var intensity = img.util.dot(img.util.normalize(n), [0, 0, -1]);
 					var color = 255 * intensity;
 
-					if (intensity > 0) 
+					if (intensity > 0)
 						img.triangle(screen_coords, color + (color << 8) + (color << 16));
 				}
 			}
 
-			img.triangle([[20, 20], [33, 150], [160, 160]], 0xffff77);
+			//img.triangle([[20, 20], [33, 150], [160, 160]], 0xffff77);
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
@@ -137,7 +137,7 @@ Img.init = function(ctx)
 	this.buf32 = new Uint32Array(this.buf);
 
 	// Z buffer
-	this.zbufer = new Uint32Array(this.buf);
+	this.zbuffer = new Uint32Array(this.imgData.data.length);
 }
 
 // Clear canvas
@@ -233,13 +233,15 @@ Img.triangle = function(points, color)
 			for (var i=0; i<3; i++) 
 				p[2] += points[i][2] * b_coords[i];
 
-			if (this.calls < 5000)
-				console.log(p[2]);
-
-			p[2] = Math.floor(p[2] / 2);
-
-			this.set(p[0], p[1], p[2] + (p[2] << 8) + (p[2] << 16));//color); 
-			this.calls++;
+			// Get buffer index
+			var index = ((this.h - p[1]) << this.log2width) + p[0];
+			
+			if (this.zbuffer[index] < p[2])
+			{
+				this.zbuffer[index] = p[2];
+				this.set(p[0], p[1], p[2] + (p[2] << 8) + (p[2] << 16));//color); 
+				this.calls++;
+			}
 		}
 }
 
