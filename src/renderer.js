@@ -6,11 +6,10 @@ function drawInit()
 
 	if (canvas.getContext)
 	{
-		var ctx = canvas.getContext('2d');
-		var draw = drawImage(model, ctx);
+		var ready = modelReady(model, canvas);
 
 		// Test load model
-		model.load("obj/diablo3.obj", draw);
+		model.load("obj/diablo3.obj", ready);
 	}
 	else
 	{
@@ -18,82 +17,100 @@ function drawInit()
 	}
 }
 
+// Display render link
+
+function modelReady(model, canvas)
+{
+	var displayButton = function()
+	{
+		console.log('ready to render!');
+
+		// Set context
+		var ctx = canvas.getContext('2d');
+
+		var el = document.getElementById('render_start');
+		el.style.display = 'block';
+		el.onclick = function() 
+		{ 
+			console.log('Begin render!'); 
+			drawImage(model, ctx);
+		}
+	}
+
+	return displayButton;
+}
+
 // Draw model called in deferred request
 
 function drawImage(model, ctx)
 {
-	var draw = function()
+	var img = Object.create(Img);
+	img.init(ctx);
+
+	console.log("Canvas loaded");
+
+	var th = 0;
+	console.log("Crunching triangles");
+
+	//var intervalID = window.setInterval(function()
 	{
-		var img = Object.create(Img);
-		img.init(ctx);
+		// "Clear" canvas to black
+		img.clear(0x0);
 
-		console.log("Canvas loaded");
+		start = new Date();
 
-		var th = 0;
-		console.log("Crunching triangles");
+		const cos_th = Math.cos(th);
+		const sin_th = Math.sin(th);
 
-		//var intervalID = window.setInterval(function()
-		{
-			// "Clear" canvas to black
-			img.clear(0x0);
+		var ratio = img.h / img.w;
 
-			start = new Date();
+		//for (var i = 0; i < 100; i++)
+		{	
+			for (var f = 0; f < model.faces.length; f++)
+			{
+				var face = model.faces[f];
 
-			const cos_th = Math.cos(th);
-			const sin_th = Math.sin(th);
+				var world_coords = [];
+				var screen_coords = [];
 
-			var ratio = img.h / img.w;
-
-			//for (var i = 0; i < 100; i++)
-			{	
-				for (var f = 0; f < model.faces.length; f++)
+				for (var j = 0; j < 3; j++)
 				{
-					var face = model.faces[f];
+					var v = model.verts[face[j][0] - 1];
+					var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
+					var y = Math.floor((v[1] / 2 + 0.5) * img.h);
+					var z = Math.floor((v[2] / 2 + 0.5) * 32768);
 
-					var world_coords = [];
-					var screen_coords = [];
-
-					for (var j = 0; j < 3; j++)
-					{
-						var v = model.verts[face[j][0] - 1];
-						var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
-						var y = Math.floor((v[1] / 2 + 0.5) * img.h);
-						var z = Math.floor((v[2] / 2 + 0.5) * 32768);
-
-						screen_coords.push([x, y, z]);
-						world_coords.push(v);
-					}
-
-					var n = cross(
-						vecSub(world_coords[2], world_coords[0]), 
-						vecSub(world_coords[1], world_coords[0])
-					);
-
-					var intensity = dot(normalize(n), [0, 0, -1]);
-					var color = 255 * intensity;
-
-					if (intensity > 0)
-						img.triangle(screen_coords, color + (color << 8) + (color << 16));
+					screen_coords.push([x, y, z]);
+					world_coords.push(v);
 				}
+
+				var n = cross(
+					vecSub(world_coords[2], world_coords[0]), 
+					vecSub(world_coords[1], world_coords[0])
+				);
+
+				var intensity = dot(normalize(n), [0, 0, -1]);
+				var color = 255 * intensity;
+
+				if (intensity > 0)
+					img.triangle(screen_coords, color + (color << 8) + (color << 16));
 			}
+		}
 
-			// Finally put image data onto canvas
-			img.flush();
+		// Finally put image data onto canvas
+		img.flush();
 
-			end = new Date();
-			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "Pixel draw calls: "+ img.calls;
+		end = new Date();
+		var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+		var calls = "Pixel draw calls: "+ img.calls;
 
-			document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-			console.log(execTime +'. '+ calls);
-			img.calls = 0;
+		document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+		console.log(execTime +'. '+ calls);
+		img.calls = 0;
 
-			th += 0.01;
+		th += 0.01;
 
-		}//, 100);
-	}
-
-	return draw;
+	}//, 100);
 }
 
 // Image drawing functions

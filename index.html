@@ -6,11 +6,13 @@
 	<title>Software render test</title>
 	<style>
 		body { font-family: Helvetica, Arial, "Sans-Serif" }
+		#render_start { display: none; }
 	</style>
 </head>
 <body onload="drawInit()">
 	<div class="container-fluid">
-		<canvas id="render" width="320" height="180"></canvas>
+		<div id="render_start"><a href="#">Render</a></div>
+		<canvas id="render" width="640" height="320"></canvas>
 	</div>
 	<div id="info">...</div>
 	<script src="renderer.js"></script>
