@@ -1,12 +1,10 @@
 
 // Utility functions
 
-var Util = new Object();
-
 // Find bounding box from a set of 2D points
 // Returns an array of 2 points (min and max bounds)
 
-Util.findBbox = function(points, img_dims)
+findBbox = function(points, img_dims)
 {
 	var boxMin = [img_dims[0] + 1, img_dims[1] + 1];
 	var boxMax = [-1, -1];
@@ -24,7 +22,7 @@ Util.findBbox = function(points, img_dims)
 
 // Add two vectors
 
-Util.vecAdd = function(a, b)
+vecAdd = function(a, b)
 {
 	var diff = [];
 	for (var i = 0; i < a.length; i++)
@@ -35,7 +33,7 @@ Util.vecAdd = function(a, b)
 
 // Subtract two vectors
 
-Util.vecSub = function(a, b)
+vecSub = function(a, b)
 {
 	var diff = [];
 	for (var i = 0; i < a.length; i++)
@@ -46,21 +44,21 @@ Util.vecSub = function(a, b)
 
 // Clamp between two values
 
-Util.clamp = function(x, a, b) 
+clamp = function(x, a, b) 
 {
 	return Math.min(Math.max(x, a), b);
 }
 
 // Dot product of two 3D vectors
 
-Util.dot = function(a, b)
+dot = function(a, b)
 {
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
 // Cross product of two 3D vectors
 
-Util.cross = function(a, b)
+cross = function(a, b)
 {
 	// (a.x, a.y, a.z) x (b.x, b.y, b.z)
 	return [
@@ -72,7 +70,7 @@ Util.cross = function(a, b)
 
 // Distance of a vector
 
-Util.dist = function(v)
+dist = function(v)
 {
 	var sum = 0;
 	for (var i = 0; i < v.length; i++)
@@ -83,9 +81,9 @@ Util.dist = function(v)
 
 // Normalize a vector
 
-Util.normalize = function(v)
+normalize = function(v)
 {
-	var length = this.dist(v);
+	var length = dist(v);
 	var res = [];
 
 	for (var i = 0; i < v.length; i++)
@@ -96,9 +94,9 @@ Util.normalize = function(v)
 
 // Barycentric coordinates from three points
 
-Util.barycentric = function(pts, point) 
+barycentric = function(pts, point) 
 {
-	var u = this.cross(
+	var u = cross(
 		[pts[2][0]-pts[0][0], pts[1][0]-pts[0][0], pts[0][0]-point[0]],  // (x2-x0, x1-x0, x0-p.x)
 		[pts[2][1]-pts[0][1], pts[1][1]-pts[0][1], pts[0][1]-point[1]]   // (y2-y0, y1-y0, y0-p.y)
 	);
@@ -110,21 +108,21 @@ Util.barycentric = function(pts, point)
 	return [1 - ((u[0] + u[1]) / u[2]), u[1] / u[2], u[0] / u[2]];
 } 
 
-Util.max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
+max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 {
 	var maxangle = 0;
-	for (var t = 0; t < 50; t++) 
+	for (var t = 0; t < 20; t++) 
 	{
-		var cur = this.vecAdd(p, [ray[0] * t, ray[1] * t]);
+		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
-		var distance = this.dist(this.vecSub(p, cur));
+		var distance = dist(vecSub(p, cur));
 		if (distance < 1) continue;
 
 		// buffer index
 		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);
 		var elevation = zbuffer[curIndex] - zbuffer[index];
-		
+
 		maxangle = Math.max(maxangle, Math.atan(elevation / distance));
 	}
 

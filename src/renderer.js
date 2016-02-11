@@ -61,12 +61,12 @@ function drawImage(model, ctx)
 						world_coords[j] = v;
 					}
 
-					var n = img.util.cross(
-						img.util.vecSub(world_coords[2], world_coords[0]), 
-						img.util.vecSub(world_coords[1], world_coords[0])
+					var n = cross(
+						vecSub(world_coords[2], world_coords[0]), 
+						vecSub(world_coords[1], world_coords[0])
 					);
 
-					var intensity = img.util.dot(img.util.normalize(n), [0, 0, -1]);
+					var intensity = dot(normalize(n), [0, 0, -1]);
 					var color = 255 * intensity;
 
 					if (intensity > 0)
@@ -99,7 +99,7 @@ function drawZbuffer(model, ctx)
 
 }
 
-// Image drawing utility functions
+// Image drawing functions
 
 var Img = new Object();
 
@@ -107,14 +107,12 @@ var Img = new Object();
 
 Img.ctx = null;
 Img.imgData = null;
-Img.util = null;
 
 // Initialize image
 
 Img.init = function(ctx)
 {
 	this.ctx = ctx;
-	this.util = Object.create(Util);
 	this.calls = 0;
 	var bufWidth = ctx.canvas.clientWidth;
 
@@ -214,14 +212,14 @@ Img.line = function(x0, y0, x1, y1, color)
 
 Img.triangle = function(points, color) 
 { 
-	const bbox = this.util.findBbox(points, [this.w, this.h]);
+	const bbox = findBbox(points, [this.w, this.h]);
 
 	var pts = 0;
 	var p = [-1, -1, 0];
 	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
 		for (p[1] = bbox[0][1]; p[1] <= bbox[1][1]; p[1]++) 
 		{
-			var b_coords = this.util.barycentric(points, p);
+			var b_coords = barycentric(points, p);
 			p[2] = 0;
 
 			// Pixel is outside of barycentric coords
@@ -258,7 +256,7 @@ Img.flush = function()
 			var total = 0;
 			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 4) 
 			{
-				total += Math.PI / 1.65 - this.util.max_elevation_angle(
+				total += Math.PI / 1.65 - max_elevation_angle(
 					this.zbuffer, index, [x, y], [this.w, this.h], [Math.cos(a), Math.sin(a)], this.log2width);
 			}
 			total /= (Math.PI / 2) * 8;
