@@ -30,6 +30,7 @@ function drawImage(model, ctx)
 		console.log("Canvas loaded");
 
 		var th = 0;
+		console.log("Crunching triangles");
 
 		//var intervalID = window.setInterval(function()
 		{
@@ -81,9 +82,10 @@ function drawImage(model, ctx)
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "<br/>Pixel draw calls: "+ img.calls;
+			var calls = "Pixel draw calls: "+ img.calls;
 
-			document.getElementById('info').innerHTML = execTime + calls;
+			document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+			console.log(execTime +'. '+ calls);
 			img.calls = 0;
 
 			th += 0.01;
@@ -92,13 +94,6 @@ function drawImage(model, ctx)
 	}
 
 	return draw;
-}
-
-// Draw the Z buffer
-
-function drawZbuffer(model, ctx)
-{
-
 }
 
 // Image drawing functions
@@ -119,10 +114,10 @@ Img.init = function(ctx)
 	var bufWidth = ctx.canvas.clientWidth;
 
 	// Get next highest 2^pow for width
-	this.log2width = 1;
-	while (bufWidth >>= 1) this.log2width++;
+	this.log2w = 1;
+	while (bufWidth >>= 1) this.log2w++;
 
-	bufWidth = 1 << this.log2width;
+	bufWidth = 1 << this.log2w;
 	this.w = ctx.canvas.clientWidth;
 	this.h = ctx.canvas.clientHeight;
 
@@ -147,20 +142,25 @@ Img.clear = function(color)
 		this.buf32[i] = color + 0xff000000;
 }
 
+// Get pixel index
+
+Img.index = function(x, y)
+{
+	return ((this.h - y) << this.log2w) + x;
+}
+
 // Set a pixel
 
 Img.set = function(x, y, color)
 {
-	const index = ((this.h - y) << this.log2width) + x;
-	this.buf32[index] = color + 0xff000000;
+	this.buf32[this.index(x, y)] = color + 0xff000000;
 }
 
 // Get a pixel
 
 Img.get = function(x, y)
 {
-	const index = ((this.h - y) << this.log2width) + x;
-	return this.buf32[index];
+	return this.buf32[this.index(x, y)];
 }
 
 // Draw a line
@@ -186,7 +186,7 @@ Img.line = function(x0, y0, x1, y1, color)
 
 	const dx = x1 - x0;
 	const dy = y1 - y0;
-	const derror = Math.abs(dy / dx);
+	const derror = Math.abs(dy / dx) << 1;
 	
 	var error = 0;
 	var y = y0; 
@@ -200,9 +200,9 @@ Img.line = function(x0, y0, x1, y1, color)
 
 		error += derror;
 
-		if (error > 0.5) { 
+		if (error > 1) { 
 			y += (y1 > y0) ? 1 : -1; 
-			error--;
+			error-= 2;
 		} 
 	}
 
@@ -216,24 +216,23 @@ Img.triangle = function(points, color)
 { 
 	const bbox = findBbox(points, [this.w, this.h]);
 
-	var pts = 0;
 	var p = [-1, -1, 0];
 	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
 		for (p[1] = bbox[0][1]; p[1] <= bbox[1][1]; p[1]++) 
 		{
 			var b_coords = barycentric(points, p);
-			p[2] = 0;
 
 			// Pixel is outside of barycentric coords
 			if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 				continue;
 
 			// Get pixel depth
+			p[2] = 0;
 			for (var i=0; i<3; i++) 
 				p[2] += points[i][2] * b_coords[i];
 
 			// Get buffer index
-			var index = ((this.h - p[1]) << this.log2width) + p[0];
+			var index = this.index(p[0], p[1]);// ((this.h - p[1]) << this.log2w) + p[0];
 			
 			if (this.zbuffer[index] < p[2])
 			{
@@ -248,20 +247,20 @@ Img.triangle = function(points, color)
 
 Img.flush = function()
 {
-	for (var x = 0; x < this.w; x++) {
-		for (var y = 0; y < this.h; y++) {
+	for (var y = 0; y < this.h; y++) {
+		for (var x = 0; x < this.w; x++) {
 
 			// Get buffer index
-			var index = ((this.h - y) << this.log2width) + x;
+			var index = this.index(x, y);
 			if (this.zbuffer[index] < 1e-5) continue;
 
 			var total = 0;
-			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 6) 
+			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 8) 
 			{
 				total += Math.PI / 2 - max_elevation_angle(
-					this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2width);
+					this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
 			}
-			total /= (Math.PI / 2) * 12;
+			total /= (Math.PI / 2) * 14;
 			//total = Math.pow(total, 1.5);
 
 			this.set(x, y, (255 * total) + ((255 * total) << 8) + ((255 * total) << 16));

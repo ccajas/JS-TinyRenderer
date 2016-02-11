@@ -1,4 +1,5 @@
 
+
 // Utility functions
 
 // Find bounding box from a set of 2D points
@@ -79,17 +80,12 @@ dist = function(v)
 	return Math.sqrt(sum);
 }
 
-// Normalize a vector
+// Normalize a 3D vector
 
 normalize = function(v)
 {
 	var length = dist(v);
-	var res = [];
-
-	for (var i = 0; i < v.length; i++)
-		res[i] = v[i] / length;
-
-	return res;
+	return res = [v[0] / length, v[1] / length, v[2] / length];
 }
 
 // Barycentric coordinates from three points
@@ -97,8 +93,8 @@ normalize = function(v)
 barycentric = function(pts, point) 
 {
 	var u = cross(
-		[pts[2][0]-pts[0][0], pts[1][0]-pts[0][0], pts[0][0]-point[0]],  // (x2-x0, x1-x0, x0-p.x)
-		[pts[2][1]-pts[0][1], pts[1][1]-pts[0][1], pts[0][1]-point[1]]   // (y2-y0, y1-y0, y0-p.y)
+		vecSub([pts[2][0], pts[1][0], pts[0][0]], [pts[0][0], pts[0][0], point[0]]), // (x2-x0, x1-x0, x0-p.x)
+		vecSub([pts[2][1], pts[1][1], pts[0][1]], [pts[0][1], pts[0][1], point[1]])  // (y2-y0, y1-y0, y0-p.y)
 	);
 
 	// triangle is degenerate, return a position with negative coordinates 
@@ -106,7 +102,9 @@ barycentric = function(pts, point)
 
 	// (1 - (u.x + u.y), u.y, u.x)
 	return [1 - ((u[0] + u[1]) / u[2]), u[1] / u[2], u[0] / u[2]];
-} 
+}
+
+// Get the max elevation angle from a point in the z-buffer (as a heightmap)
 
 max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 {
@@ -121,7 +119,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 
 		// buffer index
 		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);
-		var elevation = zbuffer[curIndex] / 127 - zbuffer[index] / 127;
+		var elevation = (zbuffer[curIndex] - zbuffer[index]) / 127;
 
 		maxangle = Math.max(maxangle, Math.atan(elevation / distance));
 	}

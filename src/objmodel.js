@@ -52,28 +52,26 @@ OBJmodel.parse = function(lines)
 	for (var i = 0; i < lines.length; i++)
 	{
 		// Find vertex positions
-		if (lines[i].indexOf('v ') == 0)
+		switch (lines[i].substr(0, 2))
 		{
-			var coords = lines[i].split(' ').splice(1, 3);
-			this.verts.push(coords);
-		}
+			case 'v ':
+				this.verts.push(lines[i].split(' ').splice(1, 3));
+				break;
 
-		// Find vertex normals
-		/*if (lines[i].indexOf('vn ') == 0)
-		{
-			var coords = lines[i].split(' ').splice(1, 3);
-			this.normals.push(coords);
-		}*/
+			// Find vertex normals
+			case 'vn':
+				this.normals.push(lines[i].split(' ').splice(1, 3));
+				break;
 
-		// Find face indices
-		if (lines[i].indexOf('f ') == 0)
-		{
-			var indices = lines[i].split(' ').splice(1, 3);
-			
-			for (var j = 0; j < 3; j++)
-				indices[j] = indices[j].split('/');
+			// Find face indices
+			case 'f ':
+				var indices = lines[i].split(' ').splice(1, 3);
+				
+				for (var j = 0; j < 3; j++)
+					indices[j] = indices[j].split('/');
 
-			this.faces.push(indices);
+				this.faces.push(indices);
+				break;
 		}
 	}
 
