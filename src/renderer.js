@@ -7,7 +7,7 @@ function drawInit()
 	if (canvas.getContext)
 	{
 		var ctx = canvas.getContext('2d');
-		var draw = drawFunc(model, ctx);
+		var draw = drawImage(model, ctx);
 
 		// Test load model
 		model.load("obj/diablo3.obj", draw);
@@ -20,15 +20,12 @@ function drawInit()
 
 // Draw model called in deferred request
 
-function drawFunc(model, ctx)
+function drawImage(model, ctx)
 {
 	var draw = function()
 	{
 		var img = Object.create(Img);
-		var zbuffer = Object.create(Img);
-
 		img.init(ctx);
-		zbuffer.init(ctx);
 
 		console.log("Canvas loaded");
 
@@ -58,8 +55,9 @@ function drawFunc(model, ctx)
 						var v = model.verts[face[j][0] - 1];
 						var x = Math.floor((v[0] / 2 + 0.5) * img.h); 
 						var y = Math.floor((v[1] / 2 + 0.5) * img.w);
+						var z = Math.floor((v[2] / 2 + 0.5) * img.w);
 
-						screen_coords[j] = [x, y];
+						screen_coords[j] = [x, y, z];
 						world_coords[j] = v;
 					}
 
@@ -76,7 +74,7 @@ function drawFunc(model, ctx)
 				}
 			}
 
-			img.triangle([[20, 20], [33, 150], [160, 160]], 0xffffff77);
+			img.triangle([[20, 20], [33, 150], [160, 160]], 0xffff77);
 
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
@@ -94,6 +92,13 @@ function drawFunc(model, ctx)
 	}
 
 	return draw;
+}
+
+// Draw the Z buffer
+
+function drawZbuffer(model, ctx)
+{
+
 }
 
 // Image drawing utility functions
@@ -130,6 +135,9 @@ Img.init = function(ctx)
 
 	this.buf8 = new Uint8ClampedArray(this.buf);
 	this.buf32 = new Uint32Array(this.buf);
+
+	// Z buffer
+	this.zbufer = new Uint32Array(this.buf);
 }
 
 // Clear canvas
@@ -211,21 +219,28 @@ Img.triangle = function(points, color)
 	const bbox = this.util.findBbox(points, [this.w, this.h]);
 
 	var pts = 0;
-	var point = [-1, -1];
-	for (point[0] = bbox[0][0]; point[0] <= bbox[1][0]; point[0]++) 
-	{ 
-		for (point[1] = bbox[0][1]; point[1] <= bbox[1][1]; point[1]++) 
+	var p = [-1, -1];
+	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
+		for (p[1] = bbox[0][1]; p[1] <= bbox[1][1]; p[1]++) 
 		{
-			var b_coords = this.util.barycentric(points, point);
+			var b_coords = this.util.barycentric(points, p);
 
 			// Pixel is outside of barycentric coords
 			if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 				continue;
 
-			this.set(point[0], point[1], color); 
+			p[2] = 0;
+			for (var i=0; i<3; i++) 
+				p[2] += points[i][2] * b_coords[i];
+
+			if (this.calls < 5000)
+				console.log(p[2]);
+
+			p[2] = Math.floor(p[2] / 2);
+
+			this.set(p[0], p[1], p[2] + (p[2] << 8) + (p[2] << 16));//color); 
 			this.calls++;
 		}
-	}
 }
 
 // Put image data on the canvas
