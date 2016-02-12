@@ -1,5 +1,5 @@
 
-function init()
+(function() 
 {
 	var canvas = document.getElementById('render');
 	var model = Object.create(OBJmodel);
@@ -13,7 +13,11 @@ function init()
 	{
 		console.error("Canvas context not supported!");
 	}
-}
+}).call(this);
+
+// Shorthand
+
+var m = Math;
 
 // Display render link
 
@@ -25,13 +29,17 @@ function modelReady(model, canvas)
 
 		// Set context
 		var ctx = canvas.getContext('2d');
-
 		var el = document.getElementById('render_start');
+
 		el.style.display = 'block';
 		el.onclick = function() 
 		{ 
 			console.log('Begin render!'); 
-			drawImage(model, ctx);
+
+			var img = Object.create(Img);
+			img.init(ctx, canvas.width, canvas.height);
+
+			drawImage(model, img);
 		}
 	}
 
@@ -40,13 +48,17 @@ function modelReady(model, canvas)
 
 // Draw model called in deferred request
 
-function drawImage(model, ctx)
+function drawImage(model, img)
 {
-	var img = Object.create(Img);
-	img.init(ctx);
-
 	// "Clear" canvas to black
 	//img.clear(0x0);
+	/*
+	setTimeout(function() {
+        requestAnimationFrame(function() { 
+        	drawImage(model, img);
+        });
+        // Drawing code goes here
+    }, 1000 / 30);*/
 
 	start = new Date();
 
@@ -66,9 +78,9 @@ function drawImage(model, ctx)
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
-			var y = Math.floor((v[1] / 2 + 0.5) * img.h);
-			var z = Math.floor((v[2] / 2 + 0.5) * 32768);
+			var x = m.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
+			var y = m.floor((v[1] / 2 + 0.5) * img.h);
+			var z = m.floor((v[2] / 2 + 0.5) * 32768);
 
 			screen_coords.push([x, y, z]);
 			world_coords.push(v);
@@ -92,7 +104,7 @@ function drawImage(model, ctx)
 		var screen = [screen_coords[i], screen_coords[i+1], screen_coords[i+2]];
 
 		if (intensity > 0)
-			img.triangle(screen, color + (color << 8) + (color << 16));
+			img.triangle(screen, color | (color << 8) | (color << 16));
 	}
 
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
@@ -124,7 +136,7 @@ var Img =
 
 	// Initialize image
 
-	init: function(ctx)
+	init: function(ctx, w, h)
 	{
 		this.ctx = ctx;
 		this.calls = 0;
@@ -136,8 +148,8 @@ var Img =
 		while (bufWidth >>= 1) this.log2w++;
 
 		bufWidth = 1 << this.log2w;
-		this.w = ctx.canvas.clientWidth;
-		this.h = ctx.canvas.clientHeight;
+		this.w = w;
+		this.h = h;
 
 		// create buffers for data manipulation
 
@@ -145,8 +157,6 @@ var Img =
 		this.buf = new ArrayBuffer(this.imgData.data.length);
 		this.buf8 = new Uint8ClampedArray(this.buf);
 		this.buf32 = new Uint32Array(this.buf);
-
-		// Z buffer
 		this.zbuf = new Uint32Array(this.imgData.data.length);
 	},
 
@@ -186,7 +196,7 @@ var Img =
 	{ 
 		var steep = false;
 
-		if (Math.abs(x0 - x1) < Math.abs(y0 - y1)) 
+		if (m.abs(x0 - x1) < m.abs(y0 - y1)) 
 		{
 			// if the line is steep, transpose the image 
 			y0 = [x0, x0 = y0][0];
@@ -203,7 +213,7 @@ var Img =
 
 		const dx = x1 - x0;
 		const dy = y1 - y0;
-		const derror = Math.abs(dy / dx) << 1;
+		const derror = m.abs(dy / dx) << 1;
 		
 		var error = 0;
 		var y = y0; 
@@ -240,8 +250,8 @@ var Img =
 		{
 			for (var j = 0; j < 2; j++) 
 			{
-				boxMin[j] = Math.min(points[i][j], boxMin[j]);
-				boxMax[j] = Math.max(points[i][j], boxMax[j]);
+				boxMin[j] = m.min(points[i][j], boxMin[j]);
+				boxMax[j] = m.max(points[i][j], boxMax[j]);
 			}
 		}
 
@@ -272,10 +282,10 @@ var Img =
 				
 				if (this.zbuf[index] < z)
 				{
-					this.zbuf[index] = z;
-					var d = z / 127;	
-					this.set(x, y, d + (d << 8) + (d << 16)); 
-					this.calls++;
+					var d = z >> 8;
+					this.zbuf[index] = z;	
+					this.set(x, y, d | (d << 8) | (d << 16)); 
+					//this.calls++;
 				}
 			}
 	},
@@ -292,15 +302,15 @@ var Img =
 				if (this.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
-				for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 12) 
+				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 12) 
 				{
-					total += Math.PI / 2 - max_elevation_angle(
-						this.zbuf, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
+					total += m.PI / 2 - max_elevation_angle(
+						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w);
 				}
-				total /= (Math.PI / 2) * 24;
-				var c = 0xff;// this.get(x, y) & 0xff;
+				total /= (m.PI / 2) * 24;
+				var c = 255 * total;// this.get(x, y) & 0xff;
 
-				this.set(x, y, (c * total) + ((c * total) << 8) + ((c * total) << 16));
+				this.set(x, y, c | (c << 8) | (c << 16));
 				this.calls++;
 			}
 	},

@@ -50,7 +50,7 @@ dist = function(v)
 	for (var i = 0; i < v.length; i++)
 		sum += (v[i] * v[i]);
 
-	return Math.sqrt(sum);
+	return m.sqrt(sum);
 }
 
 // Normalize a 3D vector
@@ -70,7 +70,7 @@ barycentric = function(pts, point)
 		vecSub([pts[2][1], pts[1][1], pts[0][1]], [pts[0][1], pts[0][1], point[1]])  // (y2-y0, y1-y0, y0-p.y)
 	);
 
-	if (Math.abs(u[2]) > 1e-2)
+	if (m.abs(u[2]) > 1e-2)
 	{
 		var inv_u = 1 / u[2];
 		return [1 - ((u[0] + u[1]) * inv_u), u[1] * inv_u, u[0] * inv_u]; // (1 - (u.x + u.y), u.y, u.x)
@@ -87,7 +87,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 	var maxangle = 0;
 	for (var t = 0; t < 30; t++) 
 	{
-		// Current position of the ray traveled
+		// Current position of the ray traveled, and check for out of bounds
 		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
@@ -95,10 +95,10 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 		if (distance < 1) continue;
 
 		// buffer index
-		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);
+		var curIndex = ((dims[1] - m.floor(cur[1])) << log2width) + m.floor(cur[0]);
 		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.007874; // 1/127
 
-		maxangle = Math.max(maxangle, Math.atan(elevation / distance));
+		maxangle = m.max(maxangle, m.atan(elevation / distance));
 	}
 
 	return maxangle;
