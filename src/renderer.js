@@ -7,7 +7,7 @@ function drawInit()
 	if (canvas.getContext)
 	{
 		// Test load model
-		model.load("obj/diablo3.obj", modelReady(model, canvas));
+		model.load("obj/dragon.obj", modelReady(model, canvas));
 	}
 	else
 	{
@@ -95,7 +95,7 @@ function drawImage(model, ctx)
 			}
 		}
 
-		img.postProc();
+		//img.postProc();
 
 		// Finally put image data onto canvas
 		img.flush();
@@ -235,6 +235,10 @@ Img.line = function(x0, y0, x1, y1, color)
 Img.triangle = function(points, color) 
 { 
 	const bbox = findBbox(points, [this.w, this.h]);
+
+	// Skip triangles that don't appear on the screen
+	if (bbox[0][0] > this.w || bbox[1][0] < 0 || bbox[0][1] > this.h || bbox[1][1] < 0)
+		return;
 
 	var p = [-1, -1, 0];
 	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
