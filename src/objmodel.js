@@ -39,7 +39,6 @@ var OBJmodel =
 			func();
 		}
 
-		// handle errors
 		var error = function(response)
 		{
 			console.error("request failed!");	
@@ -72,7 +71,9 @@ var OBJmodel =
 					var indices = splitLine(lines, i);
 					
 					for (var j = 0; j < 3; j++)
-						indices[j] = indices[j].split('/');
+						indices[j] = indices[j].split('/').map(function(i) {
+							return parseInt(i - 1);
+						});
 
 					this.faces.push(indices);
 					break;

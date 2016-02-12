@@ -1,5 +1,5 @@
 
-function drawInit()
+function init()
 {
 	var canvas = document.getElementById('render');
 	var model = Object.create(OBJmodel);
@@ -65,7 +65,7 @@ function drawImage(model, ctx)
 
 		for (var j = 0; j < 3; j++)
 		{
-			var v = model.verts[face[j][0] - 1];
+			var v = model.verts[face[j][0]];
 			var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
 			var y = Math.floor((v[1] / 2 + 0.5) * img.h);
 			var z = Math.floor((v[2] / 2 + 0.5) * 32768);
@@ -104,13 +104,13 @@ function drawImage(model, ctx)
 	// Output info to the page
 	end = new Date();
 	var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixeval;
+	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixelVal;
 
 	document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 	console.log(execTime +'. '+ calls);
 
 	img.calls = 0;
-	img.pixeval = 0;
+	img.pixelVal = 0;
 }
 
 // Image drawing functions
@@ -128,7 +128,7 @@ var Img =
 	{
 		this.ctx = ctx;
 		this.calls = 0;
-		this.pixeval = 0;
+		this.pixelVal = 0;
 		var bufWidth = ctx.canvas.clientWidth;
 
 		// Get next highest 2^pow for width
@@ -143,12 +143,11 @@ var Img =
 
 		this.imgData = ctx.createImageData(bufWidth, this.h);
 		this.buf = new ArrayBuffer(this.imgData.data.length);
-
 		this.buf8 = new Uint8ClampedArray(this.buf);
 		this.buf32 = new Uint32Array(this.buf);
 
 		// Z buffer
-		this.zbuffer = new Uint32Array(this.imgData.data.length);
+		this.zbuf = new Uint32Array(this.imgData.data.length);
 	},
 
 	// Clear canvas
@@ -256,7 +255,7 @@ var Img =
 		for (var y = bbox[0][1]; y <= bbox[1][1]; y++)  
 			for (var x = bbox[0][0]; x <= bbox[1][0]; x++) 
 			{
-				this.pixeval++;
+				this.pixelVal++;
 				var b_coords = barycentric(points, [x, y, z]);
 
 				// Pixel is outside of barycentric coords
@@ -271,9 +270,9 @@ var Img =
 				// Get buffer index
 				var index = this.index(x, y);
 				
-				if (this.zbuffer[index] < z)
+				if (this.zbuf[index] < z)
 				{
-					this.zbuffer[index] = z;
+					this.zbuf[index] = z;
 					var d = z / 127;	
 					this.set(x, y, d + (d << 8) + (d << 16)); 
 					this.calls++;
@@ -290,13 +289,13 @@ var Img =
 			{
 				// Get buffer index
 				var index = this.index(x, y);
-				if (this.zbuffer[index] < 1e-5) continue;
+				if (this.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
 				for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 12) 
 				{
 					total += Math.PI / 2 - max_elevation_angle(
-						this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
+						this.zbuf, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
 				}
 				total /= (Math.PI / 2) * 24;
 				var c = 0xff;// this.get(x, y) & 0xff;
