@@ -7,7 +7,7 @@ function drawInit()
 	if (canvas.getContext)
 	{
 		// Test load model
-		model.load("obj/dragon.obj", modelReady(model, canvas));
+		model.load("obj/diablo3.obj", modelReady(model, canvas));
 	}
 	else
 	{
@@ -45,260 +45,272 @@ function drawImage(model, ctx)
 	var img = Object.create(Img);
 	img.init(ctx);
 
-	console.log("Canvas loaded");
+	// "Clear" canvas to black
+	//img.clear(0x0);
 
-	var th = 0;
-	console.log("Crunching triangles");
+	start = new Date();
 
-	//var intervalID = window.setInterval(function()
+	var ratio = img.h / img.w;
+
+	// Coordinates for model rendering
+	var world_coords = [];
+	var screen_coords = [];
+
+	// Transform geometry to screen space
+	console.log(new Date().getTime() - start.getTime() +"ms Crunching triangles");
+
+	for (var f = 0; f < model.faces.length; f++)
 	{
-		// "Clear" canvas to black
-		img.clear(0x0);
+		var face = model.faces[f];
 
-		start = new Date();
+		for (var j = 0; j < 3; j++)
+		{
+			var v = model.verts[face[j][0] - 1];
+			var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
+			var y = Math.floor((v[1] / 2 + 0.5) * img.h);
+			var z = Math.floor((v[2] / 2 + 0.5) * 32768);
 
-		const cos_th = Math.cos(th);
-		const sin_th = Math.sin(th);
-
-		var ratio = img.h / img.w;
-
-		//for (var i = 0; i < 100; i++)
-		{	
-			for (var f = 0; f < model.faces.length; f++)
-			{
-				var face = model.faces[f];
-
-				var world_coords = [];
-				var screen_coords = [];
-
-				for (var j = 0; j < 3; j++)
-				{
-					var v = model.verts[face[j][0] - 1];
-					var x = Math.floor((v[0] / 12 + 0.5 / ratio) * img.w * ratio); 
-					var y = Math.floor((v[1] / 12 + 0.1) * img.h);
-					var z = Math.floor((v[2] / 12 + 0.5) * 32768);
-
-					screen_coords.push([x, y, z]);
-					world_coords.push(v);
-				}
-
-				var n = cross(
-					vecSub(world_coords[2], world_coords[0]), 
-					vecSub(world_coords[1], world_coords[0])
-				);
-
-				var intensity = dot(normalize(n), [0, 0, -1]);
-				var color = 255 * intensity;
-
-				if (intensity > 0)
-					img.triangle(screen_coords, color + (color << 8) + (color << 16));
-			}
+			screen_coords.push([x, y, z]);
+			world_coords.push(v);
 		}
+	}
 
-		img.postProc();
+	// Draw the triangles
+	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
-		// Finally put image data onto canvas
-		img.flush();
+	for (var i = 0; i < world_coords.length; i+= 3)
+	{
+		// Calculate normal
+		var n = cross(
+			vecSub(world_coords[i+2], world_coords[i]), 
+			vecSub(world_coords[i+1], world_coords[i])
+		);
 
-		// Then do post-processing
-		//window.setTimeout(img.postProc, 2000);
+		// Light intensity
+		var intensity = dot(normalize(n), [0, 0, -1]);
+		var color = 255 * intensity;
+		var screen = [screen_coords[i], screen_coords[i+1], screen_coords[i+2]];
 
-		end = new Date();
-		var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-		var calls = "Pixel draw calls: "+ img.calls;
+		if (intensity > 0)
+			img.triangle(screen, color + (color << 8) + (color << 16));
+	}
 
-		document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-		console.log(execTime +'. '+ calls);
-		img.calls = 0;
+	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
+	img.postProc();
 
-		th += 0.01;
+	// Finally put image data onto canvas
+	img.flush();
 
-	}//, 100);
+	// Output info to the page
+	end = new Date();
+	var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixeval;
+
+	document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+	console.log(execTime +'. '+ calls);
+
+	img.calls = 0;
+	img.pixeval = 0;
 }
 
 // Image drawing functions
 
-var Img = new Object();
-
-// Img properties
-
-Img.ctx = null;
-Img.imgData = null;
-
-// Initialize image
-
-Img.init = function(ctx)
+var Img =
 {
-	this.ctx = ctx;
-	this.calls = 0;
-	var bufWidth = ctx.canvas.clientWidth;
+	// Img properties
 
-	// Get next highest 2^pow for width
-	this.log2w = 1;
-	while (bufWidth >>= 1) this.log2w++;
+	ctx: null,
+	imgData: null,
 
-	bufWidth = 1 << this.log2w;
-	this.w = ctx.canvas.clientWidth;
-	this.h = ctx.canvas.clientHeight;
+	// Initialize image
 
-	// create buffers for data manipulation
-
-	this.imgData = ctx.createImageData(bufWidth, this.h);
-	this.buf = new ArrayBuffer(this.imgData.data.length);
-
-	this.buf8 = new Uint8ClampedArray(this.buf);
-	this.buf32 = new Uint32Array(this.buf);
-
-	// Z buffer
-	this.zbuffer = new Uint32Array(this.imgData.data.length);
-}
-
-// Clear canvas
-
-Img.clear = function(color)
-{
-	const len = this.buf32.length;
-	for (var i = 0; i < len; i++)
-		this.buf32[i] = color + 0xff000000;
-}
-
-// Get pixel index
-
-Img.index = function(x, y)
-{
-	return ((this.h - y) << this.log2w) + x;
-}
-
-// Set a pixel
-
-Img.set = function(x, y, color)
-{
-	this.buf32[this.index(x, y)] = color + 0xff000000;
-}
-
-// Get a pixel
-
-Img.get = function(x, y)
-{
-	return this.buf32[this.index(x, y)];
-}
-
-// Draw a line
-
-Img.line = function(x0, y0, x1, y1, color) 
-{ 
-	var steep = false;
-
-	if (Math.abs(x0 - x1) < Math.abs(y0 - y1)) 
+	init: function(ctx)
 	{
-		// if the line is steep, transpose the image 
-		y0 = [x0, x0 = y0][0];
-		y1 = [x1, x1 = y1][0];
-		steep = true;
-	}
+		this.ctx = ctx;
+		this.calls = 0;
+		this.pixeval = 0;
+		var bufWidth = ctx.canvas.clientWidth;
 
-	// Make line left to right
-	if (x0 > x1)
+		// Get next highest 2^pow for width
+		this.log2w = 1;
+		while (bufWidth >>= 1) this.log2w++;
+
+		bufWidth = 1 << this.log2w;
+		this.w = ctx.canvas.clientWidth;
+		this.h = ctx.canvas.clientHeight;
+
+		// create buffers for data manipulation
+
+		this.imgData = ctx.createImageData(bufWidth, this.h);
+		this.buf = new ArrayBuffer(this.imgData.data.length);
+
+		this.buf8 = new Uint8ClampedArray(this.buf);
+		this.buf32 = new Uint32Array(this.buf);
+
+		// Z buffer
+		this.zbuffer = new Uint32Array(this.imgData.data.length);
+	},
+
+	// Clear canvas
+
+	clear: function(color)
 	{
-		x1 = [x0, x0 = x1][0];
-		y1 = [y0, y0 = y1][0];		
-	}
+		const len = this.buf32.length;
+		for (var i = 0; i < len; i++)
+			this.buf32[i] = color + 0xff000000;
+	},
 
-	const dx = x1 - x0;
-	const dy = y1 - y0;
-	const derror = Math.abs(dy / dx) << 1;
-	
-	var error = 0;
-	var y = y0; 
+	// Get pixel index
 
-	for (var x = x0; x <= x1; x++) 
+	index: function(x, y)
 	{
-		if (steep)
-			this.set(x, y, color)
-		else
-			this.set(y, x, color)
+		return ((this.h - y) << this.log2w) + x;
+	},
 
-		error += derror;
+	// Set a pixel
 
-		if (error > 1) { 
-			y += (y1 > y0) ? 1 : -1; 
-			error-= 2;
-		} 
-	}
+	set: function(x, y, color)
+	{
+		this.buf32[this.index(x, y)] = color + 0xff000000;
+	},
 
-	// Increment draw calls
-	this.calls += (x1 - x0 + 1);
-}
+	// Get a pixel
 
-// Draw a triangle from 2D points
+	get: function(x, y)
+	{
+		return this.buf32[this.index(x, y)];
+	},
 
-Img.triangle = function(points, color) 
-{ 
-	const bbox = findBbox(points, [this.w, this.h]);
+	// Draw a line
+	/*
+	line: function(x0, y0, x1, y1, color) 
+	{ 
+		var steep = false;
 
-	// Skip triangles that don't appear on the screen
-	if (bbox[0][0] > this.w || bbox[1][0] < 0 || bbox[0][1] > this.h || bbox[1][1] < 0)
-		return;
-
-	var p = [-1, -1, 0];
-	for (p[0] = bbox[0][0]; p[0] <= bbox[1][0]; p[0]++)  
-		for (p[1] = bbox[0][1]; p[1] <= bbox[1][1]; p[1]++) 
+		if (Math.abs(x0 - x1) < Math.abs(y0 - y1)) 
 		{
-			var b_coords = barycentric(points, p);
+			// if the line is steep, transpose the image 
+			y0 = [x0, x0 = y0][0];
+			y1 = [x1, x1 = y1][0];
+			steep = true;
+		}
 
-			// Pixel is outside of barycentric coords
-			if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
-				continue;
+		// Make line left to right
+		if (x0 > x1)
+		{
+			x1 = [x0, x0 = x1][0];
+			y1 = [y0, y0 = y1][0];		
+		}
 
-			// Get pixel depth
-			p[2] = 0;
-			for (var i=0; i<3; i++) 
-				p[2] += points[i][2] * b_coords[i];
+		const dx = x1 - x0;
+		const dy = y1 - y0;
+		const derror = Math.abs(dy / dx) << 1;
+		
+		var error = 0;
+		var y = y0; 
 
-			// Get buffer index
-			var index = this.index(p[0], p[1]);// ((this.h - p[1]) << this.log2w) + p[0];
-			
-			if (this.zbuffer[index] < p[2])
+		for (var x = x0; x <= x1; x++) 
+		{
+			if (steep)
+				this.set(x, y, color)
+			else
+				this.set(y, x, color)
+
+			error += derror;
+
+			if (error > 1) { 
+				y += (y1 > y0) ? 1 : -1; 
+				error-= 2;
+			} 
+		}
+
+		// Increment draw calls
+		this.calls += (x1 - x0 + 1);
+	},*/
+
+	// Draw a triangle from 2D points
+
+	triangle: function(points, color) 
+	{ 
+		// Create bounding box
+		var boxMin = [this.w + 1, this.h + 1];
+		var boxMax = [-1, -1];
+
+		// Find X and Y dimensions for each
+		for (var i = 0; i < points.length; i++)
+		{
+			for (var j = 0; j < 2; j++) 
 			{
-				this.zbuffer[index] = p[2];
-				var d = p[2] / 127;	
-				this.set(p[0], p[1], color);// d + (d << 8) + (d << 16)); 
+				boxMin[j] = Math.min(points[i][j], boxMin[j]);
+				boxMax[j] = Math.max(points[i][j], boxMax[j]);
+			}
+		}
+
+		const bbox = [boxMin, boxMax];
+
+		// Skip triangles that don't appear on the screen
+		if (bbox[0][0] > this.w || bbox[1][0] < 0 || bbox[0][1] > this.h || bbox[1][1] < 0)
+			return;
+
+		var z = 0;
+		for (var y = bbox[0][1]; y <= bbox[1][1]; y++)  
+			for (var x = bbox[0][0]; x <= bbox[1][0]; x++) 
+			{
+				this.pixeval++;
+				var b_coords = barycentric(points, [x, y, z]);
+
+				// Pixel is outside of barycentric coords
+				if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
+					continue;
+
+				// Get pixel depth
+				z = 0;
+				for (var i=0; i<3; i++) 
+					z += points[i][2] * b_coords[i];
+
+				// Get buffer index
+				var index = this.index(x, y);
+				
+				if (this.zbuffer[index] < z)
+				{
+					this.zbuffer[index] = z;
+					var d = z / 127;	
+					this.set(x, y, d + (d << 8) + (d << 16)); 
+					this.calls++;
+				}
+			}
+	},
+
+	// Post-processing (mostly SSAO)
+
+	postProc: function()
+	{
+		for (var y = 0; y < this.h; y++)
+			for (var x = 0; x < this.w; x++) 
+			{
+				// Get buffer index
+				var index = this.index(x, y);
+				if (this.zbuffer[index] < 1e-5) continue;
+
+				var total = 0;
+				for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 12) 
+				{
+					total += Math.PI / 2 - max_elevation_angle(
+						this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
+				}
+				total /= (Math.PI / 2) * 24;
+				var c = 0xff;// this.get(x, y) & 0xff;
+
+				this.set(x, y, (c * total) + ((c * total) << 8) + ((c * total) << 16));
 				this.calls++;
 			}
-		}
-}
+	},
 
-// Post-processing (mostly SSAO)
+	// Put image data on the canvas
 
-Img.postProc = function()
-{
-	for (var y = 0; y < this.h; y++) {
-		for (var x = 0; x < this.w; x++) {
-
-			// Get buffer index
-			var index = this.index(x, y);
-			if (this.zbuffer[index] < 1e-5) continue;
-
-			var total = 0;
-			for (var a = 0; a < Math.PI * 2-1e-4; a += Math.PI / 8) 
-			{
-				total += Math.PI / 2 - max_elevation_angle(
-					this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
-			}
-			total /= (Math.PI / 2) * 16;
-			//total = Math.pow(total, 1.5);
-			var c = 0xff;// this.get(x, y) & 0xff;
-
-			this.set(x, y, (c * total) + ((c * total) << 8) + ((c * total) << 16));
-			this.calls++;
-		}
+	flush: function()
+	{
+		this.imgData.data.set(this.buf8);
+		this.ctx.putImageData(this.imgData, 0, 0);
 	}
-}
-
-// Put image data on the canvas
-
-Img.flush = function()
-{
-	this.imgData.data.set(this.buf8);
-	this.ctx.putImageData(this.imgData, 0, 0);
 }
