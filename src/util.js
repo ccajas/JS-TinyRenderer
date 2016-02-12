@@ -1,25 +1,5 @@
 
-
 // Utility functions
-
-// Find bounding box from a set of 2D points
-// Returns an array of 2 points (min and max bounds)
-
-findBbox = function(points, img_dims)
-{
-	var boxMin = [img_dims[0] + 1, img_dims[1] + 1];
-	var boxMax = [-1, -1];
-
-	// Find X and Y dimensions for each
-	for (var i = 0; i < points.length; i++)
-		for (var j = 0; j < 2; j++) 
-		{
-			boxMin[j] = Math.min(points[i][j], boxMin[j]);
-			boxMax[j] = Math.max(points[i][j], boxMax[j]);
-		}
-
-	return [boxMin, boxMax];
-}
 
 // Add two vectors
 
@@ -41,13 +21,6 @@ vecSub = function(a, b)
 		diff.push(a[i] - b[i]);
 
 	return diff;
-}
-
-// Clamp between two values
-
-clamp = function(x, a, b) 
-{
-	return Math.min(Math.max(x, a), b);
 }
 
 // Dot product of two 3D vectors
@@ -97,11 +70,14 @@ barycentric = function(pts, point)
 		vecSub([pts[2][1], pts[1][1], pts[0][1]], [pts[0][1], pts[0][1], point[1]])  // (y2-y0, y1-y0, y0-p.y)
 	);
 
-	// triangle is degenerate, return a position with negative coordinates 
-	if (Math.abs(u[2]) < 1) return [-1, 1, 1];
+	if (Math.abs(u[2]) > 1e-2)
+	{
+		var inv_u = 1 / u[2];
+		return [1 - ((u[0] + u[1]) * inv_u), u[1] * inv_u, u[0] * inv_u]; // (1 - (u.x + u.y), u.y, u.x)
+	}
 
-	// (1 - (u.x + u.y), u.y, u.x)
-	return [1 - ((u[0] + u[1]) / u[2]), u[1] / u[2], u[0] / u[2]];
+	// triangle is degenerate, return a position with negative coordinates 	
+	return [-1, 1, 1];
 }
 
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
@@ -109,8 +85,9 @@ barycentric = function(pts, point)
 max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 {
 	var maxangle = 0;
-	for (var t = 0; t < 10; t++) 
+	for (var t = 0; t < 30; t++) 
 	{
+		// Current position of the ray traveled
 		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
@@ -119,7 +96,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 
 		// buffer index
 		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);
-		var elevation = (zbuffer[curIndex] - zbuffer[index]) / 127;
+		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.007874; // 1/127
 
 		maxangle = Math.max(maxangle, Math.atan(elevation / distance));
 	}
