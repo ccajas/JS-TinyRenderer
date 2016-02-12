@@ -48,6 +48,8 @@ OBJmodel.load = function(file, func)
 
 OBJmodel.parse = function(lines)
 {
+	var splitLine = function(lines, i) { return lines[i].split(' ').splice(1, 3); }
+
 	// Read each line
 	for (var i = 0; i < lines.length; i++)
 	{
@@ -55,17 +57,17 @@ OBJmodel.parse = function(lines)
 		switch (lines[i].substr(0, 2))
 		{
 			case 'v ':
-				this.verts.push(lines[i].split(' ').splice(1, 3));
+				this.verts.push(splitLine(lines, i));
 				break;
 
 			// Find vertex normals
 			case 'vn':
-				this.normals.push(lines[i].split(' ').splice(1, 3));
+				this.normals.push(splitLine(lines, i));
 				break;
 
 			// Find face indices
 			case 'f ':
-				var indices = lines[i].split(' ').splice(1, 3);
+				var indices = splitLine(lines, i);
 				
 				for (var j = 0; j < 3; j++)
 					indices[j] = indices[j].split('/');
@@ -76,5 +78,6 @@ OBJmodel.parse = function(lines)
 	}
 
 	console.log('total verts: '+ this.verts.length);
+	console.log('total normals: '+ this.normals.length);
 	console.log('total faces: '+ this.faces.length);
 }
