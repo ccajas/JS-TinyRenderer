@@ -6,10 +6,8 @@ function drawInit()
 
 	if (canvas.getContext)
 	{
-		var ready = modelReady(model, canvas);
-
 		// Test load model
-		model.load("obj/diablo3.obj", ready);
+		model.load("obj/diablo3.obj", modelReady(model, canvas));
 	}
 	else
 	{
@@ -97,8 +95,13 @@ function drawImage(model, ctx)
 			}
 		}
 
+		img.postProc();
+
 		// Finally put image data onto canvas
 		img.flush();
+
+		// Then do post-processing
+		//window.setTimeout(img.postProc, 2000);
 
 		end = new Date();
 		var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
@@ -253,16 +256,17 @@ Img.triangle = function(points, color)
 			
 			if (this.zbuffer[index] < p[2])
 			{
-				this.zbuffer[index] = p[2];		
-				this.set(p[0], p[1], p[2] + (p[2] << 8) + (p[2] << 16));//color); 
+				this.zbuffer[index] = p[2];
+				var d = p[2] / 127;	
+				this.set(p[0], p[1], color);// d + (d << 8) + (d << 16)); 
 				this.calls++;
 			}
 		}
 }
 
-// Put image data on the canvas
+// Post-processing (mostly SSAO)
 
-Img.flush = function()
+Img.postProc = function()
 {
 	for (var y = 0; y < this.h; y++) {
 		for (var x = 0; x < this.w; x++) {
@@ -279,12 +283,18 @@ Img.flush = function()
 			}
 			total /= (Math.PI / 2) * 14;
 			//total = Math.pow(total, 1.5);
+			var c = this.get(x, y) & 0xff;
 
-			this.set(x, y, (255 * total) + ((255 * total) << 8) + ((255 * total) << 16));
+			this.set(x, y, (c * total) + ((c * total) << 8) + ((c * total) << 16));
 			this.calls++;
 		}
 	}
+}
 
+// Put image data on the canvas
+
+Img.flush = function()
+{
 	this.imgData.data.set(this.buf8);
 	this.ctx.putImageData(this.imgData, 0, 0);
 }
