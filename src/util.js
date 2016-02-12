@@ -115,7 +115,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
 		var distance = dist(vecSub(p, cur));
-		if (distance < 2) continue;
+		if (distance < 1) continue;
 
 		// buffer index
 		var curIndex = ((dims[1] - Math.floor(cur[1])) << log2width) + Math.floor(cur[0]);

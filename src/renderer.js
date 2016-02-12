@@ -74,9 +74,9 @@ function drawImage(model, ctx)
 				for (var j = 0; j < 3; j++)
 				{
 					var v = model.verts[face[j][0] - 1];
-					var x = Math.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
-					var y = Math.floor((v[1] / 2 + 0.5) * img.h);
-					var z = Math.floor((v[2] / 2 + 0.5) * 32768);
+					var x = Math.floor((v[0] / 12 + 0.5 / ratio) * img.w * ratio); 
+					var y = Math.floor((v[1] / 12 + 0.1) * img.h);
+					var z = Math.floor((v[2] / 12 + 0.5) * 32768);
 
 					screen_coords.push([x, y, z]);
 					world_coords.push(v);
@@ -95,7 +95,7 @@ function drawImage(model, ctx)
 			}
 		}
 
-		//img.postProc();
+		img.postProc();
 
 		// Finally put image data onto canvas
 		img.flush();
@@ -285,9 +285,9 @@ Img.postProc = function()
 				total += Math.PI / 2 - max_elevation_angle(
 					this.zbuffer, index, [x, y], [this.w, this.h], [Math.sin(a), Math.cos(a)], this.log2w);
 			}
-			total /= (Math.PI / 2) * 14;
+			total /= (Math.PI / 2) * 16;
 			//total = Math.pow(total, 1.5);
-			var c = this.get(x, y) & 0xff;
+			var c = 0xff;// this.get(x, y) & 0xff;
 
 			this.set(x, y, (c * total) + ((c * total) << 8) + ((c * total) << 16));
 			this.calls++;
