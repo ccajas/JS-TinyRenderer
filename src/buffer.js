@@ -116,7 +116,7 @@ var Buffer =
 	// Draw a triangle from 2D points
 
 	triangle: function(points, effect) 
-	{ 
+	{
 		// Create bounding box
 		var boxMin = [this.w + 1, this.h + 1];
 		var boxMax = [-1, -1];
@@ -155,7 +155,7 @@ var Buffer =
 
 				// Get buffer index and run fragment shader
 				var index = this.index(x, y);
-				var color = [0xff0000];
+				var color = [0];
 				var discard = effect.fragment(b_coords, color);
 				
 				if (this.zbuf[index] < z && !discard)

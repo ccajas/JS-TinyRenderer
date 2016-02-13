@@ -53,41 +53,42 @@ function modelReady(model, canvas)
 
 function drawImage(model, img)
 {
-	// "Clear" canvas to black
-	//img.clear(0);
-	/* */
+	var effect = null;
 
-	var effect = Object.create(Effect);
+	// Create default effect if no valid effect file was found
+	if (!objectHas(effect, ['vertex', 'fragment']))
+		effect = Object.create(Effect);
+
 	start = new Date();
-
-	var ratio = img.h / img.w;
-
-	// Coordinates for model rendering
-	var world_coords = [];
-	var screen_coords = [];
 
 	// Transform geometry to screen space
 	console.log(new Date().getTime() - start.getTime() +"ms Crunching triangles");
 
+	// Set shader uniform variables
+	setUniforms(effect, {
+		scr_w: img.w,
+		scr_h: img.h
+	});
+
 	for (var f = 0; f < model.faces.length; f++)
 	{
 		var face = model.faces[f];
+		// Coordinates for model rendering
+		//var world_coords = [];
+		var screen_coords = [];
 
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			var x = m.floor((v[0] / 2 + 0.5 / ratio) * img.w * ratio); 
-			var y = m.floor((v[1] / 2 + 0.5) * img.h);
-			var z = m.floor((v[2] / 2 + 0.5) * 32768);
-
-			screen_coords.push([x, y, z]);
-			world_coords.push(v);
+			screen_coords.push(effect.vertex(v));
 		}
+		// Draw triangle
+		img.triangle(screen_coords, effect);
 	}
 
 	// Draw the triangles
 	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
-
+/*	
 	for (var i = 0; i < world_coords.length; i+= 3)
 	{
 		// Calculate normal
@@ -104,7 +105,7 @@ function drawImage(model, img)
 		if (intensity > 0)
 			img.triangle(screen, effect);//, color | (color << 8) | (color << 16));
 	}
-
+*/
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
 
 	// Output first render to buffer

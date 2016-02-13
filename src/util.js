@@ -1,6 +1,20 @@
 
 // Utility functions
 
+// Duck Type check
+
+function objectHas(obj, methodNames)
+{
+	if (obj == null) return false;
+
+	methodNames.forEach(function(name) {
+		if ((typeof obj[name]) != "function")
+			return false;
+	});
+
+	return true;
+}
+
 // Add two vectors
 
 vecAdd = function(a, b)
@@ -94,7 +108,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 
 		// buffer index
 		var curIndex = ((dims[1] - m.floor(cur[1])) << log2width) + m.floor(cur[0]);
-		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.007874; // 1/127
+		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.0078125; // 1/128
 
 		maxangle = m.max(maxangle, elevation / distance);
 	}
