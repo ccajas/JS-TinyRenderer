@@ -1,7 +1,14 @@
 
+// Shorthand
+
+var m = Math;
+var doc = document;
+
+// Main function
+
 (function() 
 {
-	var canvas = document.getElementById('render');
+	var canvas = doc.getElementById('render');
 	var model = Object.create(OBJmodel);
 
 	if (canvas.getContext)
@@ -15,10 +22,6 @@
 	}
 }).call(this);
 
-// Shorthand
-
-var m = Math;
-
 // Display render link
 
 function modelReady(model, canvas)
@@ -29,7 +32,7 @@ function modelReady(model, canvas)
 
 		// Set context
 		var ctx = canvas.getContext('2d');
-		var el = document.getElementById('render_start');
+		var el = doc.getElementById('render_start');
 
 		el.style.display = 'block';
 		el.onclick = function() 
@@ -126,16 +129,17 @@ var Img =
 		this.ctx = ctx;
 		this.calls = 0;
 		this.pixelVal = 0;
-		var bufWidth = ctx.canvas.clientWidth;
 
-		// Get next highest 2^pow for width
-		this.log2w = 1;
-		while (bufWidth >>= 1) this.log2w++;
-
-		bufWidth = 1 << this.log2w;
 		this.w = w;
 		this.h = h;
 		this.nextline = h;
+
+		// Get next highest 2^pow for width
+		this.log2w = 1;
+		var bufWidth = w;
+		while (bufWidth >>= 1) this.log2w++;
+
+		var bufWidth = 1 << this.log2w;
 
 		// create buffers for data manipulation
 
@@ -270,7 +274,7 @@ var Img =
 				{
 					var d = z >> 8;
 					this.zbuf[index] = z;	
-					this.set(x, y, d | (d << 8) | (d << 16)); 
+					this.set(x, y, color);// d | (d << 8) | (d << 16)); 
 					this.calls++;
 				}
 			}
@@ -290,11 +294,8 @@ var Img =
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
 			var calls = "Pixel draw calls/visited: "+ this.calls +"/"+ this.pixelVal;
 
-			document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 			console.log(execTime +'. '+ calls);
-
-			this.calls = 0;
-			this.pixelVal = 0;
 
 			return;
 		}

@@ -49,7 +49,7 @@ var OBJmodel =
 
 	parse: function(lines)
 	{
-		var splitLine = function(lines, i) { return lines[i].split(' ').splice(1, 3); }
+		var splitLine = function(i) { return lines[i].split(' ').splice(1, 3); }
 
 		// Read each line
 		for (var i = 0; i < lines.length; i++)
@@ -58,17 +58,17 @@ var OBJmodel =
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					this.verts.push(splitLine(lines, i));
+					this.verts.push(splitLine(i));
 					break;
 
 				// Find vertex normals
 				case 'vn':
-					this.normals.push(splitLine(lines, i));
+					this.normals.push(splitLine(i));
 					break;
 
 				// Find face indices
 				case 'f ':
-					var indices = splitLine(lines, i);
+					var indices = splitLine(i);
 					
 					for (var j = 0; j < 3; j++)
 						indices[j] = indices[j].split('/').map(function(i) {

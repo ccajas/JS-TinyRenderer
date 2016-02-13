@@ -58,26 +58,24 @@ dist = function(v)
 normalize = function(v)
 {
 	var length = dist(v);
-	return res = [v[0] / length, v[1] / length, v[2] / length];
+	return [v[0] / length, v[1] / length, v[2] / length];
 }
 
-// Barycentric coordinates from three points
+// Barycentric coordinates from three 2D points
 
-barycentric = function(pts, point) 
+barycentric = function(pts, point)
 {
-	var u = cross(
-		vecSub([pts[2][0], pts[1][0], pts[0][0]], [pts[0][0], pts[0][0], point[0]]), // (x2-x0, x1-x0, x0-p.x)
-		vecSub([pts[2][1], pts[1][1], pts[0][1]], [pts[0][1], pts[0][1], point[1]])  // (y2-y0, y1-y0, y0-p.y)
-	);
+    var v0 = vecSub(pts[1], pts[0]), 
+    v1 = vecSub(pts[2], pts[0]), 
+    v2 = vecSub(point, pts[0]);
 
-	if (m.abs(u[2]) > 1e-2)
-	{
-		var inv_u = 1 / u[2];
-		return [1 - ((u[0] + u[1]) * inv_u), u[1] * inv_u, u[0] * inv_u]; // (1 - (u.x + u.y), u.y, u.x)
-	}
+    var dn1 = 1 / (v0[0] * v1[1] - v1[0] * v0[1]);
 
-	// triangle is degenerate, return a position with negative coordinates 	
-	return [-1, 1, 1];
+    v = (v2[0] * v1[1] - v1[0] * v2[1]) * dn1;
+    w = (v0[0] * v2[1] - v2[0] * v0[1]) * dn1;
+    u = 1 - v - w;
+
+    return [u, v, w];
 }
 
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
