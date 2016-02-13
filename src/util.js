@@ -98,7 +98,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 		var curIndex = ((dims[1] - m.floor(cur[1])) << log2width) + m.floor(cur[0]);
 		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.007874; // 1/127
 
-		maxangle = m.max(maxangle, m.atan(elevation / distance));
+		maxangle = m.max(maxangle, elevation / distance);
 	}
 
 	return maxangle;

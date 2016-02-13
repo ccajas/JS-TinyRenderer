@@ -304,8 +304,8 @@ var Img =
 				var total = 0;
 				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 12) 
 				{
-					total += m.PI / 2 - max_elevation_angle(
-						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w);
+					total += m.PI / 2 - m.atan(max_elevation_angle(
+						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w));
 				}
 				total /= (m.PI / 2) * 24;
 				var c = 255 * total;// this.get(x, y) & 0xff;
