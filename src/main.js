@@ -57,6 +57,7 @@ function drawImage(model, img)
 	//img.clear(0);
 	/* */
 
+	var effect = Object.create(Effect);
 	start = new Date();
 
 	var ratio = img.h / img.w;
@@ -101,7 +102,7 @@ function drawImage(model, img)
 		var screen = [screen_coords[i], screen_coords[i+1], screen_coords[i+2]];
 
 		if (intensity > 0)
-			img.triangle(screen, color | (color << 8) | (color << 16));
+			img.triangle(screen, effect);//, color | (color << 8) | (color << 16));
 	}
 
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");

@@ -17,6 +17,7 @@ module.exports = function(grunt)
 				files: { 'renderer.js': [
 					'src/objmodel.js',
 					'src/buffer.js',
+					'src/effect.js',
 					'src/util.js',
 					'src/main.js'
 				]}
