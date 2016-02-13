@@ -9,20 +9,23 @@ module.exports = function(grunt)
 		uglify: 
 		{
 			options: {
-				banner: '/*! <%= pkg.name %> - ver. <%= pkg.version %> */\r\n'
-				//compress: { drop_console: true }
+				banner: '/*! <%= pkg.name %> - ver. <%= pkg.version %> */\r\n',
+				compress: { drop_console: true }
 			},
 
 			js: {
 				files: { 'renderer.js': [
-					'src/*.js'
+					'src/objmodel.js',
+					'src/buffer.js',
+					'src/util.js',
+					'src/main.js'
 				]}
 			}
 		},
 
 		watch: {
 			first: {
-				files: ['src/renderer.js'],
+				files: ['src/*.js'],
 				tasks: ['uglify']
 			}
 		}
