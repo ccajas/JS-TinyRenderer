@@ -51,14 +51,8 @@ function modelReady(model, canvas)
 function drawImage(model, img)
 {
 	// "Clear" canvas to black
-	//img.clear(0x0);
-	/*
-	setTimeout(function() {
-        requestAnimationFrame(function() { 
-        	drawImage(model, img);
-        });
-        // Drawing code goes here
-    }, 1000 / 30);*/
+	//img.clear(0);
+	/* */
 
 	start = new Date();
 
@@ -108,21 +102,12 @@ function drawImage(model, img)
 	}
 
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
-	img.postProc();
 
-	// Finally put image data onto canvas
-	img.flush();
+	// Output first render to buffer
+	img.drawBuffer();
 
-	// Output info to the page
-	end = new Date();
-	var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixelVal;
-
-	document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-	console.log(execTime +'. '+ calls);
-
-	img.calls = 0;
-	img.pixelVal = 0;
+	// Scan line by line
+	img.draw();
 }
 
 // Image drawing functions
@@ -150,6 +135,7 @@ var Img =
 		bufWidth = 1 << this.log2w;
 		this.w = w;
 		this.h = h;
+		this.nextline = h;
 
 		// create buffers for data manipulation
 
@@ -285,16 +271,49 @@ var Img =
 					var d = z >> 8;
 					this.zbuf[index] = z;	
 					this.set(x, y, d | (d << 8) | (d << 16)); 
-					//this.calls++;
+					this.calls++;
 				}
 			}
 	},
 
+	draw: function()
+	{
+		var self = this;
+
+		// Done animating
+		if (self.nextline < 0)
+		{
+			console.log("Done!");
+
+			// Output info to the page
+			end = new Date();
+			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+			var calls = "Pixel draw calls/visited: "+ this.calls +"/"+ this.pixelVal;
+
+			document.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+			console.log(execTime +'. '+ calls);
+
+			this.calls = 0;
+			this.pixelVal = 0;
+
+			return;
+		}
+
+    	requestAnimationFrame(function(){
+    		self.draw();
+		});
+
+    	this.postProc(self.nextline);
+   		this.drawBuffer();
+
+		self.nextline -= 32;
+	},
+
 	// Post-processing (mostly SSAO)
 
-	postProc: function()
+	postProc: function(nextline)
 	{
-		for (var y = 0; y < this.h; y++)
+		for (var y = nextline; y > nextline - 32; y--)
 			for (var x = 0; x < this.w; x++) 
 			{
 				// Get buffer index
@@ -302,22 +321,22 @@ var Img =
 				if (this.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
-				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 12) 
+				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 7) 
 				{
 					total += m.PI / 2 - m.atan(max_elevation_angle(
 						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w));
 				}
-				total /= (m.PI / 2) * 24;
+				total /= (m.PI / 2) * 14;
 				var c = 255 * total;// this.get(x, y) & 0xff;
 
 				this.set(x, y, c | (c << 8) | (c << 16));
 				this.calls++;
-			}
+			};
 	},
 
 	// Put image data on the canvas
 
-	flush: function()
+	drawBuffer: function()
 	{
 		this.imgData.data.set(this.buf8);
 		this.ctx.putImageData(this.imgData, 0, 0);
