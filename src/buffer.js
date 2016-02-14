@@ -1,70 +1,52 @@
 
 // Image drawing functions
 
-var Buffer =
+function Buffer(ctx, w, h)
 {
-	// Img properties
+	// Buffer properties
 
-	ctx: null,
-	imgData: null,
-
-	// Initialize image
-
-	init: function(ctx, w, h)
+	var th = 
 	{
-		this.ctx = ctx;
-		this.calls = 0;
-		this.pixelVal = 0;
+		ctx: ctx,
+		w: w,
+		h: h,
 
-		this.w = w;
-		this.h = h;
-		this.nextline = h;
+		calls: 0,
+		pixelVal: 0,
 
-		// Get next highest 2^pow for width
-		this.log2w = 1;
-		var bufWidth = w;
-		while (bufWidth >>= 1) this.log2w++;
-
-		var bufWidth = 1 << this.log2w;
-
-		// create buffers for data manipulation
-
-		this.imgData = ctx.createImageData(bufWidth, this.h);
-		this.buf = new ArrayBuffer(this.imgData.data.length);
-		this.buf8 = new Uint8ClampedArray(this.buf);
-		this.buf32 = new Uint32Array(this.buf);
-		this.zbuf = new Uint32Array(this.imgData.data.length);
-	},
+		nextline: h,
+		bufWidth: w,	
+	};
 
 	// Clear canvas
 
-	clear: function(color)
+	th.clear = function(color)
 	{
-		const len = this.buf32.length;
+		const len = th.buf32.length;
 		for (var i = 0; i < len; i++)
-			this.buf32[i] = color + 0xff000000;
-	},
+			th.buf32[i] = color + 0xff000000;
+	}
 
 	// Get pixel index
 
-	index: function(x, y)
+	th.index = function(x, y)
 	{
-		return ((this.h - y) << this.log2w) + x;
-	},
+		return ((th.h - y) << th.log2w) + x;
+	}
 
 	// Set a pixel
 
-	set: function(x, y, color)
+	th.set = function(x, y, color)
 	{
-		this.buf32[this.index(x, y)] = color + 0xff000000;
-	},
+		th.buf32[th.index(x, y)] = color + 0xff000000;
+	}
 
 	// Get a pixel
 
-	get: function(x, y)
+	th.get = function(x, y)
 	{
-		return this.buf32[this.index(x, y)];
-	},
+		return th.buf32[th.index(x, y)];
+	}
 
 	// Draw a line
 	/*
@@ -115,10 +97,10 @@ var Buffer =
 
 	// Draw a triangle from 2D points
 
-	triangle: function(points, effect) 
+	th.triangle = function(points, effect) 
 	{
 		// Create bounding box
-		var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
+		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];
 
 		// Find X and Y dimensions for each
 		for (var i = 0; i < points.length; i++)
@@ -131,14 +113,14 @@ var Buffer =
 		}
 
 		// Skip triangles that don't appear on the screen
-		if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
+		if (boxMin[0] > th.w || boxMax[0] < 0 || boxMin[1] > th.h || boxMax[1] < 0)
 			return;
 
 		var z = 0;
 		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
 			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
-				this.pixelVal++;
+				th.pixelVal++;
 				var b_coords = barycentric(points, [x, y, z]);
 
 				// Pixel is outside of barycentric coords
@@ -151,23 +133,23 @@ var Buffer =
 					z += points[i][2] * b_coords[i];
 
 				// Get buffer index and run fragment shader
-				var index = this.index(x, y);
+				var index = th.index(x, y);
 				var color = [0];
 				var discard = effect.fragment(b_coords, color);
 				
-				if (this.zbuf[index] < z && !discard)
+				if (th.zbuf[index] < z && !discard)
 				{
 					//var d = z >> 8;
-					this.zbuf[index] = z;	
-					this.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
-					this.calls++;
+					th.zbuf[index] = z;	
+					th.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
+					th.calls++;
 				}
 			}
 	},
 
-	draw: function()
+	th.draw = function()
 	{
-		var self = this;
+		var self = th;
 
 		// Done animating
 		if (self.nextline < 0)
@@ -177,31 +159,11 @@ var Buffer =
 			// Output info to the page
 			end = new Date();
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "Pixel draw calls/visited: "+ this.calls +"/"+ this.pixelVal;
+			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
 
 			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 			console.log(execTime +'. '+ calls);
 
-			// test invert button
-/*
-			var img = new Image();
-			img.src = 'obj/rhino.jpg';
-			img.onload = function()
-			{
-				self.ctx.drawImage(img, 0, 0);
-  				img.style.display = 'none';
-
-  				var imgData = self.ctx.getImageData(0, 0, self.w, self.h);
-  				var data = imgData.data;
-
-  				document.getElementById('invertbtn')
-					.addEventListener('click', function() 
-					{
-						invert(self.ctx, data); 
-						self.ctx.putImageData(imgData, 0, 0);
-					});
-			};
-*/
 			return;
 		}
 
@@ -209,15 +171,15 @@ var Buffer =
     		self.draw();
 		});
 
-    	this.postProc(self.nextline);
-   		this.drawBuffer();
+    	th.postProc(self.nextline);
+   		th.drawBuffer();
 
 		self.nextline -= 32;
 	},
 
 	// Post-processing (mostly SSAO)
 
-	postProc: function(nextline)
+	th.postProc = function(nextline)
 	{
 		// Calculate ray vectors
 		var rays = [];
@@ -225,31 +187,48 @@ var Buffer =
 			rays.push([m.sin(a), m.cos(a)]);
 
 		for (var y = nextline; y > nextline - 32; y--)
-			for (var x = 0; x < this.w; x++) 
+			for (var x = 0; x < th.w; x++) 
 			{
 				// Get buffer index
-				var index = this.index(x, y);
-				if (this.zbuf[index] < 1e-5) continue;
+				var index = th.index(x, y);
+				if (th.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
 				for (var i = 0; i < rays.length; i++) 
 				{
 					total += m.PI / 2 - m.atan(max_elevation_angle(
-						this.zbuf, index, [x, y], [this.w, this.h], rays[i], this.log2w));
+						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
 				total /= (m.PI / 2) * 10;
 				var c = 255 * total;// this.get(x, y) & 0xff;
 
-				this.set(x, y, c | (c << 8) | (c << 16));
-				this.calls++;
+				th.set(x, y, c | (c << 8) | (c << 16));
+				th.calls++;
 			};
 	},
 
 	// Put image data on the canvas
 
-	drawBuffer: function()
+	th.drawBuffer = function()
 	{
-		this.imgData.data.set(this.buf8);
-		this.ctx.putImageData(this.imgData, 0, 0);
+		th.imgData.data.set(th.buf8);
+		th.ctx.putImageData(th.imgData, 0, 0);
 	}
+
+	// Get next highest 2^pow for width
+
+	th.log2w = 1;
+	while (th.bufWidth >>= 1) th.log2w++;
+	th.bufWidth = 1 << th.log2w;
+
+	// create buffers for data manipulation
+
+	th.imgData = ctx.createImageData(th.bufWidth, th.h);
+
+	th.buf = new ArrayBuffer(th.imgData.data.length);
+	th.buf8 = new Uint8ClampedArray(th.buf);
+	th.buf32 = new Uint32Array(th.buf);
+	th.zbuf = new Uint32Array(th.imgData.data.length);
+
+	return th;
 }

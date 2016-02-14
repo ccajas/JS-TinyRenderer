@@ -26,12 +26,12 @@ var doc = document;
 
 function modelReady(model, canvas)
 {
-	var displayButton = function()
+	return function()
 	{
 		console.log('ready to render!');
 
 		// Create texture and effects
-		var effect = Object.create(Effect);
+		var effect = new DefaultEffect;
 		var texture = Object.create(Texture);
 
 		// Preload textures
@@ -46,8 +46,7 @@ function modelReady(model, canvas)
 		{ 
 			console.log('Begin render!'); 
 
-			var img = Object.create(Buffer);
-			img.init(ctx, canvas.width, canvas.height);
+			var img = Buffer(ctx, canvas.width, canvas.height);
 
 			// Set shader parameters
 			effect.setParameters({
@@ -59,8 +58,6 @@ function modelReady(model, canvas)
 			drawImage(model, img, effect);
 		}
 	}
-
-	return displayButton;
 }
 
 // Draw model called in deferred request
@@ -68,14 +65,12 @@ function modelReady(model, canvas)
 function drawImage(model, img, effect)
 {
 	start = new Date();
-	console.log(new Date().getTime() - start.getTime() +"ms Crunching triangles");
+	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
 	// Transform geometry to screen space
 	for (var f = 0; f < model.faces.length; f++)
 	{
 		var face = model.faces[f];
-		// Coordinates for model rendering
-		//var world_coords = [];
 		var screen_coords = [];
 
 		for (var j = 0; j < 3; j++)
@@ -87,26 +82,6 @@ function drawImage(model, img, effect)
 		img.triangle(screen_coords, effect);
 	}
 
-	// Draw the triangles
-	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
-/*	
-	for (var i = 0; i < world_coords.length; i+= 3)
-	{
-		// Calculate normal
-		var n = cross(
-			vecSub(world_coords[i+2], world_coords[i]), 
-			vecSub(world_coords[i+1], world_coords[i])
-		);
-
-		// Light intensity
-		var intensity = dot(normalize(n), [0, 0, -1]);
-		var color = 255 * intensity;
-		var screen = [screen_coords[i], screen_coords[i+1], screen_coords[i+2]];
-
-		if (intensity > 0)
-			img.triangle(screen, effect);//, color | (color << 8) | (color << 16));
-	}
-*/
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
 
 	// Output first render to buffer

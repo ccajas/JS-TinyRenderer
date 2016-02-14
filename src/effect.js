@@ -1,41 +1,52 @@
 
-// Default shader effect
+// Effect object implementation
 
 var Effect = 
 {
-	// Conversion to screen space
-	vertex: function(vs_in)
-	{
-		var ratio = this.scr_h / this.scr_w;
+	// Vertex and fragment shaders
+	vertex: function(vs_in) { },
+	fragment: function(ps_in, color) { },
 
-		var x = m.floor((vs_in[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
-		var y = m.floor((vs_in[1] / 2 + 0.5) * this.scr_h);
-		var z = m.floor((vs_in[2] / 2 + 0.5) * 32768);
+	// Map parameters to effect
 
-		return [x, y, z];
-	},
-
-	// Flat shading effect, blue pixels
-
-	fragment: function(b_coords, color)
-	{
-		color[0] = 0xff0000;
-		color[0] = this.texture.sample(null, [0.5, 0.5]);
-
-		return false;
-	},
-
-	// Map uniform values to effect
-
-	setParameters: function(uniforms)
+	setParameters: function(params)
 	{
 		var self = this;
-		Object.keys(uniforms).map(function(key) 
+		Object.keys(params).map(function(key) 
 		{
-			self[key] = uniforms[key];
+			self[key] = params[key];
 		});
 	}
-};
+}
+
+// Default shader effect
+
+var DefaultEffect = function() { };
+
+DefaultEffect.prototype = Object.create(Effect);
+
+// Conversion to screen space
+
+DefaultEffect.prototype.vertex = function(vs_in)
+{
+	var ratio = this.scr_h / this.scr_w;
+
+	var x = m.floor((vs_in[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
+	var y = m.floor((vs_in[1] / 2 + 0.5) * this.scr_h);
+	var z = m.floor((vs_in[2] / 2 + 0.5) * 32768);
+
+	return [x, y, z];
+}
+
+// Flat shading effect, blue pixels
+
+DefaultEffect.prototype.fragment = function(ps_in, color)
+{
+	color[0] = 0xff0000;
+	color[0] = this.texture.sample(null, [0.5, 0.5]);
+
+	return false;
+}
 
 // Texture object
 
