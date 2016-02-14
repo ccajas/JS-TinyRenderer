@@ -185,6 +185,26 @@ var Buffer =
 			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 			console.log(execTime +'. '+ calls);
 
+			// test invert button
+
+			var img = new Image();
+			img.src = 'obj/rhino.jpg';
+			img.onload = function()
+			{
+				self.ctx.drawImage(img, 0, 0);
+  				img.style.display = 'none';
+
+  				var imgData = self.ctx.getImageData(0, 0, self.w, self.h);
+  				var data = imgData.data;
+
+  				document.getElementById('invertbtn')
+					.addEventListener('click', function() 
+					{
+						invert(self.ctx, data); 
+						self.ctx.putImageData(imgData, 0, 0);
+					});
+			};
+
 			return;
 		}
 
@@ -210,12 +230,12 @@ var Buffer =
 				if (this.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
-				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 7) 
+				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 5) 
 				{
 					total += m.PI / 2 - m.atan(max_elevation_angle(
 						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w));
 				}
-				total /= (m.PI / 2) * 14;
+				total /= (m.PI / 2) * 10;
 				var c = 255 * total;// this.get(x, y) & 0xff;
 
 				this.set(x, y, c | (c << 8) | (c << 16));
@@ -231,3 +251,15 @@ var Buffer =
 		this.ctx.putImageData(this.imgData, 0, 0);
 	}
 }
+
+// Invert image test
+
+var invert = function(ctx, data) 
+{
+	for (var i = 0; i < data.length; i += 4) 
+	{
+		data[i]     = 255 - data[i];     // red
+		data[i + 1] = 255 - data[i + 1]; // green
+		data[i + 2] = 255 - data[i + 2]; // blue
+	}
+};
