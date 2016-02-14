@@ -1,20 +1,6 @@
 
 // Utility functions
 
-// Duck Type check
-
-function objectHas(obj, methodNames)
-{
-	if (obj == null) return false;
-
-	methodNames.forEach(function(name) {
-		if ((typeof obj[name]) != "function")
-			return false;
-	});
-
-	return true;
-}
-
 // Add two vectors
 
 vecAdd = function(a, b)

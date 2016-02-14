@@ -157,7 +157,7 @@ var Buffer =
 				
 				if (this.zbuf[index] < z && !discard)
 				{
-					var d = z >> 8;
+					//var d = z >> 8;
 					this.zbuf[index] = z;	
 					this.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
 					this.calls++;
@@ -253,15 +253,3 @@ var Buffer =
 		this.ctx.putImageData(this.imgData, 0, 0);
 	}
 }
-
-// Invert image test
-
-var invert = function(ctx, data) 
-{
-	for (var i = 0; i < data.length; i += 4) 
-	{
-		data[i]     = 255 - data[i];     // red
-		data[i + 1] = 255 - data[i + 1]; // green
-		data[i + 2] = 255 - data[i + 2]; // blue
-	}
-};

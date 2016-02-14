@@ -30,6 +30,13 @@ function modelReady(model, canvas)
 	{
 		console.log('ready to render!');
 
+		// Create texture and effects
+		var effect = Object.create(Effect);
+		var texture = Object.create(Texture);
+
+		// Preload textures
+		texture.load('obj/diablo3_pose_diffuse.png');
+
 		// Set context
 		var ctx = canvas.getContext('2d');
 		var el = doc.getElementById('render_start');
@@ -42,7 +49,14 @@ function modelReady(model, canvas)
 			var img = Object.create(Buffer);
 			img.init(ctx, canvas.width, canvas.height);
 
-			drawImage(model, img);
+			// Set shader parameters
+			effect.setParameters({
+				scr_w: img.w,
+				scr_h: img.h,
+				texture: texture
+			});
+
+			drawImage(model, img, effect);
 		}
 	}
 
@@ -51,28 +65,12 @@ function modelReady(model, canvas)
 
 // Draw model called in deferred request
 
-function drawImage(model, img)
+function drawImage(model, img, effect)
 {
-	var effect = null;
-
-	// Create default effect if no valid effect file was found
-	if (!objectHas(effect, ['vertex', 'fragment']))
-		effect = Object.create(Effect);
-
 	start = new Date();
-
-	// Transform geometry to screen space
 	console.log(new Date().getTime() - start.getTime() +"ms Crunching triangles");
 
-	// Set shader uniform variables
-	setUniforms(effect, {
-		scr_w: img.w,
-		scr_h: img.h
-	});
-
-	// Preload textures
-	loadTextures(img.ctx);
-
+	// Transform geometry to screen space
 	for (var f = 0; f < model.faces.length; f++)
 	{
 		var face = model.faces[f];

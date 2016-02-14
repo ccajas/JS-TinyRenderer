@@ -16,37 +16,65 @@ var Effect =
 	},
 
 	// Flat shading effect, blue pixels
-	fragment: function(bar, color)
+
+	fragment: function(b_coords, color)
 	{
 		color[0] = 0xff0000;
+		color[0] = this.texture.sample(null, [0.5, 0.5]);
+
 		return false;
+	},
+
+	// Map uniform values to effect
+
+	setParameters: function(uniforms)
+	{
+		var self = this;
+		Object.keys(uniforms).map(function(key) 
+		{
+			self[key] = uniforms[key];
+		});
 	}
 };
 
-// Map uniform values to effect
+// Texture object
 
-var setUniforms = function(effect, uniforms)
+var Texture =
 {
-	Object.keys(uniforms).map(function(key) 
+	texData: null,
+	sampled: false,
+	source: '',
+
+	load: function(src)
 	{
-		effect[key] = uniforms[key];
-	});
-}
+		var self = this;
+		img = new Image();
+		img.src = src;
 
-var loadTextures = function()
-{
-    var texCanvas = document.createElement('canvas');
-    texCanvas.width = 1024;
-    texCanvas.height = 1024;
+		img.onload = function() 
+		{
+			texCanvas = document.createElement('canvas');
+			ctx = texCanvas.getContext('2d');
 
-    var ctx = texCanvas.getContext('2d');
-	var img = new Image();
+			texCanvas.width = img.width;
+			texCanvas.height = img.height;
+		
+			ctx.drawImage(img, 0, 0);
+			img.style.display = 'none';
+			self.texData = ctx.getImageData(0, 0, img.width, img.height);
 
-	img.src = 'obj/diablo3_pose_diffuse.png';
-	img.onload = function() 
+			console.log(self.texData);
+		}	
+	},
+
+	sample: function(state, uv)
 	{
-		ctx.drawImage(img, 0, 0);
-		var imgData = ctx.getImageData(0, 0, 1024, 1024);
-  		console.log(imgData);
+		var data = this.texData.data;
+
+		x = 512;
+		y = 512;
+		i = (y * this.texData.width + x);
+
+		return data[i] | data[i + 1] << 8 | data[i + 2] << 16 | data[i + 3] << 24;
 	}
 }
