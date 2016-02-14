@@ -118,8 +118,7 @@ var Buffer =
 	triangle: function(points, effect) 
 	{
 		// Create bounding box
-		var boxMin = [this.w + 1, this.h + 1];
-		var boxMax = [-1, -1];
+		var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
 
 		// Find X and Y dimensions for each
 		for (var i = 0; i < points.length; i++)
@@ -131,15 +130,13 @@ var Buffer =
 			}
 		}
 
-		const bbox = [boxMin, boxMax];
-
 		// Skip triangles that don't appear on the screen
-		if (bbox[0][0] > this.w || bbox[1][0] < 0 || bbox[0][1] > this.h || bbox[1][1] < 0)
+		if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 			return;
 
 		var z = 0;
-		for (var y = bbox[0][1]; y <= bbox[1][1]; y++)  
-			for (var x = bbox[0][0]; x <= bbox[1][0]; x++) 
+		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
+			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
 				this.pixelVal++;
 				var b_coords = barycentric(points, [x, y, z]);
@@ -186,7 +183,7 @@ var Buffer =
 			console.log(execTime +'. '+ calls);
 
 			// test invert button
-
+/*
 			var img = new Image();
 			img.src = 'obj/rhino.jpg';
 			img.onload = function()
@@ -204,7 +201,7 @@ var Buffer =
 						self.ctx.putImageData(imgData, 0, 0);
 					});
 			};
-
+*/
 			return;
 		}
 
@@ -222,6 +219,11 @@ var Buffer =
 
 	postProc: function(nextline)
 	{
+		// Calculate ray vectors
+		var rays = [];
+		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 5)
+			rays.push([m.sin(a), m.cos(a)]);
+
 		for (var y = nextline; y > nextline - 32; y--)
 			for (var x = 0; x < this.w; x++) 
 			{
@@ -230,10 +232,10 @@ var Buffer =
 				if (this.zbuf[index] < 1e-5) continue;
 
 				var total = 0;
-				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 5) 
+				for (var i = 0; i < rays.length; i++) 
 				{
 					total += m.PI / 2 - m.atan(max_elevation_angle(
-						this.zbuf, index, [x, y], [this.w, this.h], [m.sin(a), m.cos(a)], this.log2w));
+						this.zbuf, index, [x, y], [this.w, this.h], rays[i], this.log2w));
 				}
 				total /= (m.PI / 2) * 10;
 				var c = 255 * total;// this.get(x, y) & 0xff;

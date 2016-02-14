@@ -32,3 +32,21 @@ var setUniforms = function(effect, uniforms)
 		effect[key] = uniforms[key];
 	});
 }
+
+var loadTextures = function()
+{
+    var texCanvas = document.createElement('canvas');
+    texCanvas.width = 1024;
+    texCanvas.height = 1024;
+
+    var ctx = texCanvas.getContext('2d');
+	var img = new Image();
+
+	img.src = 'obj/diablo3_pose_diffuse.png';
+	img.onload = function() 
+	{
+		ctx.drawImage(img, 0, 0);
+		var imgData = ctx.getImageData(0, 0, 1024, 1024);
+  		console.log(imgData);
+	}
+}

@@ -70,6 +70,9 @@ function drawImage(model, img)
 		scr_h: img.h
 	});
 
+	// Preload textures
+	loadTextures(img.ctx);
+
 	for (var f = 0; f < model.faces.length; f++)
 	{
 		var face = model.faces[f];

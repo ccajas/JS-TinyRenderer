@@ -8,6 +8,7 @@ var OBJmodel =
 	verts: [],
 	faces: [],
 	normals: [],
+	texcoords: [],
 
 	request: function(file)
 	{
@@ -64,6 +65,11 @@ var OBJmodel =
 				// Find vertex normals
 				case 'vn':
 					this.normals.push(splitLine(i));
+					break;
+
+				// Find texture coordinates
+				case 'vt':
+					this.texcoords.push(splitLine(i));
 					break;
 
 				// Find face indices
