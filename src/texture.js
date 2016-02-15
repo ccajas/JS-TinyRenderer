@@ -5,6 +5,7 @@ function Texture(src)
 	var tx =
 	{
 		texData: null,
+		buf32: null,
 		sampled: false,
 		source: ''
 	}
@@ -24,9 +25,20 @@ function Texture(src)
 		
 			ctx.drawImage(img, 0, 0);
 			img.style.display = 'none';
+
 			tx.texData = ctx.getImageData(0, 0, img.width, img.height);
 
-			console.log(tx.texData);
+			var buf = new ArrayBuffer(tx.texData.data.length);
+			tx.buf32 = new Uint32Array(buf);
+
+			// Set the buffer data
+
+			for (var i = 0; i < tx.buf32.length; i++)
+			{
+				var data = tx.texData.data;
+				var j = i << 2;
+				tx.buf32[i] = data[j] | data[j + 1] << 8 | data[j + 2] << 16 | data[j + 3] << 24;
+			}
 		}	
 	}
 
@@ -38,9 +50,9 @@ function Texture(src)
 		const y = m.floor(uv[1] * tx.texData.height);
 
 		// Get starting index of texture data sample
-		i = ((tx.texData.height - y) * tx.texData.width + x) << 2;
+		i = ((tx.texData.height - y) * tx.texData.width + x);
 
-		return data[i] | data[i + 1] << 8 | data[i + 2] << 16 | data[i + 3] << 24;
+		return tx.buf32[i];
 	}
 
 	tx.load(src);

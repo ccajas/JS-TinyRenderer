@@ -128,15 +128,16 @@ function Buffer(ctx, w, h)
 			return;
 
 		var z = 0;
-		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
-			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
+		for (var y = boxMin[1]-1; y <= boxMax[1]+1; y++)  
+			for (var x = boxMin[0]-1; x <= boxMax[0]+1; x++) 
 			{
 				th.pixelVal++;
 				//console.log(points);
 				var b_coords = barycentric(points, [x, y, z]);
+				var ep = -0.001;
 
 				// Pixel is outside of barycentric coords
-				if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
+				if (b_coords[0] < ep || b_coords[1] < ep || b_coords[2] < ep) 
 					continue;
 
 				// Calculate tex and normal coords
@@ -208,8 +209,8 @@ function Buffer(ctx, w, h)
 						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
 				total /= (m.PI / 2) * 10;
-				total = m.pow(total, 5) * 10;
-				if (total > 1) total = 1;
+				//total = m.pow(total, 5) * 10;
+				//if (total > 1) total = 1;
 
 				var c = this.get(x, y);
 

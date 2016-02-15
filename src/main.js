@@ -61,8 +61,6 @@ function modelReady(model, canvas)
 
 function drawImage(model, img, effect)
 {
-	img.clear(0);
-
 	start = new Date();
 	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
@@ -92,7 +90,7 @@ function drawImage(model, img, effect)
 	img.drawBuffer();
 
 	// Scan line by line
-	//img.draw();
+	img.draw();
 
 	// Log output info to the page
 	end = new Date();
