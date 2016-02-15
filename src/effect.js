@@ -33,7 +33,7 @@ DefaultEffect.prototype.vertex = function(vs_in)
 
 	var x = m.floor((vs_in[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
 	var y = m.floor((vs_in[1] / 2 + 0.5) * this.scr_h);
-	var z = m.floor((vs_in[2] / 2 + 0.5) * 32768);
+	var z = m.floor((vs_in[2] / 2 + 0.5) * 65536);
 
 	return [x, y, z];
 }
@@ -45,19 +45,19 @@ DefaultEffect.prototype.fragment = function(ps_in, color)
 	var n = ps_in[1];
 	var ambient = 0.15;
 	var intensity = n[2];//dot(ps_in[1], [0, 0, 1]);*/
-	//var c = this.texture.sample(null, ps_in[0]);
+	var c = this.texture.sample(null, ps_in[0]);
 	//var l = [0, 0, 1];
 
 	//ref = normalize((dot(n, l) * 2) - l);   // reflected light
     //spec = m.pow(m.max(ref[2], 0), -1);
 
 	intensity = (m.max(intensity, 0) * (1-ambient)) + ambient;
-/*				
+			
 	var r = ((c) & 0xff) * intensity;
 	var g = ((c >> 8) & 0xff) * intensity;
 	var b = ((c >> 16) & 0xff) * intensity;
-*/
-	color[0] = 0xffffffff;//r | (g << 8) | (b << 16);
+
+	color[0] = r | (g << 8) | (b << 16);
 
 	return false;
 }

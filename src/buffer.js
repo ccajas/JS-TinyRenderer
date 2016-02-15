@@ -129,7 +129,7 @@ function Buffer(ctx, w, h)
 
 		var u, v, nx, ny, nz;
 		var z = 0;
-		
+
 		for (var y = boxMin[1]-1; y <= boxMax[1]+1; y++)  
 			for (var x = boxMin[0]-1; x <= boxMax[0]+1; x++) 
 			{
@@ -167,7 +167,7 @@ function Buffer(ctx, w, h)
 					{
 						var d = z >> 8;
 						th.zbuf[index] = z;	
-						th.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
+						th.set(x, y, color[0]);//d | (d << 8) | (d << 16)); 
 						th.calls++;
 					}
 				}
@@ -180,10 +180,22 @@ function Buffer(ctx, w, h)
 
 		// Done animating
 		if (self.nextline < 0)
+		{
+			// Log output info to the page
+			end = new Date();
+
+			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
+
+			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+			console.log(execTime +'. '+ calls);
 			return;
+		}
 
     	requestAnimationFrame(function(){
     		self.draw();
+    		//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
+   			//doc.getElementById('info').innerHTML = calls;
 		});
 
     	th.postProc(self.nextline);
@@ -198,7 +210,7 @@ function Buffer(ctx, w, h)
 	{
 		// Calculate ray vectors
 		var rays = [];
-		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 5)
+		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 9)
 			rays.push([m.sin(a), m.cos(a)]);
 
 		for (var y = nextline; y > nextline - 32; y--)
@@ -214,7 +226,7 @@ function Buffer(ctx, w, h)
 					total += m.PI / 2 - m.atan(max_elevation_angle(
 						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
-				total /= (m.PI / 2) * 10;
+				total /= (m.PI / 2) * rays.length;
 				//total = m.pow(total, 5) * 10;
 				//if (total > 1) total = 1;
 
