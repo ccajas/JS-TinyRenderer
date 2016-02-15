@@ -14,7 +14,7 @@ var doc = document;
 	if (canvas.getContext)
 	{
 		// Test load model
-		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
+		model.load("obj/aventador/Avent.obj", modelReady(model, canvas));
 	}
 	else
 	{
@@ -73,8 +73,8 @@ function drawImage(model, img, effect)
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			var vt = (model.texcoords.length > 0) ? model.texcoords[face[j][1]] : [0, 0];
-			var vn = (model.normals.length > 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
+			var vt = (model.texcoords.length > 0 && face[j][1] >= 0) ? model.texcoords[face[j][1]] : [0, 0];
+			var vn = (model.normals.length > 0 && face[i][2] >= 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
 
 			// world coords are transformed, tex coords are unchanged
 			v = effect.vertex(v);
@@ -100,5 +100,5 @@ function drawImage(model, img, effect)
 	img.calls = 0;
 
 	// Scan line by line
-	//img.draw();
+	img.draw();
 }
