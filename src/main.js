@@ -88,6 +88,15 @@ function drawImage(model, img, effect)
 
 	// Output first render to buffer
 	img.drawBuffer();
+
+			end = new Date();
+
+			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+			var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixelVal;
+
+			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+			console.log(execTime +'. '+ calls);
+
 	img.calls = 0;
 
 	// Scan line by line
