@@ -1,33 +1,132 @@
 
-// Utility functions
+// Camera functions
+
+viewport = function(x, y, w, h) 
+{
+    var vp = Matrix();
+    vp[0][3] = x + w/2;
+    vp[1][3] = y + h/2;
+    vp[2][3] = 1;
+    vp[0][0] = w/2;
+    vp[1][1] = h/2;
+    vp[2][2] = 0;
+
+    return vp;
+}
+
+projection = function(coeff) 
+{
+    var proj = Matrix();
+    proj[3][2] = coeff;
+
+    return proj;
+}
+
+// Camera lookat with three 3D vectors
+
+lookat = function(eye, center, up)
+{
+    var z = normalize(vecSub(eye, center));
+    var x = normalize(cross(up, z));
+    var y = normalize(cross(z,x));
+
+    var minv = Matrix();
+   	var tr   = Matrix();
+
+    for (var i = 0; i < 3; i++) 
+    {
+        minv[0][i] = x[i];
+        minv[1][i] = y[i];
+        minv[2][i] = z[i];
+        tr[i][3] = -center[i];
+    }
+
+    ModelView = Minv * Tr;
+}
+
+// Matrix functions
+
+function Matrix()
+{
+	var mat = 
+	{
+		rows: [],
+	}
+
+	mat.identity()
+	{
+		mat.rows = [
+			[1, 0, 0, 0],
+			[0, 1, 0, 0],
+			[0, 0, 1, 0],
+			[0, 0, 0, 1]
+		];
+		return mat.rows;
+	}
+
+	mat.row(r)
+	{
+		return mat.rows[r];
+	}
+
+	mat.col(c)
+	{
+		var col = [];
+		for (var i = 0; i < mat.rows.length; i++)
+			col[i] = mat.at(i, c);
+		return col;
+	}
+
+	mat.at(row, col)
+	{
+		return mat.rows[row][col];
+	}
+
+	mat.mul = function(rhs)
+	{
+		var result = [];
+    	for (var i = 0; i < mat.rows.length; i++)
+        	for (var j = 0; j < mat.rows[0].length; j++)
+        		result[i][j] = 
+        			dot(mat.row(i), rhs.col(j));
+
+    	return result;
+	}
+
+	return mat;
+}
+
+// Vector functions
 
 // Add two vectors
 
 vecAdd = function(a, b)
 {
-	var sum = [];
+	var r = [];
 	for (var i = 0; i < a.length; i++)
-		sum.push(a[i] + b[i]);
+		r.push(a[i] + b[i]);
 
-	return sum;
+	return r;
 }
 
 // Subtract two vectors
 
 vecSub = function(a, b)
 {
-	var diff = [];
+	var r = [];
 	for (var i = 0; i < a.length; i++)
-		diff.push(a[i] - b[i]);
+		r.push(a[i] - b[i]);
 
-	return diff;
+	return r;
 }
 
-// Dot product of two 3D vectors
+// Dot product of two vectors
 
 dot = function(a, b)
 {
-	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	var r;
+	for (var i = a.length; i--; r += a[i] * b[i]);
+	return r;
 }
 
 // Cross product of two 3D vectors
