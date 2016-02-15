@@ -104,7 +104,6 @@ function Buffer(ctx, w, h)
 
 		var tu = texcoords.map(function(t) { return t[0]; });
 		var tv = texcoords.map(function(t) { return t[1]; });
-		//console.log(points);
 
 		// Create bounding box
 		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];

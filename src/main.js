@@ -32,10 +32,7 @@ function modelReady(model, canvas)
 
 		// Create texture and effects
 		var effect = new DefaultEffect;
-		var texture = Object.create(Texture);
-
-		// Preload textures
-		texture.load('obj/diablo3/diablo3_pose_diffuse.png');
+		var texture = Texture('obj/diablo3/diablo3_pose_diffuse.png');
 
 		// Set context
 		var ctx = canvas.getContext('2d');

@@ -18,6 +18,7 @@ module.exports = function(grunt)
 					'src/objmodel.js',
 					'src/buffer.js',
 					'src/effect.js',
+					'src/texture.js',
 					'src/util.js',
 					'src/main.js'
 				]}
