@@ -38,6 +38,7 @@ function Buffer(ctx, w, h)
 
 	th.set = function(x, y, color)
 	{
+		color = color[0] | color[1] << 8 | color[2] << 16;
 		th.buf32[th.index(x, y)] = color + 0xff000000;
 	}
 
@@ -128,15 +129,14 @@ function Buffer(ctx, w, h)
 		var _nz = normals.map(function(n) { return n[2]; });
 
 		var u, v, nx, ny, nz;
+		var ep = -0.0001;
 		var z = 0;
 
-		for (var y = boxMin[1]-1; y <= boxMax[1]+1; y++)  
-			for (var x = boxMin[0]-1; x <= boxMax[0]+1; x++) 
+		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
+			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
 				th.pixelVal++;
-				//console.log(points);
 				var b_coords = barycentric(points, [x, y, z]);
-				var ep = -0.0001;
 
 				// Pixel is outside of barycentric coords
 				if (b_coords[0] < ep || b_coords[1] < ep || b_coords[2] < ep) 
@@ -160,14 +160,14 @@ function Buffer(ctx, w, h)
 					ny = dot(b_coords, _ny);
 					nz = dot(b_coords, _nz);
 
-					var color = [0];
+					var color = [0, 0, 0];
 					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 
 					if (!discard)
 					{
 						var d = z >> 8;
 						th.zbuf[index] = z;	
-						th.set(x, y, color[0]);//d | (d << 8) | (d << 16)); 
+						th.set(x, y, [d, d, d]); 
 						th.calls++;
 					}
 				}
@@ -210,7 +210,7 @@ function Buffer(ctx, w, h)
 	{
 		// Calculate ray vectors
 		var rays = [];
-		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 9)
+		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 19)
 			rays.push([m.sin(a), m.cos(a)]);
 
 		for (var y = nextline; y > nextline - 32; y--)

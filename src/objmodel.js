@@ -5,7 +5,7 @@ var OBJmodel =
 {
 	// OBJ properties
 
-	verts: [],
+	verts:[],
 	faces: [],
 	normals: [],
 	texcoords: [],
