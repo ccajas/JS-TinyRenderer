@@ -14,7 +14,7 @@ var doc = document;
 	if (canvas.getContext)
 	{
 		// Test load model
-		model.load("obj/diablo3.obj", modelReady(model, canvas));
+		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
 	}
 	else
 	{
@@ -35,7 +35,7 @@ function modelReady(model, canvas)
 		var texture = Object.create(Texture);
 
 		// Preload textures
-		texture.load('obj/diablo3_pose_diffuse.png');
+		texture.load('obj/diablo3/diablo3_pose_diffuse.png');
 
 		// Set context
 		var ctx = canvas.getContext('2d');
@@ -71,15 +71,19 @@ function drawImage(model, img, effect)
 	for (var f = 0; f < model.faces.length; f++)
 	{
 		var face = model.faces[f];
-		var screen_coords = [];
+		var vs_out = [];
 
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			screen_coords.push(effect.vertex(v));
+			var t = model.texcoords[face[j][1]];
+
+			// world coords are transformed, tex coords are unchanged
+			v = effect.vertex(v);
+			vs_out.push([v, t]);
 		}
 		// Draw triangle
-		img.triangle(screen_coords, effect);
+		img.triangle(vs_out, effect);
 	}
 
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");

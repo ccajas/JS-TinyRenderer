@@ -97,8 +97,13 @@ function Buffer(ctx, w, h)
 
 	// Draw a triangle from 2D points
 
-	th.triangle = function(points, effect) 
+	th.triangle = function(verts, effect) 
 	{
+		var points = [verts[0][0], verts[1][0], verts[2][0]];
+		var texcoords = [verts[0][1], verts[1][1], verts[2][1]];
+
+		//console.log(points);
+
 		// Create bounding box
 		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];
 
@@ -121,11 +126,20 @@ function Buffer(ctx, w, h)
 			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
 				th.pixelVal++;
+				//console.log(points);
 				var b_coords = barycentric(points, [x, y, z]);
 
 				// Pixel is outside of barycentric coords
 				if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 					continue;
+
+				// Calculate tex coords
+				var u = b_coords[0] * texcoords[0][0] + 
+					b_coords[1] * texcoords[1][0] +
+					b_coords[2] * texcoords[2][0];
+				var v = b_coords[0] * texcoords[0][1] + 
+					b_coords[1] * texcoords[1][1] +
+					b_coords[2] * texcoords[2][1];
 
 				// Get pixel depth
 				z = 0;
@@ -135,7 +149,7 @@ function Buffer(ctx, w, h)
 				// Get buffer index and run fragment shader
 				var index = th.index(x, y);
 				var color = [0];
-				var discard = effect.fragment(b_coords, color);
+				var discard = effect.fragment([u, v], color);
 				
 				if (th.zbuf[index] < z && !discard)
 				{
@@ -177,7 +191,7 @@ function Buffer(ctx, w, h)
 		self.nextline -= 32;
 	},
 
-	// Post-processing (mostly SSAO)
+	// Post-processing (temporary, mostly SSAO)
 
 	th.postProc = function(nextline)
 	{
@@ -200,7 +214,7 @@ function Buffer(ctx, w, h)
 						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
 				total /= (m.PI / 2) * 10;
-				var c = 255 * total;// this.get(x, y) & 0xff;
+				var c = total * (this.get(x, y) & 0xff);
 
 				th.set(x, y, c | (c << 8) | (c << 16));
 				th.calls++;
@@ -215,7 +229,7 @@ function Buffer(ctx, w, h)
 		th.ctx.putImageData(th.imgData, 0, 0);
 	}
 
-	// Get next highest 2^pow for width
+	// Get next highest 2^pow for buffer width
 
 	th.log2w = 1;
 	while (th.bufWidth >>= 1) th.log2w++;

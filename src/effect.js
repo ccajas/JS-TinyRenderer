@@ -43,7 +43,7 @@ DefaultEffect.prototype.vertex = function(vs_in)
 DefaultEffect.prototype.fragment = function(ps_in, color)
 {
 	color[0] = 0xff0000;
-	color[0] = this.texture.sample(null, [0.5, 0.5]);
+	color[0] = this.texture.sample(null, [ps_in[0], ps_in[1]]);
 
 	return false;
 }
@@ -82,9 +82,11 @@ var Texture =
 	{
 		var data = this.texData.data;
 
-		x = 512;
-		y = 512;
-		i = (y * this.texData.width + x);
+		const x = m.floor(uv[0] * this.texData.width);
+		const y = m.floor(uv[1] * this.texData.height);
+
+		// Get starting index of texture data sample
+		i = ((this.texData.height - y) * this.texData.width + x) << 2;
 
 		return data[i] | data[i + 1] << 8 | data[i + 2] << 16 | data[i + 3] << 24;
 	}
