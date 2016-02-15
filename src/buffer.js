@@ -101,9 +101,14 @@ function Buffer(ctx, w, h)
 	{
 		var points = [verts[0][0], verts[1][0], verts[2][0]];
 		var texcoords = [verts[0][1], verts[1][1], verts[2][1]];
+		var normals = [verts[0][2], verts[1][2], verts[2][2]];
 
-		var tu = texcoords.map(function(t) { return t[0]; });
-		var tv = texcoords.map(function(t) { return t[1]; });
+		var _u = texcoords.map(function(t) { return t[0]; });
+		var _v = texcoords.map(function(t) { return t[1]; });
+
+		var _nx = normals.map(function(n) { return n[0]; });
+		var _ny = normals.map(function(n) { return n[1]; });
+		var _nz = normals.map(function(n) { return n[2]; });
 
 		// Create bounding box
 		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];
@@ -134,9 +139,13 @@ function Buffer(ctx, w, h)
 				if (b_coords[0] < 0 || b_coords[1] < 0 || b_coords[2] < 0) 
 					continue;
 
-				// Calculate tex coords
-				var u = dot(b_coords, tu);
-				var v = dot(b_coords, tv);
+				// Calculate tex and normal coords
+				var u = dot(b_coords, _u);
+				var v = dot(b_coords, _v);
+
+				var nx = dot(b_coords, _nx);
+				var ny = dot(b_coords, _ny);
+				var nz = dot(b_coords, _nz);
 
 				// Get pixel depth
 				z = 0;
@@ -146,11 +155,11 @@ function Buffer(ctx, w, h)
 				// Get buffer index and run fragment shader
 				var index = th.index(x, y);
 				var color = [0];
-				var discard = effect.fragment([u, v], color);
+				var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 				
 				if (th.zbuf[index] < z && !discard)
 				{
-					//var d = z >> 8;
+					var d = z >> 8;
 					th.zbuf[index] = z;	
 					th.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
 					th.calls++;
@@ -164,19 +173,7 @@ function Buffer(ctx, w, h)
 
 		// Done animating
 		if (self.nextline < 0)
-		{
-			console.log("Done!");
-
-			// Output info to the page
-			end = new Date();
-			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
-
-			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-			console.log(execTime +'. '+ calls);
-
 			return;
-		}
 
     	requestAnimationFrame(function(){
     		self.draw();
@@ -211,9 +208,16 @@ function Buffer(ctx, w, h)
 						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
 				total /= (m.PI / 2) * 10;
-				var c = total * (this.get(x, y) & 0xff);
+				total = m.pow(total, 5) * 10;
+				if (total > 1) total = 1;
 
-				th.set(x, y, c | (c << 8) | (c << 16));
+				var c = this.get(x, y);
+
+				var r = (c & 0xff) * total;
+				var g = ((c >> 8) & 0xff) * total;
+				var b = ((c >> 16) & 0xff) * total;
+
+				th.set(x, y, r | (g << 8) | (b << 16));
 				th.calls++;
 			};
 	},

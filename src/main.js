@@ -61,6 +61,8 @@ function modelReady(model, canvas)
 
 function drawImage(model, img, effect)
 {
+	img.clear(0);
+
 	start = new Date();
 	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
@@ -73,11 +75,12 @@ function drawImage(model, img, effect)
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			var t = model.texcoords[face[j][1]];
+			var vt = model.texcoords[face[j][1]];
+			var vn = model.normals[face[j][2]];
 
 			// world coords are transformed, tex coords are unchanged
 			v = effect.vertex(v);
-			vs_out.push([v, t]);
+			vs_out.push([v, vt, vn]);
 		}
 		// Draw triangle
 		img.triangle(vs_out, effect);
@@ -89,5 +92,13 @@ function drawImage(model, img, effect)
 	img.drawBuffer();
 
 	// Scan line by line
-	img.draw();
+	//img.draw();
+
+	// Log output info to the page
+	end = new Date();
+	var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
+	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixelVal;
+
+	doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+	console.log(execTime +'. '+ calls);
 }

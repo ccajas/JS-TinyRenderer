@@ -42,8 +42,17 @@ DefaultEffect.prototype.vertex = function(vs_in)
 
 DefaultEffect.prototype.fragment = function(ps_in, color)
 {
-	color[0] = 0xff0000;
-	color[0] = this.texture.sample(null, [ps_in[0], ps_in[1]]);
+	var ambient = 0.15;
+	var intensity = ps_in[1][2];//dot(ps_in[1], [0, 0, 1]);*/
+	var c = this.texture.sample(null, ps_in[0]);
+
+	intensity = (m.max(intensity, 0) * (1-ambient)) + ambient;
+				
+	var r = ((c) & 0xff) * intensity;
+	var g = ((c >> 8) & 0xff) * intensity;
+	var b = ((c >> 16) & 0xff) * intensity;
+
+	color[0] = r | (g << 8) | (b << 16);
 
 	return false;
 }
