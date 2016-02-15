@@ -102,6 +102,8 @@ function Buffer(ctx, w, h)
 		var points = [verts[0][0], verts[1][0], verts[2][0]];
 		var texcoords = [verts[0][1], verts[1][1], verts[2][1]];
 
+		var tu = texcoords.map(function(t) { return t[0]; });
+		var tv = texcoords.map(function(t) { return t[1]; });
 		//console.log(points);
 
 		// Create bounding box
@@ -134,12 +136,8 @@ function Buffer(ctx, w, h)
 					continue;
 
 				// Calculate tex coords
-				var u = b_coords[0] * texcoords[0][0] + 
-					b_coords[1] * texcoords[1][0] +
-					b_coords[2] * texcoords[2][0];
-				var v = b_coords[0] * texcoords[0][1] + 
-					b_coords[1] * texcoords[1][1] +
-					b_coords[2] * texcoords[2][1];
+				var u = dot(b_coords, tu);
+				var v = dot(b_coords, tv);
 
 				// Get pixel depth
 				z = 0;
