@@ -74,7 +74,7 @@ function drawImage(model, img, effect)
 		{
 			var v = model.verts[face[j][0]];
 			var vt = (model.texcoords.length > 0 && face[j][1] >= 0) ? model.texcoords[face[j][1]] : [0, 0];
-			var vn = (model.normals.length > 0 && face[i][2] >= 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
+			var vn = (model.normals.length > 0 && face[j][2] >= 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
 
 			// world coords are transformed, tex coords are unchanged
 			v = effect.vertex(v);
