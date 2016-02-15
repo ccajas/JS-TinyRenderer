@@ -94,6 +94,7 @@ function drawImage(model, img, effect)
 
 	// Log output info to the page
 	end = new Date();
+	
 	var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
 	var calls = "Pixel draw calls/visited: "+ img.calls +"/"+ img.pixelVal;
 

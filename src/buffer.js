@@ -103,13 +103,6 @@ function Buffer(ctx, w, h)
 		var texcoords = [verts[0][1], verts[1][1], verts[2][1]];
 		var normals = [verts[0][2], verts[1][2], verts[2][2]];
 
-		var _u = texcoords.map(function(t) { return t[0]; });
-		var _v = texcoords.map(function(t) { return t[1]; });
-
-		var _nx = normals.map(function(n) { return n[0]; });
-		var _ny = normals.map(function(n) { return n[1]; });
-		var _nz = normals.map(function(n) { return n[2]; });
-
 		// Create bounding box
 		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];
 
@@ -127,26 +120,27 @@ function Buffer(ctx, w, h)
 		if (boxMin[0] > th.w || boxMax[0] < 0 || boxMin[1] > th.h || boxMax[1] < 0)
 			return;
 
+		var _u = texcoords.map(function(t) { return t[0]; });
+		var _v = texcoords.map(function(t) { return t[1]; });
+
+		var _nx = normals.map(function(n) { return n[0]; });
+		var _ny = normals.map(function(n) { return n[1]; });
+		var _nz = normals.map(function(n) { return n[2]; });
+
+		var u, v, nx, ny, nz;
 		var z = 0;
+		
 		for (var y = boxMin[1]-1; y <= boxMax[1]+1; y++)  
 			for (var x = boxMin[0]-1; x <= boxMax[0]+1; x++) 
 			{
 				th.pixelVal++;
 				//console.log(points);
 				var b_coords = barycentric(points, [x, y, z]);
-				var ep = -0.001;
+				var ep = -0.0001;
 
 				// Pixel is outside of barycentric coords
 				if (b_coords[0] < ep || b_coords[1] < ep || b_coords[2] < ep) 
 					continue;
-
-				// Calculate tex and normal coords
-				var u = dot(b_coords, _u);
-				var v = dot(b_coords, _v);
-
-				var nx = dot(b_coords, _nx);
-				var ny = dot(b_coords, _ny);
-				var nz = dot(b_coords, _nz);
 
 				// Get pixel depth
 				z = 0;
@@ -155,15 +149,27 @@ function Buffer(ctx, w, h)
 
 				// Get buffer index and run fragment shader
 				var index = th.index(x, y);
-				var color = [0];
-				var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 				
-				if (th.zbuf[index] < z && !discard)
+				if (th.zbuf[index] < z)
 				{
-					var d = z >> 8;
-					th.zbuf[index] = z;	
-					th.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
-					th.calls++;
+					// Calculate tex and normal coords
+					u = dot(b_coords, _u);
+					v = dot(b_coords, _v);
+
+					nx = dot(b_coords, _nx);
+					ny = dot(b_coords, _ny);
+					nz = dot(b_coords, _nz);
+
+					var color = [0];
+					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
+
+					if (!discard)
+					{
+						var d = z >> 8;
+						th.zbuf[index] = z;	
+						th.set(x, y, color[0]);// d | (d << 8) | (d << 16)); 
+						th.calls++;
+					}
 				}
 			}
 	},
