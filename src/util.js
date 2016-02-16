@@ -195,7 +195,7 @@ barycentric = function(pts, point)
 max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 {
 	var maxangle = 0;
-	for (var t = 1; t < 40; t += 2) 
+	for (var t = 1; t < 40; t += 3) 
 	{
 		// Current position of the ray traveled, and check for out of bounds
 		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);

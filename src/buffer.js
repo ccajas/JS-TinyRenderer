@@ -215,14 +215,15 @@ function Buffer(ctx, w, h)
 
 	th.postProc = function(nextline)
 	{
-		// Calculate ray vectors
-		var rays = [];
-		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 8)
-			rays.push([m.sin(a), m.cos(a)]);
-
 		for (var y = nextline; y > nextline - 272; y--)
 			for (var x = 0; x < th.w; x++) 
 			{
+				// Calculate ray vectors
+				var rays = [];
+
+				for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / (m.random() * (5 - 2) + 2))
+					rays.push([m.sin(a), m.cos(a)]);			
+
 				// Get buffer index
 				var index = th.index(x, y);
 				if (th.zbuf[index] < 1e-5) continue;
@@ -237,13 +238,13 @@ function Buffer(ctx, w, h)
 				//total = m.pow(total, 5) * 10;
 				//if (total > 1) total = 1;
 
-				var c = this.get(x, y);
+				var c = 0xffffff;//this.get(x, y);
 
 				var r = (c & 0xff) * total;
 				var g = ((c >> 8) & 0xff) * total;
 				var b = ((c >> 16) & 0xff) * total;
 
-				th.set(x, y, new Uint8Array([r, g, b]));
+				th.set(x, y, [r, g, b]);
 				th.calls++;
 			};
 	},

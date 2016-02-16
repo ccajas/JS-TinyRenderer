@@ -101,6 +101,22 @@ function drawImage()
 		img.triangle(vs_out, effect);
 	}
 
+	theta += 0.1;
+
+	// Profile 50 frames
+	if(++frames >= 50)
+	{
+		var timespan = new Date().getTime() - startProfile.getTime();
+		console.log('50 frames- Avg. render time: '+ timespan / 50 +'ms'+
+			' Avg. FPS: '+ (50000 / timespan).toFixed(3));
+
+		frames = 0;
+		startProfile = new Date();
+	}
+
+	// Scan line by line
+	img.draw();
+
 	var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 	var calls = "Pixels drawn/found "+ img.calls +'/'+ img.pixels;
 	doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
@@ -110,23 +126,7 @@ function drawImage()
 	img.calls = 0;
 	img.pixels = 0;
 
-	theta += 0.1;
-
-	// Profile 100 frames
-	if(++frames >= 100)
-	{
-		var timespan = new Date().getTime() - startProfile.getTime();
-		console.log('100 frames- Avg. render time: '+ timespan / 100 +'ms'+
-			' Avg. FPS: '+ (100000 / timespan).toFixed(3));
-
-		frames = 0;
-		startProfile = new Date();
-	}
-
 	requestAnimationFrame(function() {
 		drawImage();
 	});
-
-	// Scan line by line
-	//img.draw();
 }
