@@ -12,7 +12,7 @@ function Buffer(ctx, w, h)
 		h: h,
 
 		calls: 0,
-		pixelVal: 0,
+		pixels: 0,
 
 		nextline: h,
 		bufWidth: w,	
@@ -121,20 +121,13 @@ function Buffer(ctx, w, h)
 		if (boxMin[0] > th.w || boxMax[0] < 0 || boxMin[1] > th.h || boxMax[1] < 0)
 			return;
 
-		var _u = [texcoords[0][0], texcoords[1][0], texcoords[2][0]];
-		var _v = [texcoords[0][1], texcoords[1][1], texcoords[2][1]];
-
-		var _nx = [normals[0][0], normals[1][0], normals[2][0]];
-		var _ny = [normals[0][1], normals[1][1], normals[2][1]];
-		var _nz = [normals[0][2], normals[1][2], normals[2][2]];
-
 		var u, v, nx, ny, nz;
 		var z = 0;
 
 		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
 			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
-				th.pixelVal++;
+				th.pixels++;
 
 				var b_coords = barycentric(points, [x, y, z]);
 				var ep = -0.0001;
@@ -154,14 +147,14 @@ function Buffer(ctx, w, h)
 				if (th.zbuf[index] < z)
 				{
 					// Calculate tex and normal coords
-					u = dot(b_coords, _u);
-					v = dot(b_coords, _v);
+					u = dot(b_coords, [texcoords[0][0], texcoords[1][0], texcoords[2][0]]);
+					v = dot(b_coords, [texcoords[0][1], texcoords[1][1], texcoords[2][1]]);
 
-					nx = dot(b_coords, _nx);
-					ny = dot(b_coords, _ny);
-					nz = dot(b_coords, _nz);
+					nx = dot(b_coords, [normals[0][0], normals[1][0], normals[2][0]]);
+					ny = dot(b_coords, [normals[0][1], normals[1][1], normals[2][1]]);
+					nz = dot(b_coords, [normals[0][2], normals[1][2], normals[2][2]]);
 
-					var color = new Uint8Array([0, 0, 0]);
+					var color = [0, 0, 0];
 					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 
 					if (!discard)
@@ -186,7 +179,7 @@ function Buffer(ctx, w, h)
 			end = new Date();
 
 			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
+			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
 
 			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 			console.log(execTime +'. '+ calls);
@@ -195,7 +188,7 @@ function Buffer(ctx, w, h)
 
     	requestAnimationFrame(function(){
     		self.draw();
-    		//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixelVal;
+    		//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
    			//doc.getElementById('info').innerHTML = calls;
 		});
 

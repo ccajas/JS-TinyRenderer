@@ -52,10 +52,11 @@ DefaultEffect.prototype.fragment = function(ps_in, color)
     //spec = m.pow(m.max(ref[2], 0), -1);
 
 	intensity = (m.max(intensity, 0) * (1-ambient)) + ambient;
-			
-	color[0] = 255;//(t & 0xff) * intensity;
-	color[1] = 255;//((t >> 8) & 0xff) * intensity;
-	color[2] = 255;//((t >> 16) & 0xff) * intensity;
+		
+	// Output color	
+	color[0] = t[0] * intensity;
+	color[1] = t[1] * intensity;
+	color[2] = t[2] * intensity;
 
 	return false;
 }

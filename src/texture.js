@@ -51,8 +51,9 @@ function Texture(src)
 
 		// Get starting index of texture data sample
 		i = ((tx.texData.height - y) * tx.texData.width + x);
+		smp = tx.buf32[i];
 
-		return tx.buf32[i];
+		return new Uint8Array([smp, (smp >> 8), (smp >> 16), (smp >> 24)]);
 	}
 
 	tx.load(src);

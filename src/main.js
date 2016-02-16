@@ -75,25 +75,31 @@ function drawImage(model, img, effect)
 		for (var j = 0; j < 3; j++)
 		{
 			var v = model.verts[face[j][0]];
-			var vt = (model.texcoords.length) ? model.texcoords[face[j][1]] : [0, 0];
-			var vn = (model.normals.length > 0 && face[j][2] >= 0) ? 
-				model.normals[face[j][2]]   : [1, 0, 0];
+			var vt = (model.texcoords.length > 0) ? model.texcoords[face[j][1]] : [0, 0];
+			var vn = (model.normals.length > 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
 
 			// world coords are transformed, tex coords are unchanged
 			v = effect.vertex(v);
 			vs_out.push([v, vt, vn]);
 		}
 
+		// Get triangle direction for backface culling
+		s1 = vecSub(vs_out[1][0], vs_out[0][0]);
+		s2 = vecSub(vs_out[2][0], vs_out[0][0]);
+		dir = cross(s1, s2);
+
 		// Draw triangle
-		img.triangle(vs_out, effect);
+		if (dot(normalize(dir), [0, 0, 1]) > 0)
+			img.triangle(vs_out, effect);
 	}
 
 	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
+	console.log("Pixels drawn/found "+ img.calls +'/'+ img.pixels)
 
 	// Output first render to buffer
 	img.drawBuffer();
 	img.calls = 0;
 
 	// Scan line by line
-	img.draw();
+	//img.draw();
 }
