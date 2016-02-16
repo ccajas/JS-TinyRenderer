@@ -127,28 +127,48 @@ function Buffer(ctx, w, h)
 		if (boxMin[0] > th.w || boxMax[0] < 0 || boxMin[1] > th.h || boxMax[1] < 0)
 			return;
 
+		// Triangle setup
+		var a01 = points[0][1] - points[1][1], b01 = points[1][0] - points[0][0];
+		var a12 = points[1][1] - points[2][1], b12 = points[2][0] - points[1][0];
+		var a20 = points[2][1] - points[0][1], b20 = points[0][0] - points[2][0];
+
+		// Get orientation to see where the triangle is facing
+		var edge_w0 = th.orient2d(points[1], points[2], boxMin);
+		var edge_w1 = th.orient2d(points[2], points[0], boxMin);
+		var edge_w2 = th.orient2d(points[0], points[1], boxMin);
+
+		var color = [0, 0, 0];
 		var u, v, nx, ny, nz;
 		var z = 0;
 
-		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
-			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
+		for (var py = boxMin[1]; py <= boxMax[1]; py++)  
+		{
+			// Barycentric coordinates at start of row
+			var w0 = edge_w0;
+			var w1 = edge_w1;
+			var w2 = edge_w2;
+
+			for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 			{
 				th.pixels++;
 
-				var b_coords = barycentric(points, [x, y, z]);
-				var ep = -0.0001;
+				// Step right
+				w0 += a12;
+				w1 += a20;
+				w2 += a01;		
 
-				// Pixel is outside of barycentric coords
-				if (b_coords[0] < ep || b_coords[1] < ep || b_coords[2] < ep) 
+				// Pixel is inside of barycentric coords
+				if (w0 < a12 || w1 < a20 || w2 < a01)
 					continue;
+
+				// Get buffer index and run fragment shader
+				var index = th.index(px, py);
+				var b_coords = barycentric(points, [px, py, z]);
 
 				// Get pixel depth
 				z = 0;
 				for (var i=0; i<3; i++) 
 					z += points[i][2] * b_coords[i];
-
-				// Get buffer index and run fragment shader
-				var index = th.index(x, y);
 				
 				if (th.zbuf[index] < z)
 				{
@@ -160,18 +180,28 @@ function Buffer(ctx, w, h)
 					ny = dot(b_coords, [normals[0][1], normals[1][1], normals[2][1]]);
 					nz = dot(b_coords, [normals[0][2], normals[1][2], normals[2][2]]);
 
-					var color = [0, 0, 0];
 					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 
 					if (!discard)
 					{
-						var d = z >> 8;
+						var d = z >> 9;
 						th.zbuf[index] = z;
-						th.set(x, y, color);//d | (d << 8) | (d << 16)); 
+						th.set(px, py, color); 
 						th.calls++;
 					}
 				}
 			}
+
+			// One row step
+			edge_w0 += b12;
+			edge_w1 += b20;
+			edge_w2 += b01;
+		}
+	},
+
+	th.orient2d = function(a, b, c)
+	{
+		return (b[0]-a[0]) * (c[1]-a[1]) - (b[1]-a[1]) * (c[0]-a[0]);
 	},
 
 	th.draw = function()

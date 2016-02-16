@@ -69,7 +69,7 @@ function drawImage()
 	img.clear([255, 255, 255]);
 
 	start = new Date();
-	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
+	//console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
 	effect.setParameters({
 		r: theta
@@ -93,14 +93,8 @@ function drawImage()
 			vs_out.push(out);
 		}
 
-		// Get triangle direction for backface culling
-		s1 = vecSub(vs_out[1][0], vs_out[0][0]);
-		s2 = vecSub(vs_out[2][0], vs_out[0][0]);
-		dir = cross(s1, s2);
-
 		// Draw triangle
-		if (dot(normalize(dir), [0, 0, 1]) > 0)
-			img.triangle(vs_out, effect);
+		img.triangle(vs_out, effect);
 	}
 
 	//console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
