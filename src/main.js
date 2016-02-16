@@ -26,6 +26,8 @@ var doc = document;
 
 var model, img, effect;
 var theta = 0;
+var frames = 0;
+var startProfile;
 
 // Display render link
 
@@ -37,7 +39,7 @@ function modelReady(model, canvas)
 
 		// Create texture and effects
 		effect = new DefaultEffect;
-		var texture = Texture('obj/diablo3/diablo3_pose_diffuse.png');
+		Texture.load('obj/diablo3/diablo3_pose_diffuse.png');
 
 		// Set context
 		var ctx = canvas.getContext('2d');
@@ -54,8 +56,10 @@ function modelReady(model, canvas)
 			effect.setParameters({
 				scr_w: img.w,
 				scr_h: img.h,
-				texture: texture
+				texture: Texture
 			});
+
+			startProfile = new Date();
 
 			drawImage();
 		}
@@ -97,11 +101,8 @@ function drawImage()
 		img.triangle(vs_out, effect);
 	}
 
-	//console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
 	var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 	var calls = "Pixels drawn/found "+ img.calls +'/'+ img.pixels;
-
-	console.log(calls);
 	doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 
 	// Output first render to buffer
@@ -110,6 +111,17 @@ function drawImage()
 	img.pixels = 0;
 
 	theta += 0.1;
+
+	// Profile 100 frames
+	if(++frames >= 100)
+	{
+		var timespan = new Date().getTime() - startProfile.getTime();
+		console.log('100 frames- Avg. render time: '+ timespan / 100 +'ms'+
+			' Avg. FPS: '+ (100000 / timespan).toFixed(3));
+
+		frames = 0;
+		startProfile = new Date();
+	}
 
 	requestAnimationFrame(function() {
 		drawImage();

@@ -1,6 +1,6 @@
 // Texture object
 
-function Texture(src)
+Texture = (function()
 {
 	var tx =
 	{
@@ -56,6 +56,6 @@ function Texture(src)
 		return new Uint8Array([smp, (smp >> 8), (smp >> 16), (smp >> 24)]);
 	}
 
-	tx.load(src);
 	return tx;
-}
+
+})();
