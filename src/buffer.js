@@ -15,16 +15,22 @@ function Buffer(ctx, w, h)
 		pixels: 0,
 
 		nextline: h,
-		bufWidth: w,	
+		bufWidth: w,    
 	};
 
 	// Clear canvas
 
 	th.clear = function(color)
 	{
-		const len = th.buf32.length;
-		for (var i = 0; i < len; i++)
-			th.buf32[i] = color | 0xff000000;
+		for (var y = 0; y <= th.h; y++)
+			for (var x = 0; x < th.bufWidth; x++)
+			{
+				var index = th.index(x, y);	
+				th.set(x, y, color);
+				th.zbuf[index] = 0;
+			}
+
+		th.imgData.data.set(th.buf8);
 	}
 
 	// Get pixel index
@@ -67,7 +73,7 @@ function Buffer(ctx, w, h)
 		if (x0 > x1)
 		{
 			x1 = [x0, x0 = x1][0];
-			y1 = [y0, y0 = y1][0];		
+			y1 = [y0, y0 = y1][0];      
 		}
 
 		const dx = x1 - x0;
@@ -177,25 +183,19 @@ function Buffer(ctx, w, h)
 		{
 			// Log output info to the page
 			end = new Date();
-
-			var execTime = "Execution took "+ (end.getTime() - start.getTime()) +" ms";
-			var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
-
-			doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-			console.log(execTime +'. '+ calls);
 			return;
 		}
+/*
+		requestAnimationFrame(function(){
+			self.draw();
+			//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
+			//doc.getElementById('info').innerHTML = calls;
+		});*/
 
-    	requestAnimationFrame(function(){
-    		self.draw();
-    		//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
-   			//doc.getElementById('info').innerHTML = calls;
-		});
+		th.postProc(self.nextline);
+		th.drawBuffer();
 
-    	th.postProc(self.nextline);
-   		th.drawBuffer();
-
-		self.nextline -= 32;
+		//self.nextline -= 32;
 	},
 
 	// Post-processing (temporary, mostly SSAO)
@@ -207,7 +207,7 @@ function Buffer(ctx, w, h)
 		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 8)
 			rays.push([m.sin(a), m.cos(a)]);
 
-		for (var y = nextline; y > nextline - 32; y--)
+		for (var y = nextline; y > nextline - 272; y--)
 			for (var x = 0; x < th.w; x++) 
 			{
 				// Get buffer index

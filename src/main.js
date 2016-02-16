@@ -9,7 +9,7 @@ var doc = document;
 (function() 
 {
 	var canvas = doc.getElementById('render');
-	var model = Object.create(OBJmodel);
+	model = Object.create(OBJmodel);
 
 	if (canvas.getContext)
 	{
@@ -24,6 +24,9 @@ var doc = document;
 	}
 }).call(this);
 
+var model, img, effect;
+var theta = 0;
+
 // Display render link
 
 function modelReady(model, canvas)
@@ -33,7 +36,7 @@ function modelReady(model, canvas)
 		console.log('ready to render!');
 
 		// Create texture and effects
-		var effect = new DefaultEffect;
+		effect = new DefaultEffect;
 		var texture = Texture('obj/diablo3/diablo3_pose_diffuse.png');
 
 		// Set context
@@ -45,7 +48,7 @@ function modelReady(model, canvas)
 		{ 
 			console.log('Begin render!'); 
 
-			var img = Buffer(ctx, canvas.width, canvas.height);
+			img = Buffer(ctx, canvas.width, canvas.height);
 
 			// Set shader parameters
 			effect.setParameters({
@@ -54,17 +57,23 @@ function modelReady(model, canvas)
 				texture: texture
 			});
 
-			drawImage(model, img, effect);
+			drawImage();
 		}
 	}
 }
 
 // Draw model called in deferred request
 
-function drawImage(model, img, effect)
+function drawImage()
 {
+	img.clear([255, 255, 255]);
+
 	start = new Date();
 	console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
+
+	effect.setParameters({
+		r: theta
+	});
 
 	// Transform geometry to screen space
 	for (var f = 0; f < model.faces.length; f++)
@@ -79,8 +88,9 @@ function drawImage(model, img, effect)
 			var vn = (model.normals.length > 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
 
 			// world coords are transformed, tex coords are unchanged
-			v = effect.vertex(v);
-			vs_out.push([v, vt, vn]);
+			var vs_in = [v, vt, vn];
+			var out = effect.vertex(vs_in);
+			vs_out.push(out);
 		}
 
 		// Get triangle direction for backface culling
@@ -93,12 +103,23 @@ function drawImage(model, img, effect)
 			img.triangle(vs_out, effect);
 	}
 
-	console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
-	console.log("Pixels drawn/found "+ img.calls +'/'+ img.pixels)
+	//console.log(new Date().getTime() - start.getTime() +"ms Post-processing");
+	var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
+	var calls = "Pixels drawn/found "+ img.calls +'/'+ img.pixels;
+
+	console.log(calls);
+	doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
 
 	// Output first render to buffer
 	img.drawBuffer();
 	img.calls = 0;
+	img.pixels = 0;
+
+	theta += 0.1;
+
+	requestAnimationFrame(function() {
+		drawImage();
+	});
 
 	// Scan line by line
 	//img.draw();
