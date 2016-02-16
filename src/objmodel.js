@@ -10,26 +10,6 @@ var OBJmodel =
 	normals: [],
 	texcoords: [],
 
-	request: function(file)
-	{
-		return new Promise(function(resolve, reject)
-		{
-			var xhr = new XMLHttpRequest();
-
-			xhr.open("GET", file, true);
-			xhr.onload = function() {
-		      	if (xhr.status == 200) {
-		        	resolve(xhr.response);
-		      	}
-		      	else {
-		        	reject(Error(xhr.statusText));
-		      	}
-		    }
-			xhr.onerror = reject;
-			xhr.send(null);
-		});
-	},
-
 	load: function(file, func)
 	{
 		var self = this;
@@ -45,7 +25,7 @@ var OBJmodel =
 			console.error("request failed!");	
 		}
 
-		self.request(file).then(success, error);
+		request(file).then(success, error);
 	},
 
 	parse: function(lines)
@@ -90,4 +70,26 @@ var OBJmodel =
 		console.log('total normals: '+ this.normals.length);
 		console.log('total faces: '+ this.faces.length);
 	}
+}
+
+// General AJAX request function
+
+var request = function(file)
+{
+	return new Promise(function(resolve, reject)
+	{
+		var xhr = new XMLHttpRequest();
+
+		xhr.open("GET", file, true);
+		xhr.onload = function() {
+	      	if (xhr.status == 200) {
+	        	resolve(xhr.response);
+	      	}
+	      	else {
+	        	reject(Error(xhr.statusText));
+	      	}
+	    }
+		xhr.onerror = reject;
+		xhr.send(null);
+	});
 }

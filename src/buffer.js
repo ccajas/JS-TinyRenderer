@@ -268,21 +268,3 @@ function Buffer(ctx, w, h)
 	return th;
 }
 
-// Worker test
-worker = makeWorker(function(e)
-{
-	self.onmessage = function(e)
-	{
-		//console.log(e.data);
-		//console.log('Message received from main script');
-
-		self.postMessage(e.data);
-		return e.data;
-	}
-});
-
-worker.onmessage = function(e) 
-{
-	//console.log(e.data);
-	//console.log('Message received from worker');
-}

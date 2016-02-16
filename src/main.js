@@ -13,6 +13,8 @@ var doc = document;
 
 	if (canvas.getContext)
 	{
+		//JSON.parse(response).then(null, null);
+
 		// Test load model
 		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
 	}
@@ -74,11 +76,11 @@ function drawImage(model, img, effect)
 		{
 			var v = model.verts[face[j][0]];
 			var vt = (model.texcoords.length) ? model.texcoords[face[j][1]] : [0, 0];
-			var vn = (model.normals.length > 0 && face[j][2] >= 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
+			var vn = (model.normals.length > 0 && face[j][2] >= 0) ? 
+				model.normals[face[j][2]]   : [1, 0, 0];
 
 			// world coords are transformed, tex coords are unchanged
 			v = effect.vertex(v);
-			//v = worker.postMessage({ });
 			vs_out.push([v, vt, vn]);
 		}
 
@@ -93,20 +95,5 @@ function drawImage(model, img, effect)
 	img.calls = 0;
 
 	// Scan line by line
-	//img.draw();
-}
-
-// Generic worker task
-
-function makeWorker(func) 
-{
-    var URL = window.URL || window.webkitURL;
-    var Blob = window.Blob;
-    var Worker = window.Worker;
-    
-    if (!URL || !Blob || !Worker || !func) return null;
-    
-    var blob = new Blob(['(', func,')()' ], { type: 'application/javascript' });
-    var worker = new Worker(URL.createObjectURL(blob));
-    return worker;
+	img.draw();
 }
