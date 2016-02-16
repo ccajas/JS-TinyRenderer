@@ -45,7 +45,7 @@ DefaultEffect.prototype.fragment = function(ps_in, color)
 	var n = ps_in[1];
 	var ambient = 0.15;
 	var intensity = n[2];//dot(ps_in[1], [0, 0, 1]);*/
-	var c = this.texture.sample(null, ps_in[0]);
+	var t = this.texture.sample(null, ps_in[0]);
 	//var l = [0, 0, 1];
 
 	//ref = normalize((dot(n, l) * 2) - l);   // reflected light
@@ -53,11 +53,9 @@ DefaultEffect.prototype.fragment = function(ps_in, color)
 
 	intensity = (m.max(intensity, 0) * (1-ambient)) + ambient;
 			
-	var r = ((c) & 0xff) * intensity;
-	var g = ((c >> 8) & 0xff) * intensity;
-	var b = ((c >> 16) & 0xff) * intensity;
-
-	color[0] = r | (g << 8) | (b << 16);
+	color[0] = 255;//(t & 0xff) * intensity;
+	color[1] = 255;//((t >> 8) & 0xff) * intensity;
+	color[2] = 255;//((t >> 16) & 0xff) * intensity;
 
 	return false;
 }

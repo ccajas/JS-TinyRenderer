@@ -124,9 +124,7 @@ vecSub = function(a, b)
 
 dot = function(a, b)
 {
-	var r;
-	for (var i = a.length; i--; r += a[i] * b[i]);
-	return r;
+	return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
 }
 
 // Cross product of two 3D vectors

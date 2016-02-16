@@ -24,7 +24,7 @@ function Buffer(ctx, w, h)
 	{
 		const len = th.buf32.length;
 		for (var i = 0; i < len; i++)
-			th.buf32[i] = color + 0xff000000;
+			th.buf32[i] = color | 0xff000000;
 	}
 
 	// Get pixel index
@@ -38,8 +38,8 @@ function Buffer(ctx, w, h)
 
 	th.set = function(x, y, color)
 	{
-		color = color[0] | color[1] << 8 | color[2] << 16;
-		th.buf32[th.index(x, y)] = color + 0xff000000;
+		var c = color[0] | (color[1] << 8) | (color[2] << 16);
+		th.buf32[th.index(x, y)] = c | 0xff000000;
 	}
 
 	// Get a pixel
@@ -121,22 +121,23 @@ function Buffer(ctx, w, h)
 		if (boxMin[0] > th.w || boxMax[0] < 0 || boxMin[1] > th.h || boxMax[1] < 0)
 			return;
 
-		var _u = texcoords.map(function(t) { return t[0]; });
-		var _v = texcoords.map(function(t) { return t[1]; });
+		var _u = [texcoords[0][0], texcoords[1][0], texcoords[2][0]];
+		var _v = [texcoords[0][1], texcoords[1][1], texcoords[2][1]];
 
-		var _nx = normals.map(function(n) { return n[0]; });
-		var _ny = normals.map(function(n) { return n[1]; });
-		var _nz = normals.map(function(n) { return n[2]; });
+		var _nx = [normals[0][0], normals[1][0], normals[2][0]];
+		var _ny = [normals[0][1], normals[1][1], normals[2][1]];
+		var _nz = [normals[0][2], normals[1][2], normals[2][2]];
 
 		var u, v, nx, ny, nz;
-		var ep = -0.0001;
 		var z = 0;
 
 		for (var y = boxMin[1]; y <= boxMax[1]; y++)  
 			for (var x = boxMin[0]; x <= boxMax[0]; x++) 
 			{
 				th.pixelVal++;
+
 				var b_coords = barycentric(points, [x, y, z]);
+				var ep = -0.0001;
 
 				// Pixel is outside of barycentric coords
 				if (b_coords[0] < ep || b_coords[1] < ep || b_coords[2] < ep) 
@@ -160,14 +161,14 @@ function Buffer(ctx, w, h)
 					ny = dot(b_coords, _ny);
 					nz = dot(b_coords, _nz);
 
-					var color = [0, 0, 0];
+					var color = new Uint8Array([0, 0, 0]);
 					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 
 					if (!discard)
 					{
 						var d = z >> 8;
-						th.zbuf[index] = z;	
-						th.set(x, y, [d, d, d]); 
+						th.zbuf[index] = z;
+						th.set(x, y, color);//d | (d << 8) | (d << 16)); 
 						th.calls++;
 					}
 				}
@@ -210,7 +211,7 @@ function Buffer(ctx, w, h)
 	{
 		// Calculate ray vectors
 		var rays = [];
-		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 19)
+		for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / 8)
 			rays.push([m.sin(a), m.cos(a)]);
 
 		for (var y = nextline; y > nextline - 32; y--)
@@ -236,7 +237,7 @@ function Buffer(ctx, w, h)
 				var g = ((c >> 8) & 0xff) * total;
 				var b = ((c >> 16) & 0xff) * total;
 
-				th.set(x, y, r | (g << 8) | (b << 16));
+				th.set(x, y, new Uint8Array([r, g, b]));
 				th.calls++;
 			};
 	},
@@ -265,4 +266,23 @@ function Buffer(ctx, w, h)
 	th.zbuf = new Uint32Array(th.imgData.data.length);
 
 	return th;
+}
+
+// Worker test
+worker = makeWorker(function(e)
+{
+	self.onmessage = function(e)
+	{
+		//console.log(e.data);
+		//console.log('Message received from main script');
+
+		self.postMessage(e.data);
+		return e.data;
+	}
+});
+
+worker.onmessage = function(e) 
+{
+	//console.log(e.data);
+	//console.log('Message received from worker');
 }
