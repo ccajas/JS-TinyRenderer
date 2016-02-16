@@ -93,6 +93,14 @@ function Matrix()
     	return result;
 	}
 
+	mat.rotation = function(x, y, z, w) {
+      return [
+      	[1 - 2*y*y - 2*z*z, 2*x*y + 2*z*w, 		2*x*z - 2*y*w, 		0], 
+      	[2*x*y - 2*z*w, 	1 - 2*x*x - 2*z*z,	2*z*y + 2*x*w, 		0], 
+      	[2*x*z + 2*y*w, 	2*z*y - 2*x*w, 		1 - 2*x*x - 2*y*y, 	0], 
+      	[0, 0, 0, 1]];
+    };
+
 	return mat;
 }
 
@@ -156,6 +164,13 @@ normalize = function(v)
 {
 	var length = dist(v);
 	return [v[0] / length, v[1] / length, v[2] / length];
+}
+
+// Orientation on a side
+
+orient2d = function(a, b, p)
+{
+	return (b[0]-a[0]) * (p[1]-a[1]) - (b[1]-a[1]) * (p[0]-a[0]);
 }
 
 // Barycentric coordinates from three 2D points

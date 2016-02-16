@@ -29,8 +29,6 @@ function Buffer(ctx, w, h)
 				th.set(x, y, color);
 				th.zbuf[index] = 0;
 			}
-
-		th.imgData.data.set(th.buf8);
 	}
 
 	// Get pixel index
@@ -133,9 +131,9 @@ function Buffer(ctx, w, h)
 		var a20 = points[2][1] - points[0][1], b20 = points[0][0] - points[2][0];
 
 		// Get orientation to see where the triangle is facing
-		var edge_w0 = th.orient2d(points[1], points[2], boxMin);
-		var edge_w1 = th.orient2d(points[2], points[0], boxMin);
-		var edge_w2 = th.orient2d(points[0], points[1], boxMin);
+		var edge_w0 = orient2d(points[1], points[2], boxMin);
+		var edge_w1 = orient2d(points[2], points[0], boxMin);
+		var edge_w2 = orient2d(points[0], points[1], boxMin);
 
 		var color = [0, 0, 0];
 		var u, v, nx, ny, nz;
@@ -199,28 +197,13 @@ function Buffer(ctx, w, h)
 		}
 	},
 
-	th.orient2d = function(a, b, c)
-	{
-		return (b[0]-a[0]) * (c[1]-a[1]) - (b[1]-a[1]) * (c[0]-a[0]);
-	},
-
 	th.draw = function()
 	{
 		var self = th;
 
 		// Done animating
 		if (self.nextline < 0)
-		{
-			// Log output info to the page
-			end = new Date();
 			return;
-		}
-/*
-		requestAnimationFrame(function(){
-			self.draw();
-			//var calls = "Pixel draw calls/visited: "+ th.calls +"/"+ th.pixels;
-			//doc.getElementById('info').innerHTML = calls;
-		});*/
 
 		th.postProc(self.nextline);
 		th.drawBuffer();
