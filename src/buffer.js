@@ -105,8 +105,8 @@ function Buffer(ctx, w, h)
 	th.triangle = function(verts, effect) 
 	{
 		var points = [verts[0][0], verts[1][0], verts[2][0]];
-		var texcoords = [verts[0][1], verts[1][1], verts[2][1]];
-		var normals = [verts[0][2], verts[1][2], verts[2][2]];
+		var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
+		var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
 		// Create bounding box
 		var boxMin = [th.w + 1, th.h + 1], boxMax = [-1, -1];
@@ -142,41 +142,41 @@ function Buffer(ctx, w, h)
 		for (var py = boxMin[1]; py <= boxMax[1]; py++)  
 		{
 			// Barycentric coordinates at start of row
-			var w0 = edge_w0;
-			var w1 = edge_w1;
-			var w2 = edge_w2;
+			var w = [edge_w0, edge_w1, edge_w2];
 
 			for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 			{
 				th.pixels++;
 
 				// Step right
-				w0 += a12;
-				w1 += a20;
-				w2 += a01;		
+				w[0] += a12;
+				w[1] += a20;
+				w[2] += a01;		
 
-				// Pixel is inside of barycentric coords
-				if (w0 < a12 || w1 < a20 || w2 < a01)
+				// Check if pixel is outsde of barycentric coords
+				if (w[0] < a12 || w[1] < a20 || w[2] < a01)
 					continue;
 
-				// Get buffer index and run fragment shader
-				var index = th.index(px, py);
-				var b_coords = barycentric(points, [px, py, z]);
+				bc = (noDither || (px + py) % 2 == 1) ? 
+					barycentric(points, [px, py, z]) : [0.3333, 0.3333, 0.3333];
 
 				// Get pixel depth
 				z = 0;
 				for (var i=0; i<3; i++) 
-					z += points[i][2] * b_coords[i];
+					z += points[i][2] * bc[i];
+
+				// Get buffer index and run fragment shader
+				var index = th.index(px, py);
 				
 				if (th.zbuf[index] < z)
 				{
 					// Calculate tex and normal coords
-					u = dot(b_coords, [texcoords[0][0], texcoords[1][0], texcoords[2][0]]);
-					v = dot(b_coords, [texcoords[0][1], texcoords[1][1], texcoords[2][1]]);
+					u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
+					v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
 
-					nx = dot(b_coords, [normals[0][0], normals[1][0], normals[2][0]]);
-					ny = dot(b_coords, [normals[0][1], normals[1][1], normals[2][1]]);
-					nz = dot(b_coords, [normals[0][2], normals[1][2], normals[2][2]]);
+					nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
+					ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
+					nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
 					var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
 
@@ -235,10 +235,10 @@ function Buffer(ctx, w, h)
 						th.zbuf, index, [x, y], [th.w, th.h], rays[i], th.log2w));
 				}
 				total /= (m.PI / 2) * rays.length;
-				//total = m.pow(total, 5) * 10;
+				//total = m.pow(total, 2) * 2;
 				//if (total > 1) total = 1;
 
-				var c = 0xffffff;//this.get(x, y);
+				var c = this.get(x, y);
 
 				var r = (c & 0xff) * total;
 				var g = ((c >> 8) & 0xff) * total;
