@@ -137,6 +137,8 @@ Buffer = (function()
 					
 					if (this.zbuf[index] < z)
 					{
+						var u, v, nx, ny, nz;
+
 						// Calculate tex and normal coords
 						u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
 						v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];

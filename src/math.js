@@ -1,47 +1,48 @@
 
+
 // Camera functions
 
 viewport = function(x, y, w, h) 
 {
-    var vp = Matrix();
-    vp[0][3] = x + w/2;
-    vp[1][3] = y + h/2;
-    vp[2][3] = 1;
-    vp[0][0] = w/2;
-    vp[1][1] = h/2;
-    vp[2][2] = 0;
+	var vp = Matrix();
+	vp[0][3] = x + w/2;
+	vp[1][3] = y + h/2;
+	vp[2][3] = 1;
+	vp[0][0] = w/2;
+	vp[1][1] = h/2;
+	vp[2][2] = 0;
 
-    return vp;
+	return vp;
 }
 
 projection = function(coeff) 
 {
-    var proj = Matrix();
-    proj[3][2] = coeff;
+	var proj = Matrix();
+	proj[3][2] = coeff;
 
-    return proj;
+	return proj;
 }
 
 // Camera lookat with three 3D vectors
 
 lookat = function(eye, center, up)
 {
-    var z = normalize(vecSub(eye, center));
-    var x = normalize(cross(up, z));
-    var y = normalize(cross(z,x));
+	var z = normalize(vecSub(eye, center));
+	var x = normalize(cross(up, z));
+	var y = normalize(cross(z,x));
 
-    var minv = Matrix();
-   	var tr   = Matrix();
+	var minv = Matrix();
+	var tr   = Matrix();
 
-    for (var i = 0; i < 3; i++) 
-    {
-        minv[0][i] = x[i];
-        minv[1][i] = y[i];
-        minv[2][i] = z[i];
-        tr[i][3] = -center[i];
-    }
+	for (var i = 0; i < 3; i++) 
+	{
+		minv[0][i] = x[i];
+		minv[1][i] = y[i];
+		minv[2][i] = z[i];
+		tr[i][3] = -center[i];
+	}
 
-    ModelView = Minv * Tr;
+	ModelView = Minv * Tr;
 }
 
 // Matrix functions
@@ -64,7 +65,7 @@ Matrix = (function()
 	{
 		var result = [];
 
-    	return result;
+		return result;
 	}
 
 	Matrix.rotation = function(x, y, z, w) {
@@ -74,7 +75,7 @@ Matrix = (function()
 			[2*x*z + 2*y*w, 	2*z*y - 2*x*w, 		1 - 2*x*x - 2*y*y, 	0], 
 			[0, 0, 0, 1]
 		];
-    }
+	}
 
 	return Matrix;
 
@@ -133,18 +134,49 @@ barycentric = function(pts, point)
 {
 	var pt0 = pts[0], pt1 = pts[1], pt2 = pts[2];
 
-    var v0 = [pt1[0] - pt0[0], pt1[1] - pt0[1], pt1[2] - pt0[2]],
-    v1 =     [pt2[0] - pt0[0], pt2[1] - pt0[1], pt2[2] - pt0[2]], 
-    v2 =     [point[0] - pt0[0], point[1] - pt0[1], point[2] - pt0[2]];
+	var v0 = [pt1[0] - pt0[0], pt1[1] - pt0[1], pt1[2] - pt0[2]],
+	v1 =     [pt2[0] - pt0[0], pt2[1] - pt0[1], pt2[2] - pt0[2]], 
+	v2 =     [point[0] - pt0[0], point[1] - pt0[1], point[2] - pt0[2]];
 
-    var dn1 = 1 / (v0[0] * v1[1] - v1[0] * v0[1]);
+	var dn1 = 1 / (v0[0] * v1[1] - v1[0] * v0[1]);
 
-    v = (v2[0] * v1[1] - v1[0] * v2[1]) * dn1;
-    w = (v0[0] * v2[1] - v2[0] * v0[1]) * dn1;
-    u = 1 - v - w;
+	v = (v2[0] * v1[1] - v1[0] * v2[1]) * dn1;
+	w = (v0[0] * v2[1] - v2[0] * v0[1]) * dn1;
+	u = 1 - v - w;
 
-    return [u, v, w];
+	return [u, v, w];
 }
+
+VecModule = function(stdlib, foreign, heap) 
+{
+    "use asm";
+
+    // Variable Declarations
+    var sqrt = stdlib.Math.sqrt;
+    var H = new stdlib.Float32Array(heap);
+    var I = new stdlib.Uint8Array(heap);
+
+    function dist(x, y) {
+        x = +x;
+        y = +y;
+        return +sqrt((x*x) + (y*y));
+    }
+
+    function mul(a, b)
+    {
+    	a = +a;
+    	b = +b;
+    	return a * b;
+    }
+
+	return { dist: dist, mul: mul };
+}
+
+var buf = new ArrayBuffer(65536);
+var array = new Float32Array(buf);
+var vecModule = VecModule(this, {}, buf);
+
+console.log(vecModule.dist(12, 11));
 
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
 

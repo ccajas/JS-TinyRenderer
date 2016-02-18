@@ -47,13 +47,15 @@ DefaultEffect = (function()
 			var normal = vs_in[2];
 			var ratio = this.scr_h / this.scr_w;
 
+			var rt = [];
+			var nx, ny, nz;
+
 			// Rotate vertex and normal
 
-			var nx = normal[0] * m.cos(this.r) - normal[2] * m.sin(this.r);
-			var nz = normal[0] * m.sin(this.r) + normal[2] * m.cos(this.r);
-			var ny = normal[1];
+			nx = normal[0] * m.cos(this.r) - normal[2] * m.sin(this.r);
+			nz = normal[0] * m.sin(this.r) + normal[2] * m.cos(this.r);
+			ny = normal[1];
 
-			var rt = [];
 			rt[0] = world[0] * m.cos(this.r) - world[2] * m.sin(this.r);
 			rt[1] = world[0] * m.sin(this.r) + world[2] * m.cos(this.r);
 
