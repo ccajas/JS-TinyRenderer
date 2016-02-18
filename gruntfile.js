@@ -1,6 +1,9 @@
 
 module.exports = function(grunt) 
 {
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	
 	grunt.initConfig(
 	{
 		cwd: process.cwd(),
@@ -16,16 +19,16 @@ module.exports = function(grunt)
 			js: {
 				files: { 'renderer.js': [
 					'src/objmodel.js',
+					'src/math.js',
 					'src/buffer.js',
 					'src/effect.js',
 					'src/texture.js',
-					'src/util.js',
 					'src/main.js'
 				]}
 			}
 		},
 
-		watch: {
+		watchfiles: {
 			first: {
 				files: ['src/*.js'],
 				tasks: ['uglify']
@@ -33,8 +36,7 @@ module.exports = function(grunt)
 		}
 	});
 
-	grunt.registerTask('watch', ['watch:first']); 
+	grunt.renameTask('watch', 'watchfiles');
 
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.registerTask('watch', ['watchfiles']); 
 };

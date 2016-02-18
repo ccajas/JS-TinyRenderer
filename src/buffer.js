@@ -157,7 +157,7 @@ function Buffer(ctx, w, h)
 				if (w[0] < a12 || w[1] < a20 || w[2] < a01)
 					continue;
 
-				bc = (noDither || (px + py) % 2 == 1) ? 
+				bc = ((px + py) % 2 == 1) ? 
 					barycentric(points, [px, py, z]) : [0.3333, 0.3333, 0.3333];
 
 				// Get pixel depth

@@ -46,125 +46,79 @@ lookat = function(eye, center, up)
 
 // Matrix functions
 
-function Matrix()
+Matrix = (function()
 {
-	var mat = 
-	{
-		rows: [],
-	}
+	function Matrix() {}
 
-	mat.identity()
+	Matrix.identity = function()
 	{
-		mat.rows = [
+		return [
 			[1, 0, 0, 0],
 			[0, 1, 0, 0],
 			[0, 0, 1, 0],
 			[0, 0, 0, 1]
 		];
-		return mat.rows;
 	}
 
-	mat.row(r)
-	{
-		return mat.rows[r];
-	}
-
-	mat.col(c)
-	{
-		var col = [];
-		for (var i = 0; i < mat.rows.length; i++)
-			col[i] = mat.at(i, c);
-		return col;
-	}
-
-	mat.at(row, col)
-	{
-		return mat.rows[row][col];
-	}
-
-	mat.mul = function(rhs)
+	Matrix.mul = function(lhs, rhs)
 	{
 		var result = [];
-    	for (var i = 0; i < mat.rows.length; i++)
-        	for (var j = 0; j < mat.rows[0].length; j++)
-        		result[i][j] = 
-        			dot(mat.row(i), rhs.col(j));
 
     	return result;
 	}
 
-	mat.rotation = function(x, y, z, w) {
-      return [
-      	[1 - 2*y*y - 2*z*z, 2*x*y + 2*z*w, 		2*x*z - 2*y*w, 		0], 
-      	[2*x*y - 2*z*w, 	1 - 2*x*x - 2*z*z,	2*z*y + 2*x*w, 		0], 
-      	[2*x*z + 2*y*w, 	2*z*y - 2*x*w, 		1 - 2*x*x - 2*y*y, 	0], 
-      	[0, 0, 0, 1]];
-    };
+	Matrix.rotation = function(x, y, z, w) {
+		return [
+			[1 - 2*y*y - 2*z*z, 2*x*y + 2*z*w, 		2*x*z - 2*y*w, 		0], 
+			[2*x*y - 2*z*w, 	1 - 2*x*x - 2*z*z,	2*z*y + 2*x*w, 		0], 
+			[2*x*z + 2*y*w, 	2*z*y - 2*x*w, 		1 - 2*x*x - 2*y*y, 	0], 
+			[0, 0, 0, 1]
+		];
+    }
 
-	return mat;
-}
+	return Matrix;
+
+})();
 
 // Vector functions
 
-// Add two vectors
-
-vecAdd = function(a, b)
+Vec3 = (function() 
 {
-	var r = [];
-	for (var i = 0; i < a.length; i++)
-		r.push(a[i] + b[i]);
+	function Vec3() {}
 
-	return r;
-}
+	Vec3.dot = function(a, b)
+	{
+		return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
+	}
 
-// Subtract two vectors
+	Vec3.cross = function(a, b)
+	{
+		// (a.x, a.y, a.z) x (b.x, b.y, b.z)
+		return [
+			a[1] * b[2] - a[2] * b[1], 
+			a[2] * b[0] - a[0] * b[2], 
+			a[0] * b[1] - a[1] * b[0]
+		];
+	}
 
-vecSub = function(a, b)
-{
-	var r = [];
-	for (var i = 0; i < a.length; i++)
-		r.push(a[i] - b[i]);
+	Vec3.dist = function(v)
+	{
+		var sum = 0;
+		for (var i = 0; i < v.length; i++)
+			sum += (v[i] * v[i]);
 
-	return r;
-}
+		return m.sqrt(sum);
+	}
 
-// Dot product of two vectors
+	Vec3.normalize = function(v)
+	{
+		var dist1 = 1 / Vec3.dist(v);
+		return [v[0] * dist1, v[1] * dist1, v[2] * dist1];
+	}
 
-dot = function(a, b)
-{
-	return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
-}
+	return Vec3;
 
-// Cross product of two 3D vectors
-
-cross = function(a, b)
-{
-	// (a.x, a.y, a.z) x (b.x, b.y, b.z)
-	return [
-		a[1] * b[2] - a[2] * b[1], 
-		a[2] * b[0] - a[0] * b[2], 
-		a[0] * b[1] - a[1] * b[0]
-	];
-}
-
-// Distance of a vector
-
-dist = function(v)
-{
-	var sum = 0;
-	for (var i = 0; i < v.length; i++)
-		sum += (v[i] * v[i]);
-
-	return m.sqrt(sum);
-}
-
-// Normalize a 3D vector
-
-normalize = function(v)
-{
-	var length = dist(v);
-	return [v[0] / length, v[1] / length, v[2] / length];
-}
+})();
 
 // Orientation on a side
 
@@ -177,9 +131,11 @@ orient2d = function(a, b, p)
 
 barycentric = function(pts, point)
 {
-    var v0 = vecSub(pts[1], pts[0]), 
-    v1 = vecSub(pts[2], pts[0]), 
-    v2 = vecSub(point, pts[0]);
+	var pt0 = pts[0], pt1 = pts[1], pt2 = pts[2];
+
+    var v0 = [pt1[0] - pt0[0], pt1[1] - pt0[1], pt1[2] - pt0[2]],
+    v1 =     [pt2[0] - pt0[0], pt2[1] - pt0[1], pt2[2] - pt0[2]], 
+    v2 =     [point[0] - pt0[0], point[1] - pt0[1], point[2] - pt0[2]];
 
     var dn1 = 1 / (v0[0] * v1[1] - v1[0] * v0[1]);
 
@@ -201,7 +157,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
-		var distance = dist(vecSub(p, cur));
+		var distance = Vec3.dist([p[0] - cur[0], p[1] - cur[1]]);
 		if (distance < 1) continue;
 
 		// buffer index
