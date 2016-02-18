@@ -39,17 +39,17 @@ var OBJmodel =
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					this.verts.push(new f64(splitLine(i)));
+					this.verts.push(f32x4(splitLine(i)));
 					break;
 
 				// Find vertex normals
 				case 'vn':
-					this.normals.push(new f64(splitLine(i)));
+					this.normals.push(f32x4(splitLine(i)));
 					break;
 
 				// Find texture coordinates
 				case 'vt':
-					this.texcoords.push(new f64(splitLine(i)));
+					this.texcoords.push(f32x4(splitLine(i)));
 					break;
 
 				// Find face indices

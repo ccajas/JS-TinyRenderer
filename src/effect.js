@@ -4,9 +4,10 @@ Effect = (function()
 {
 	function Effect() {}
 
-	// Vertex and fragment shaders
 	Effect.prototype = 
 	{
+		// Vertex and fragment shaders
+
 		vertex: function(vs_in) { },
 
 		fragment: function(ps_in, color) { },
@@ -62,7 +63,7 @@ DefaultEffect = (function()
 			var y = m.floor((world[1] / 2 + 0.5) * this.scr_h);
 			var z = m.floor((rt[1] / 2 + 0.5) * 65536);
 
-			return [[x, y, z], vs_in[1], [nx, ny, nz]];
+			return [[x, y, z, 0], vs_in[1], [nx, ny, nz, 0]];
 		},
 
 		fragment: function(ps_in, color)

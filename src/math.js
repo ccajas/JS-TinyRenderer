@@ -154,7 +154,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 	for (var t = 1; t < 40; t += 3) 
 	{
 		// Current position of the ray traveled, and check for out of bounds
-		var cur = vecAdd(p, [ray[0] * t, ray[1] * t]);
+		var cur = [p[0] + ray[0] * t, p[1] + ray[1] * t];
 		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
 
 		var distance = Vec3.dist([p[0] - cur[0], p[1] - cur[1]]);

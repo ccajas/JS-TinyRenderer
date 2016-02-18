@@ -4,35 +4,30 @@
 (function() 
 {
 	// Shorthand
-
 	m = Math;
 	doc = document;
-	log = console.log.bind(console);
-	f64 = Float64Array;
+	f32x4 = (typeof SIMD == 'undefined') ? 
+		function(a) {
+			return new Float32Array(a);
+		} : 
+		function(a){
+			return SIMD.Float32x4.load(a, 0);
+		}
 
 	// Globals
-
-	model = null;
-	img = null;
-	effect = null;
+	model = null, img = null, effect = null, startProfile = null;
 	theta = 0;
 	frames = 0;
-	startProfile = null;
 
 	// Set canvas
-
 	var canvas = doc.getElementById('render');
 	model = Object.create(OBJmodel);
 
 	if (canvas.getContext)
-	{
-		// Test load model
 		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
-	}
 	else
-	{
 		console.error("Canvas context not supported!");
-	}
+
 }).call(this);
 
 // Display render link
@@ -41,12 +36,11 @@ function modelReady(model, canvas)
 {
 	return function()
 	{
-		log('ready to render!');
+		console.log('ready to render!');
 
 		// Create texture and effects
 		effect = new DefaultEffect();
-		var texture = new Texture('obj/diablo3/diablo3_pose_diffuse.png');
-		log('module', effect);
+		var texture = new Texture('obj/diablo3/diablo3_pose_diffuse_sm.png');
 
 		// Set context
 		var ctx = canvas.getContext('2d');
@@ -55,9 +49,9 @@ function modelReady(model, canvas)
 		el.style.display = 'block';
 		el.onclick = function() 
 		{ 
-			log('Begin render!'); 
+			console.log('Begin render!'); 
 
-			img = Buffer(ctx, canvas.width, canvas.height);
+			img = new Buffer(ctx, canvas.width, canvas.height);
 
 			// Set shader parameters
 			effect.setParameters({
@@ -78,9 +72,7 @@ function modelReady(model, canvas)
 function drawImage()
 {
 	img.clear([255, 255, 255]);
-
 	start = new Date();
-	//console.log(new Date().getTime() - start.getTime() +"ms Drawing triangles");
 
 	effect.setParameters({
 		r: theta
@@ -108,30 +100,18 @@ function drawImage()
 		img.triangle(vs_out, effect);
 	}
 
-	theta += 0.1;
+	// Output first render to buffer
+	img.calls = 0;
+	img.pixels = 0;
 
-	// Profile 50 frames
-	if(++frames >= 50)
-	{
-		var timespan = new Date().getTime() - startProfile.getTime();
-		log('50 frames- Avg. render time: '+ timespan / 50 +'ms'+
-			' Avg. FPS: '+ (50000 / timespan).toFixed(3));
+	//img.postProc();
+	img.draw();
 
-		frames = 0;
-		startProfile = new Date();
-	}
-
-	// Scan line by line
-	//img.draw();
+	theta += (0.001 * (new Date().getTime() - start.getTime()));
 
 	var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 	var calls = "Pixels drawn/found "+ img.calls +'/'+ img.pixels;
 	doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
-
-	// Output first render to buffer
-	img.drawBuffer();
-	img.calls = 0;
-	img.pixels = 0;
 
 	requestAnimationFrame(function() {
 		drawImage();
