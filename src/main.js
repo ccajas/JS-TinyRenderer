@@ -1,20 +1,31 @@
 
-// Shorthand
-
-var m = Math;
-var doc = document;
-
 // Main function
 
 (function() 
 {
+	// Shorthand
+
+	m = Math;
+	doc = document;
+	log = console.log.bind(console);
+	f64 = Float64Array;
+
+	// Globals
+
+	model = null;
+	img = null;
+	effect = null;
+	theta = 0;
+	frames = 0;
+	startProfile = null;
+
+	// Set canvas
+
 	var canvas = doc.getElementById('render');
 	model = Object.create(OBJmodel);
 
 	if (canvas.getContext)
 	{
-		//JSON.parse(response).then(null, null);
-
 		// Test load model
 		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
 	}
@@ -24,22 +35,18 @@ var doc = document;
 	}
 }).call(this);
 
-var model, img, effect;
-var theta = 0;
-var frames = 0;
-var startProfile;
-
 // Display render link
 
 function modelReady(model, canvas)
 {
 	return function()
 	{
-		console.log('ready to render!');
+		log('ready to render!');
 
 		// Create texture and effects
-		effect = new DefaultEffect;
-		Texture.load('obj/diablo3/diablo3_pose_diffuse.png');
+		effect = new DefaultEffect();
+		var texture = new Texture('obj/diablo3/diablo3_pose_diffuse.png');
+		log('module', effect);
 
 		// Set context
 		var ctx = canvas.getContext('2d');
@@ -48,7 +55,7 @@ function modelReady(model, canvas)
 		el.style.display = 'block';
 		el.onclick = function() 
 		{ 
-			console.log('Begin render!'); 
+			log('Begin render!'); 
 
 			img = Buffer(ctx, canvas.width, canvas.height);
 
@@ -56,7 +63,7 @@ function modelReady(model, canvas)
 			effect.setParameters({
 				scr_w: img.w,
 				scr_h: img.h,
-				texture: Texture
+				texture: texture
 			});
 
 			startProfile = new Date();
@@ -107,7 +114,7 @@ function drawImage()
 	if(++frames >= 50)
 	{
 		var timespan = new Date().getTime() - startProfile.getTime();
-		console.log('50 frames- Avg. render time: '+ timespan / 50 +'ms'+
+		log('50 frames- Avg. render time: '+ timespan / 50 +'ms'+
 			' Avg. FPS: '+ (50000 / timespan).toFixed(3));
 
 		frames = 0;
@@ -115,7 +122,7 @@ function drawImage()
 	}
 
 	// Scan line by line
-	img.draw();
+	//img.draw();
 
 	var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 	var calls = "Pixels drawn/found "+ img.calls +'/'+ img.pixels;
