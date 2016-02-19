@@ -72,6 +72,7 @@ Renderer = (function()
 
 			console.log('ready to render!');
 			model = content.model;
+			console.log(model);
 
 			// Create texture and effects
 			effect = new DefaultEffect();

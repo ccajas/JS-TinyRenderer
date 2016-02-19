@@ -6,8 +6,7 @@
 	f32x4 = Float32Array;
 
 	// Globals
-	model = null, effect = null, startProfile = null;
-	vertex = null;
+	startProfile = null;
 	theta = 0;
 	frames = 0;
 
@@ -21,7 +20,7 @@
 	if (canvas.getContext)
 	{
 		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
-		content.load('Model')('assets/obj/head/head.obj', 'head');
+		content.load('Model')('assets/obj/head/head.obj', 'model');
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 		//renderer.modelReady(model, canvas)
 
@@ -32,9 +31,9 @@
 		    callback: function()
 		    {
 		        console.log("Renderer ready!");
-		        //effect = new defaultEffect();
+		        //effect = new DefaultEffect();
 
-		        //renderer.modelReady(content.contentCollection(), canvas);
+		        renderer.modelReady(content.contentCollection(), canvas);
 		    }
 		});
 	}

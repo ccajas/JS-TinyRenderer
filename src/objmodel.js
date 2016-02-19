@@ -3,19 +3,17 @@
 
 OBJmodel = (function()
 {
-	function OBJmodel() { }
-
 	// OBJ properties
 
-	OBJmodel.prototype =
-	{
-		verts:[],
-		faces: [],
-		normals: [],
-		texcoords: [],
+	function OBJmodel() 
+	{ 
+		this.verts = [];
+		this.faces = [];
+		this.normals = [];
+		this.texcoords = [];
 	}
 
-	OBJmodel.parse = function(lines)
+	OBJmodel.parse = function(lines, model)
 	{
 		var splitLine = function(i) { return lines[i].split(' ').splice(1, 3); }
 
@@ -26,17 +24,17 @@ OBJmodel = (function()
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					this.prototype.verts.push(new f32x4(splitLine(i)));
+					model.verts.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find vertex normals
 				case 'vn':
-					this.prototype.normals.push(new f32x4(splitLine(i)));
+					model.normals.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find texture coordinates
 				case 'vt':
-					this.prototype.texcoords.push(new f32x4(splitLine(i)));
+					model.texcoords.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find face indices
@@ -48,16 +46,14 @@ OBJmodel = (function()
 							return parseInt(i - 1);
 						});
 
-					this.prototype.faces.push(indices);
+					model.faces.push(indices);
 					break;
 			}
 		}
 
-		console.log('total verts: '+ this.prototype.verts.length);
-		console.log('total normals: '+ this.prototype.normals.length);
-		console.log('total faces: '+ this.prototype.faces.length);
-
-		return this.prototype;
+		console.log('total verts: '+ model.verts.length);
+		console.log('total normals: '+ model.normals.length);
+		console.log('total faces: '+ model.faces.length);
 	}
 
 	return OBJmodel;

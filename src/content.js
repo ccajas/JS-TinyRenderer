@@ -65,8 +65,10 @@ ContentManager = (function()
 			if (modelname == null)
 				return;
 
-			lines = response.split('\n');
-			model = OBJmodel.parse(lines);
+			var model = new OBJmodel();
+			var lines = response.split('\n');
+
+			OBJmodel.parse(lines, model);
 			
 			collection[modelname] = model;
 			requestComplete();
