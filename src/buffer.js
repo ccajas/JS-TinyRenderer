@@ -20,6 +20,9 @@ Buffer = (function()
 		this.buf8 = new Uint8ClampedArray(this.buf);
 		this.buf32 = new Uint32Array(this.buf);
 		this.zbuf = new Uint32Array(this.imgData.data.length);
+
+		// Per-frame vertex data
+		this.points = new Int32Array(3);
 	}
 
 	Buffer.prototype =
@@ -48,7 +51,7 @@ Buffer = (function()
 
 		set: function(x, y, color)
 		{
-			var c = color[0] | (color[1] << 8) | (color[2] << 16);
+			var c = (color[0] & 0xff) | ((color[1] & 0xff) << 8) | ((color[2] & 0xff) << 16);
 			this.buf32[this.index(x, y)] = c | 0xff000000;
 		},
 
@@ -63,9 +66,12 @@ Buffer = (function()
 
 		triangle: function(verts, effect) 
 		{
-			var points = [verts[0][0], verts[1][0], verts[2][0]];
-			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
-			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
+			this.points = [verts[0][0], verts[1][0], verts[2][0]];
+			var texUV   = [verts[0][1], verts[1][1], verts[2][1]];
+			var norm    = [verts[0][2], verts[1][2], verts[2][2]];
+			var world   = [verts[0][3], verts[1][3], verts[2][3]];
+
+			var points = this.points;
 
 			// Create bounding box
 			var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
@@ -106,50 +112,57 @@ Buffer = (function()
 
 				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 				{
-					this.pixels++;
+					this.pixels++;	
+
+					// Check if pixel is outsde of barycentric coords
+					if ((w[0] | w[1] | w[2]) > 0)
+					{
+						bc = //((px + py) % 2 == 0) ? 
+							barycentric(points, [px, py, z])// : [0.3333, 0.3333, 0.3333];
+
+						// Get pixel depth
+						z = 0;
+						for (var i=0; i<3; i++) 
+							z += points[i][2] * bc[i];
+
+						// Get buffer index and run fragment shader
+						var index = this.index(px, py);
+						
+						if (this.zbuf[index] < z)
+						{
+							var u, v, nx, ny, nz;
+
+							// Calculate tex and normal coords
+							u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
+							v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
+
+							nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
+							ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
+							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
+
+							// Calculate world position
+							wx = bc[0] * world[0][0] + bc[1] * world[1][0] + bc[2] * world[2][0];
+							wy = bc[0] * world[0][1] + bc[1] * world[1][1] + bc[2] * world[2][1];
+							wz = bc[0] * world[0][2] + bc[1] * world[1][2] + bc[2] * world[2][2];
+
+							var discard = effect.fragment(
+								[[u, v], [nx, ny, nz], // Texture and normals
+								[wy, wx, wz]], color);
+
+							if (!discard)
+							{
+								var d = z >> 9;
+								this.zbuf[index] = z;
+								this.set(px, py, color); 
+								this.calls++;
+							}
+						}
+					}
 
 					// Step right
 					w[0] += a12;
 					w[1] += a20;
-					w[2] += a01;		
-
-					// Check if pixel is outsde of barycentric coords
-					if (w[0] < a12 || w[1] < a20 || w[2] < a01)
-						continue;
-
-					bc = //((px + py) % 2 == 0) ? 
-						barycentric(points, [px, py, z])// : [0.3333, 0.3333, 0.3333];
-
-					// Get pixel depth
-					z = 0;
-					for (var i=0; i<3; i++) 
-						z += points[i][2] * bc[i];
-
-					// Get buffer index and run fragment shader
-					var index = this.index(px, py);
-					
-					if (this.zbuf[index] < z)
-					{
-						var u, v, nx, ny, nz;
-
-						// Calculate tex and normal coords
-						u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
-						v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
-
-						nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
-						ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
-						nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
-
-						var discard = effect.fragment([[u, v], [ny, nx, nz]], color);
-
-						if (!discard)
-						{
-							var d = z >> 9;
-							this.zbuf[index] = z;
-							this.set(px, py, color); 
-							this.calls++;
-						}
-					}
+					w[2] += a01;
 				}
 
 				// One row step

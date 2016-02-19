@@ -1,6 +1,6 @@
 
 // Camera functions
-
+/*
 viewport = function(x, y, w, h) 
 {
 	var vp = Matrix();
@@ -79,7 +79,7 @@ Matrix = (function()
 	return Matrix;
 
 })();
-
+*/
 // Vector functions
 
 Vec3 = (function() 
@@ -99,6 +99,14 @@ Vec3 = (function()
 			a[2] * b[0] - a[0] * b[2], 
 			a[0] * b[1] - a[1] * b[0]
 		];
+	}
+
+	Vec3.reflect = function(l, n)
+	{
+		var ldn = Vec3.dot(l, n);
+		var proj = [2 * n[0] * ldn, 2 * n[1] * ldn, 2 * n[2] * ldn];
+
+		return [proj[0] - l[0], proj[1] - l[1], proj[2] - l[2]];
 	}
 
 	Vec3.dist = function(v)
@@ -122,9 +130,9 @@ Vec3 = (function()
 
 // Orientation on a side
 
-orient2d = function(a, b, p)
+orient2d = function(p1, p2, b)
 {
-	return (b[0]-a[0]) * (p[1]-a[1]) - (b[1]-a[1]) * (p[0]-a[0]);
+	return (p2[0]-p1[0]) * (b[1]-p1[1]) - (p2[1]-p1[1]) * (b[0]-p1[0]);
 }
 
 // Barycentric coordinates from three 2D points

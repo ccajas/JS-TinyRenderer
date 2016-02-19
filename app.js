@@ -7,7 +7,6 @@
 
 	// Globals
 	startProfile = null;
-	theta = 0;
 	frames = 0;
 
 	// Set canvas
@@ -20,7 +19,7 @@
 	if (canvas.getContext)
 	{
 		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
-		content.load('Model')('assets/obj/head/head.obj', 'model');
+		content.load('Model')('assets/obj/head/head.obj', 'head');
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 		//renderer.modelReady(model, canvas)
 
@@ -28,13 +27,7 @@
 		content.finishedLoading(
 		{
 		    numRequest: 3,
-		    callback: function()
-		    {
-		        console.log("Renderer ready!");
-		        //effect = new DefaultEffect();
-
-		        renderer.modelReady(content.contentCollection(), canvas);
-		    }
+		    callback: renderer.modelReady(content.contentCollection(), canvas)
 		});
 	}
 	else
