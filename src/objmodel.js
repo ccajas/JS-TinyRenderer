@@ -10,24 +10,6 @@ var OBJmodel =
 	normals: [],
 	texcoords: [],
 
-	load: function(file, func)
-	{
-		var self = this;
-		var success = function(response)
-		{
-			var lines = response.split('\n');
-			self.parse(lines);
-			func();
-		}
-
-		var error = function(response)
-		{
-			console.error("request failed!");	
-		}
-
-		request(file).then(success, error);
-	},
-
 	parse: function(lines)
 	{
 		var splitLine = function(i) { return lines[i].split(' ').splice(1, 3); }
@@ -39,17 +21,17 @@ var OBJmodel =
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					this.verts.push(f32x4(splitLine(i)));
+					this.verts.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find vertex normals
 				case 'vn':
-					this.normals.push(f32x4(splitLine(i)));
+					this.normals.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find texture coordinates
 				case 'vt':
-					this.texcoords.push(f32x4(splitLine(i)));
+					this.texcoords.push(new f32x4(splitLine(i)));
 					break;
 
 				// Find face indices
@@ -70,26 +52,4 @@ var OBJmodel =
 		console.log('total normals: '+ this.normals.length);
 		console.log('total faces: '+ this.faces.length);
 	}
-}
-
-// General AJAX request function
-
-var request = function(file)
-{
-	return new Promise(function(resolve, reject)
-	{
-		var xhr = new XMLHttpRequest();
-
-		xhr.open("GET", file, true);
-		xhr.onload = function() {
-	      	if (xhr.status == 200) {
-	        	resolve(xhr.response);
-	      	}
-	      	else {
-	        	reject(Error(xhr.statusText));
-	      	}
-	    }
-		xhr.onerror = reject;
-		xhr.send(null);
-	});
 }

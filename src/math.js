@@ -1,5 +1,4 @@
 
-
 // Camera functions
 
 viewport = function(x, y, w, h) 
@@ -146,7 +145,7 @@ barycentric = function(pts, point)
 
 	return [u, v, w];
 }
-
+/*
 VecModule = function(stdlib, foreign, heap) 
 {
     "use asm";
@@ -180,7 +179,7 @@ console.log(vecModule.dist(12, 11));
 
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
 
-max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
+max_elevation_angle = function(zbuffer, index, p, dims, ray, width)
 {
 	var maxangle = 0;
 	for (var t = 1; t < 40; t += 3) 
@@ -193,7 +192,7 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 		if (distance < 1) continue;
 
 		// buffer index
-		var curIndex = ((dims[1] - m.floor(cur[1])) << log2width) + m.floor(cur[0]);
+		var curIndex = ((dims[1] - m.floor(cur[1])) * width) + m.floor(cur[0]);
 		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.002; // 1/500
 
 		maxangle = m.max(maxangle, elevation / distance);
@@ -201,3 +200,4 @@ max_elevation_angle = function(zbuffer, index, p, dims, ray, log2width)
 
 	return maxangle;
 }
+*/

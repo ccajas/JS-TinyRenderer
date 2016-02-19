@@ -6,16 +6,7 @@
 	// Shorthand
 	m = Math;
 	doc = document;
-	f32x4 = (typeof SIMD == 'undefined') ? 
-		function(a) {
-			return new Float32Array(a);
-		} : 
-		function(a) {
-			return new Float32Array(a);
-			/*var arr = new Float32Array([0,0,0,0]);
-			for (var i = a.length; i--; arr[i] = a[i]);
-			return SIMD.Float32x4.load(arr, 0);*/
-		}
+	f32x4 = Float32Array;
 
 	// Globals
 	model = null, img = null, effect = null, startProfile = null;
@@ -27,8 +18,12 @@
 	var canvas = doc.getElementById('render');
 	model = Object.create(OBJmodel);
 
+	var content = new Content();
+	console.dir(content);
+
 	if (canvas.getContext)
-		model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
+		content.load('Model')('assets/obj/diablo3/diablo3.obj');
+		//model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
 	else
 		console.error("Canvas context not supported!");
 
@@ -102,7 +97,7 @@
 			img.triangle(vs_out, effect);
 		}
 
-		img.postProc();
+		//img.postProc();
 		img.draw();
 
 		theta += (0.001 * (new Date().getTime() - start.getTime()));

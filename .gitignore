@@ -1,5 +1,5 @@
 *.o
 *.DS_Store
 node_modules/*
-obj/*
+assets/*
 media/*

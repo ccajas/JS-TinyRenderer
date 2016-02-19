@@ -11,17 +11,10 @@ Buffer = (function()
 
 		this.calls = 0;
 		this.pixels = 0;
-		this.bufWidth = w;
-
-		// Get next highest 2^pow for buffer width
-
-		this.log2w = 1;
-		while (this.bufWidth >>= 1) this.log2w++;
-		this.bufWidth = 1 << this.log2w;
 
 		// create buffers for data manipulation
 
-		this.imgData = ctx.createImageData(this.bufWidth, this.h);
+		this.imgData = ctx.createImageData(this.w, this.h);
 
 		this.buf = new ArrayBuffer(this.imgData.data.length);
 		this.buf8 = new Uint8ClampedArray(this.buf);
@@ -36,7 +29,7 @@ Buffer = (function()
 		clear: function(color)
 		{
 			for (var y = 0; y <= this.h; y++)
-				for (var x = 0; x < this.bufWidth; x++)
+				for (var x = 0; x < this.w; x++)
 				{
 					var index = this.index(x, y);	
 					this.set(x, y, color);
@@ -48,7 +41,7 @@ Buffer = (function()
 
 		index: function(x, y)
 		{
-			return ((this.h - y) << this.log2w) + x;
+			return ((this.h - y) * this.w) + x;
 		},
 
 		// Set a pixel
@@ -124,8 +117,8 @@ Buffer = (function()
 					if (w[0] < a12 || w[1] < a20 || w[2] < a01)
 						continue;
 
-					bc = //((px + py) % 2 == 0) ? 
-						barycentric(points, [px, py, z])// : [0.3333, 0.3333, 0.3333];
+					bc = ((px + py) % 2 == 0) ? 
+						barycentric(points, [px, py, z]) : [0.3333, 0.3333, 0.3333];
 
 					// Get pixel depth
 					z = 0;
@@ -165,7 +158,7 @@ Buffer = (function()
 				edge_w2 += b01;
 			}
 		},
-
+/*
 		// Post-processing (temporary, mostly SSAO)
 
 		postProc: function()
@@ -187,7 +180,7 @@ Buffer = (function()
 					for (var i = 0; i < rays.length; i++) 
 					{
 						total += m.PI / 2 - m.atan(max_elevation_angle(
-							this.zbuf, index, [x, y], [this.w, this.h], rays[i], this.log2w));
+							this.zbuf, index, [x, y], [this.w, this.h], rays[i], this.w));
 					}
 					total /= (m.PI / 2) * rays.length;
 					//total = m.pow(total, 2) * 2;
@@ -202,7 +195,7 @@ Buffer = (function()
 					this.set(x, y, [r, g, b]);
 					this.calls++;
 				};
-		},
+		},*/
 
 		// Put image data on the canvas
 
