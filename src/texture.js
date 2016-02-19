@@ -7,6 +7,7 @@ Texture = (function()
 		this.texData = null;
 		this.buf32 = null;
 		this.source = src;
+		this.texUV = new Int32Array(2);
 
 		this.load();
 	}
@@ -52,14 +53,15 @@ Texture = (function()
 		{
 			var data = this.texData.data;
 
-			const x = m.floor(uv[0] * this.texData.width);
-			const y = m.floor(uv[1] * this.texData.height);
+			//tex = new Int32Array(2);
+			var x = m.floor(uv[0] * this.texData.width);
+			var y = m.floor(uv[1] * this.texData.height);
 
 			// Get starting index of texture data sample
 			i = ((this.texData.height - y) * this.texData.width + x);
 			smp = this.buf32[i];
 
-			return new Uint8Array([smp, (smp >> 8), (smp >> 16), (smp >> 24)]);
+			return [smp & 0xff, (smp >> 8) & 0xff, (smp >> 16) & 0xff, (smp >> 24) & 0xff];
 		}
 	}
 
