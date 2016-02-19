@@ -117,8 +117,8 @@ Buffer = (function()
 					if (w[0] < a12 || w[1] < a20 || w[2] < a01)
 						continue;
 
-					bc = ((px + py) % 2 == 0) ? 
-						barycentric(points, [px, py, z]) : [0.3333, 0.3333, 0.3333];
+					bc = //((px + py) % 2 == 0) ? 
+						barycentric(points, [px, py, z])// : [0.3333, 0.3333, 0.3333];
 
 					// Get pixel depth
 					z = 0;
