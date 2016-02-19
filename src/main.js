@@ -7,7 +7,7 @@ Renderer = (function()
 
 	// Internal variables
 
-	var buffer;
+	var buffer, effect, model;
 
 	// Draw model called in deferred request
 
@@ -66,39 +66,37 @@ Renderer = (function()
 	{
 		// Display render button
 
-		modelReady: function(model, canvas)
+		modelReady: function(content, canvas)
 		{
 			var self = this;
 
-			return function()
-			{
-				console.log('ready to render!');
+			console.log('ready to render!');
+			model = content.model;
 
-				// Create texture and effects
-				effect = new DefaultEffect();
-				var texture = new Texture('assets/obj/diablo3/diablo3_pose_diffuse.png');
+			// Create texture and effects
+			effect = new DefaultEffect();
+			var texture = new Texture('assets/obj/diablo3/diablo3_pose_diffuse.png');
 
-				// Set context
-				var ctx = canvas.getContext('2d');
-				var el = doc.getElementById('render_start');
+			// Set context
+			var ctx = canvas.getContext('2d');
+			var el = doc.getElementById('render_start');
 
-				buffer = new Buffer(ctx, canvas.width, canvas.height);
+			buffer = new Buffer(ctx, canvas.width, canvas.height);
 
-				// Set shader parameters
-				effect.setParameters({
-					scr_w: buffer.w,
-					scr_h: buffer.h,
-					texture: texture
-				});			
+			// Set shader parameters
+			effect.setParameters({
+				scr_w: buffer.w,
+				scr_h: buffer.h,
+				texture: texture
+			});			
 
-				el.style.display = 'block';
-				el.onclick = function() 
-				{ 
-					console.log('Begin render!'); 
-					startProfile = new Date();
+			el.style.display = 'block';
+			el.onclick = function() 
+			{ 
+				console.log('Begin render!'); 
+				startProfile = new Date();
 
-					drawImage();
-				}
+				drawImage();
 			}
 		},
 	}

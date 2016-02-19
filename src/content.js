@@ -1,9 +1,19 @@
 
 // Content pipeline functions
 
-Content = (function()
+ContentManager = (function()
 {
 	function Content() { }
+
+	// Content request data and content loaded callback
+
+	var requestsCompleted = 0;
+	var requestsToComplete = 0;
+	var contentLoadedCallback;
+
+	// Content collection
+
+	var collection = { }
 
 	// General AJAX request function
 
@@ -32,19 +42,37 @@ Content = (function()
 		console.error("request failed!");	
 	}
 
+	// Add total completed content load requests
+
+	function requestComplete() 
+	{
+		requestsCompleted++;
+		console.log('requests done:', requestsCompleted);
+
+		if (requestsCompleted == requestsToComplete) 
+		{
+			console.info("All content is ready");
+			contentLoadedCallback();
+		}
+	};
+
 	// Load OBJ model via AJAX
 
-	function loadOBJ(file, func)
+	function loadOBJ(file, modelname)
 	{
 		var success = function(response)
 		{
-			var lines = response.split('\n');
-			OBJmodel.parse(lines);
+			if (modelname == null)
+				return;
 
-			if (func != null) func();
+			lines = response.split('\n');
+			model = OBJmodel.parse(lines);
+			
+			collection[modelname] = model;
+			requestComplete();
 		}
 
-		request(file).then(success, loadError);
+		return request(file).then(success, loadError);
 	}
 
 	// Load an effect from external JS file 
@@ -57,6 +85,7 @@ Content = (function()
 		effect.onload = function()
 		{
 			if (func != null) func();
+			requestComplete();
 		}
 
 		document.head.appendChild(effect);	
@@ -66,7 +95,7 @@ Content = (function()
 
 	Content.prototype =
 	{
-		// Just one public function, for loading all content
+		// Just one public method, for loading all content
 
 		load: function(contentType)
 		{
@@ -87,6 +116,24 @@ Content = (function()
 						break;
 				}
 			}
+		},
+
+		// Accessor to your content
+
+		contentCollection: function()
+		{
+			return collection;
+		},
+
+		// Set up content loaded callback and no. of requests to wait for
+
+		finishedLoading: function(options) 
+		{
+			if (!options) options = {};
+			requestsToComplete = options.numRequest || 0;
+
+			if (options.callback) 
+				contentLoadedCallback = options.callback;
 		}
 	}
 
