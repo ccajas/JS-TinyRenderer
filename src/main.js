@@ -22,8 +22,10 @@
 	console.dir(content);
 
 	if (canvas.getContext)
+	{
 		content.load('Model')('assets/obj/diablo3/diablo3.obj');
-		//model.load("obj/diablo3/diablo3.obj", modelReady(model, canvas));
+		content.load('Effect')('assets/shaders/defaultEffect.js', modelReady(model, canvas));
+	}
 	else
 		console.error("Canvas context not supported!");
 
@@ -37,7 +39,7 @@
 
 			// Create texture and effects
 			effect = new DefaultEffect();
-			var texture = new Texture('obj/diablo3/diablo3_pose_diffuse.png');
+			var texture = new Texture('assets/obj/diablo3/diablo3_pose_diffuse.png');
 
 			// Set context
 			var ctx = canvas.getContext('2d');
