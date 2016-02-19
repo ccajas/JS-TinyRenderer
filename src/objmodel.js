@@ -5,7 +5,7 @@ OBJmodel = (function()
 {
 	// OBJ properties
 
-	function OBJmodel() 
+	function OBJmodel()
 	{ 
 		this.verts = [];
 		this.faces = [];
@@ -24,17 +24,17 @@ OBJmodel = (function()
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					model.verts.push(new f32x4(splitLine(i)));
+					model.verts.push(new f32a(splitLine(i)));
 					break;
 
 				// Find vertex normals
 				case 'vn':
-					model.normals.push(new f32x4(splitLine(i)));
+					model.normals.push(new f32a(splitLine(i)));
 					break;
 
 				// Find texture coordinates
 				case 'vt':
-					model.texcoords.push(new f32x4(splitLine(i)));
+					model.texcoords.push(new f32a(splitLine(i)));
 					break;
 
 				// Find face indices

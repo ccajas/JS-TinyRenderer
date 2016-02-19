@@ -146,8 +146,7 @@ Buffer = (function()
 							wz = bc[0] * world[0][2] + bc[1] * world[1][2] + bc[2] * world[2][2];
 
 							var discard = effect.fragment(
-								[[u, v], [nx, ny, nz], // Texture and normals
-								[wy, wx, wz]], color);
+								[[u, v], [nx, ny, nz], [wy, wx, wz]], color);
 
 							if (!discard)
 							{

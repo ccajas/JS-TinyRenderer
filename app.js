@@ -1,10 +1,5 @@
 (function() 
 {
-	// Shorthand
-	m = Math;
-	doc = document;
-	f32x4 = Float32Array;
-
 	// Globals
 	startProfile = null;
 	frames = 0;
@@ -18,8 +13,8 @@
 
 	if (canvas.getContext)
 	{
-		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'head');
-		content.load('Model')('assets/obj/head/head.obj', 'model');
+		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'test');
+		content.load('Model')('assets/obj/sphere/sphere.obj', 'model');
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 
 		// Call update after content is loaded
