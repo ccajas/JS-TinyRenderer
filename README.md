@@ -16,11 +16,17 @@ As this is a software renderer, the entire application is CPU bound, but there i
 * Triangle drawing using barycentric coordinates
 * 3D transformations
 * Z-buffer for depth checking
-* Shader support (in progress)
+* Custom shader support with external scripts
 * Screen-space effects (SSAO included as an example)
 
 ##### Misc
-* Basic OBJ model support
+* Content loading and management (Shaders & models for now)
+
+##### Todo
+* Render to Texture
+* Perspective view camera
+* Asm.js optimization
+* Support multiple materials
 
 ## Installing
 
