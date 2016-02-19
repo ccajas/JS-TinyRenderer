@@ -18,10 +18,9 @@
 
 	if (canvas.getContext)
 	{
-		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
-		content.load('Model')('assets/obj/head/head.obj', 'head');
+		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'head');
+		content.load('Model')('assets/obj/head/head.obj', 'model');
 		content.load('Effect')('assets/shaders/defaultEffect.js');
-		//renderer.modelReady(model, canvas)
 
 		// Call update after content is loaded
 		content.finishedLoading(
