@@ -78,12 +78,12 @@
 		{
 			// Display render button
 
-			modelReady: function(content, canvas)
+			ready: function(canvas)
 			{
 				var self = this;
 				console.log('ready to render!');
 
-				return function()
+				return function(content)
 				{
 					model = content.model;
 

@@ -13,7 +13,7 @@ ContentManager = (function()
 
 	// Storage for content
 
-	var contentColl = { }
+	var collection = { }
 
 	// General AJAX request function
 
@@ -50,8 +50,8 @@ ContentManager = (function()
 
 		if (requestsCompleted == requestsToComplete) 
 		{
-			console.info("All content is ready");
-			contentLoadedCallback();
+			console.info("All content is ready")
+			contentLoadedCallback(collection);
 		}
 	};
 
@@ -69,7 +69,7 @@ ContentManager = (function()
 
 			OBJmodel.parse(lines, model);
 			
-			contentColl[modelname] = model;
+			collection[modelname] = model;
 			requestComplete();
 		}
 
@@ -90,7 +90,7 @@ ContentManager = (function()
 			img.onload = function() 
 			{
 				var texture = Texture.load(img);
-				contentColl[texname] = texture;
+				collection[texname] = texture;
 				requestComplete();
 			}
 		}
@@ -143,20 +143,16 @@ ContentManager = (function()
 
 		// Accessor to content
 
-		collection: function()
+		contentCollection: function()
 		{
-			return contentColl;
+			return collection;
 		},
 
-		// Set up content loaded callback and no. of requests to wait for
+		// Set up content loaded callback
 
-		finishedLoading: function(options) 
-		{
-			if (!options) options = {};
-			//requestsToComplete = options.numRequest || 0;
-
-			if (options.callback) 
-				contentLoadedCallback = options.callback;
+		finishedLoading: function(callback) 
+		{ 
+			contentLoadedCallback = callback;
 		}
 	}
 

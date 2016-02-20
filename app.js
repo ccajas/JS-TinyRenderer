@@ -6,7 +6,6 @@
 
 	// Set canvas
 	var canvas = doc.getElementById('render');
-	//model = Object.create(OBJmodel);
 
 	renderer = new Renderer();
 	content = new ContentManager();
@@ -21,10 +20,7 @@
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 
 		// Call update after content is loaded
-		content.finishedLoading(
-		{
-		    callback: renderer.modelReady(content.collection(), canvas)
-		});
+		content.finishedLoading(renderer.ready(canvas));
 	}
 	else
 		console.error("Canvas context not supported!");
