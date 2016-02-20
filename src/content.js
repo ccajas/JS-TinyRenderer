@@ -11,9 +11,9 @@ ContentManager = (function()
 	var requestsToComplete = 0;
 	var contentLoadedCallback;
 
-	// Content collection
+	// Storage for content
 
-	var collection = { }
+	var contentColl = { }
 
 	// General AJAX request function
 
@@ -70,7 +70,7 @@ ContentManager = (function()
 
 			OBJmodel.parse(lines, model);
 			
-			collection[modelname] = model;
+			contentColl[modelname] = model;
 			requestComplete();
 		}
 
@@ -86,11 +86,14 @@ ContentManager = (function()
 		{
 			if (texname == null) return;
 
-			var texture = new Texture(file);
-			Texture.load(texture);
-			
-			collection[texname] = texture;
-			requestComplete();
+			var img = new Image();
+			img.src = file;
+			img.onload = function() 
+			{
+				var texture = Texture.load(img);
+				contentColl[texname] = texture;
+				requestComplete();
+			}
 		}
 
 		return request(file).then(success, loadError);
@@ -139,11 +142,11 @@ ContentManager = (function()
 			}
 		},
 
-		// Accessor to your content
+		// Accessor to content
 
-		contentCollection: function()
+		collection: function()
 		{
-			return collection;
+			return contentColl;
 		},
 
 		// Set up content loaded callback and no. of requests to wait for

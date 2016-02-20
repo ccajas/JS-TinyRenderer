@@ -40,6 +40,10 @@
 					var vt = (model.texcoords.length > 0) ? model.texcoords[face[j][1]] : [0, 0];
 					var vn = (model.normals.length > 0)   ? model.normals[face[j][2]]   : [1, 0, 0];
 
+					// Calculate tangent and bitangent
+					//var dv1 = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
+					//var dv2 = [v[2][0] - v[0][0], v[2][1] - v[0][1], v[2][2] - v[0][2]];
+
 					// world coords are transformed, tex coords are unchanged
 					var vs_in = [v, vt, vn];
 					var out = effect.vertex(vs_in);
@@ -85,7 +89,10 @@
 
 					// Create texture and effects
 					effect = new DefaultEffect();
-					var texture = content.model_diff;
+					var texture_nrm = content.model_diff;
+					var texture = content.model_nrm;
+
+					console.log(content);
 
 					// Set context
 					var ctx = canvas.getContext('2d');
@@ -97,7 +104,8 @@
 					effect.setParameters({
 						scr_w: buffer.w,
 						scr_h: buffer.h,
-						texture: texture
+						texture: texture,
+						texture_nrm: texture_nrm
 					});			
 
 					el.style.display = 'block';
@@ -105,7 +113,6 @@
 					{ 
 						console.log('Begin render!'); 
 						startProfile = new Date();
-
 						drawImage();
 					}
 				}

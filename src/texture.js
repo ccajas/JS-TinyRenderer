@@ -2,10 +2,10 @@
 
 Texture = (function()
 {
-	function Texture(src)
+	function Texture(src, data, buf)
 	{
-		this.texData = null;
-		this.buf32 = null;
+		this.texData = data;
+		this.buf32 = buf;
 		this.source = src;
 
 		this.sample = function(state, uv)
@@ -24,37 +24,33 @@ Texture = (function()
 		}
 	}
 
-	Texture.load = function(texture)
+	Texture.load = function(img)
 	{
-		img = new Image();
-		img.src = texture.source;
+		texCanvas = document.createElement('canvas');
+		ctx = texCanvas.getContext('2d');
 
-		img.onload = function() 
+		texCanvas.width = img.width;
+		texCanvas.height = img.height;
+	
+		ctx.drawImage(img, 0, 0);
+		img.style.display = 'none';
+
+		var texData = ctx.getImageData(0, 0, img.width, img.height);
+
+		var buf = new ArrayBuffer(texData.data.length);
+		var buf32 = new Uint32Array(buf);
+
+		// Set the buffer data
+
+		for (var i = 0; i < buf32.length; i++)
 		{
-			texCanvas = document.createElement('canvas');
-			ctx = texCanvas.getContext('2d');
-
-			texCanvas.width = img.width;
-			texCanvas.height = img.height;
-		
-			ctx.drawImage(img, 0, 0);
-			img.style.display = 'none';
-
-			texture.texData = ctx.getImageData(0, 0, img.width, img.height);
-
-			var buf = new ArrayBuffer(texture.texData.data.length);
-			texture.buf32 = new Uint32Array(buf);
-
-			// Set the buffer data
-
-			for (var i = 0; i < texture.buf32.length; i++)
-			{
-				var data = texture.texData.data;
-				var j = i << 2;
-				texture.buf32[i] = 
-					data[j] | data[j + 1] << 8 | data[j + 2] << 16 | data[j + 3] << 24;
-			}
+			var data = texData.data;
+			var j = i << 2;
+			buf32[i] = 
+				data[j] | data[j + 1] << 8 | data[j + 2] << 16 | data[j + 3] << 24;
 		}
+
+		return new Texture(img.src, texData, buf32);
 	}
 
 	return Texture;
