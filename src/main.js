@@ -85,7 +85,7 @@
 
 					// Create texture and effects
 					effect = new DefaultEffect();
-					var texture = new Texture('assets/obj/diablo3/diablo3_pose_diffuse.png');
+					var texture = content.model_diff;
 
 					// Set context
 					var ctx = canvas.getContext('2d');

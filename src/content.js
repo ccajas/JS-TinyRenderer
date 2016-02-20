@@ -60,10 +60,10 @@ ContentManager = (function()
 
 	function loadOBJ(file, modelname)
 	{
+		requestsToComplete++;
 		var success = function(response)
 		{
-			if (modelname == null)
-				return;
+			if (modelname == null) return;
 
 			var model = new OBJmodel();
 			var lines = response.split('\n');
@@ -77,11 +77,30 @@ ContentManager = (function()
 		return request(file).then(success, loadError);
 	}
 
+	// Load Texture image into off-screen canvas
+
+	function loadTexture(file, texname)
+	{
+		requestsToComplete++;
+		var success = function(response)
+		{
+			if (texname == null) return;
+
+			var texture = new Texture(file);
+			Texture.load(texture);
+			
+			collection[texname] = texture;
+			requestComplete();
+		}
+
+		return request(file).then(success, loadError);
+	}
+
 	// Load an effect from external JS file 
 
 	function loadEffect(file, func)
 	{
-		console.log('Effect');
+		requestsToComplete++;
 		var effect = document.createElement('script');
 		effect.src = file;
 		effect.onload = function()
@@ -132,7 +151,7 @@ ContentManager = (function()
 		finishedLoading: function(options) 
 		{
 			if (!options) options = {};
-			requestsToComplete = options.numRequest || 0;
+			//requestsToComplete = options.numRequest || 0;
 
 			if (options.callback) 
 				contentLoadedCallback = options.callback;
