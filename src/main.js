@@ -68,7 +68,7 @@
 			buffer.pixels = 0;
 
 			requestAnimationFrame(function() {
-				//drawImage();
+				drawImage();
 			});
 		}
 

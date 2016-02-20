@@ -24,6 +24,8 @@ Texture = (function()
 		}
 	}
 
+	// Create a new texture from an image
+
 	Texture.load = function(img)
 	{
 		texCanvas = document.createElement('canvas');

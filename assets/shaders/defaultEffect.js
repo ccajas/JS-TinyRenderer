@@ -22,23 +22,25 @@ DefaultEffect = (function()
 			var normal = vs_in[2];
 			var ratio = this.scr_h / this.scr_w;
 
-			var rt = [];
 			var nx, ny, nz;
+			world[3] = 0;
 
 			// Rotate vertex and normal
-/*
-			nx = normal[0] * m.cos(this.r) - normal[2] * m.sin(this.r);
-			nz = normal[0] * m.sin(this.r) + normal[2] * m.cos(this.r);
-			ny = normal[1];
-*/
-			rt[0] = world[0] * m.cos(this.r) - world[2] * m.sin(this.r);
-			rt[1] = world[0] * m.sin(this.r) + world[2] * m.cos(this.r);
+
+			var q = Quaternion.fromEuler(0, -this.r, m.PI);
+			var mat_r = Matrix.rotation(q);
+
+			var rt = [
+				mat_r[0][0] * world[0] + mat_r[0][1] * world[1] + mat_r[0][2] * world[2], 
+				mat_r[1][0] * world[0] + mat_r[1][1] * world[1] + mat_r[1][2] * world[2], 
+				mat_r[2][0] * world[0] + mat_r[2][1] * world[1] + mat_r[2][2] * world[2]
+			];
 
 			// Transform vertex to screen space
 
 			var x = m.floor((rt[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
-			var y = m.floor((world[1] / 2 + 0.5) * this.scr_h);
-			var z = m.floor((rt[1] / 2 + 0.5) * 65536);
+			var y = m.floor((rt[1] / 2 + 0.5) * this.scr_h);
+			var z = m.floor((rt[2] / 2 + 0.5) * 65536);
 
 			return [[x, y, z], vs_in[1], normal, this.r];
 		},

@@ -43,7 +43,7 @@ lookat = function(eye, center, up)
 
 	ModelView = Minv * Tr;
 }
-
+*/
 // Matrix functions
 
 Matrix = (function()
@@ -60,14 +60,10 @@ Matrix = (function()
 		];
 	}
 
-	Matrix.mul = function(lhs, rhs)
+	Matrix.rotation = function(q) 
 	{
-		var result = [];
+		var x = q[0], y = q[1], z = q[2], w = q[3];
 
-		return result;
-	}
-
-	Matrix.rotation = function(x, y, z, w) {
 		return [
 			[1 - 2*y*y - 2*z*z, 2*x*y + 2*z*w, 		2*x*z - 2*y*w, 		0], 
 			[2*x*y - 2*z*w, 	1 - 2*x*x - 2*z*z,	2*z*y + 2*x*w, 		0], 
@@ -79,7 +75,121 @@ Matrix = (function()
 	return Matrix;
 
 })();
-*/
+
+// Experimental matrix
+function Mat4(stdlib, foreign, heap) 
+{
+    'use asm';
+
+    var H = new stdlib.Float32Array(heap);
+    var I = new stdlib.Uint8Array(heap);
+    var fr = stdlib.Math.fround;
+
+    var x2 = 0.0, y2 = 0.0, z2 = 0.0;
+    var f1 = fr(1.0), f2 = fr(2.0);
+    var db = 0.0;
+
+    function identity() 
+    {
+        var offset = 0;
+        offset = ((I[0]|0 + 16) << 6)|0;
+        I[0] = I[0]|0 + 1;
+
+        H[offset >> 2] = 1.0;
+        H[(offset + 4) >> 2] = 0.0;
+        H[(offset + 8) >> 2] = 0.0;
+        H[(offset + 12) >> 2] = 0.0;
+        H[(offset + 16) >> 2] = 0.0;
+        H[(offset + 20) >> 2] = 1.0;
+        H[(offset + 24) >> 2] = 0.0;
+        H[(offset + 28) >> 2] = 0.0;
+        H[(offset + 32) >> 2] = 0.0;
+        H[(offset + 36) >> 2] = 0.0;
+        H[(offset + 40) >> 2] = 1.0;
+        H[(offset + 44) >> 2] = 0.0;
+        H[(offset + 48) >> 2] = 0.0;
+        H[(offset + 52) >> 2] = 0.0;
+        H[(offset + 56) >> 2] = 0.0;
+        H[(offset + 60) >> 2] = 1.0;
+
+        return (offset >> 2)|0;
+    }
+
+    function rotation(x, y, z, w) 
+    {
+    	x = +x;
+    	y = +y;
+    	z = +z;
+    	w = +w;
+
+    	// Set buffers
+        var offset = 0;
+        //offset = ((I[0]|0 + 16) << 6)|0;
+        //I[0] = I[0]|0 + 1;
+
+        // Assign values
+        //db = (+f2) * +(y*y);
+        H[offset >> 2] = 1.0 - 2.0 * (y*y) - 2.0 * (z*z);
+        H[4 >> 2] = 2.0 * (x*y) + 2.0 * (z*w);
+        H[8 >> 2] = 2.0 * (x*z) - 2.0 * (y*w);
+        H[12 >> 2] = 0.0;
+
+        H[16 >> 2] = 2.0 * (x*y) - 2.0 * (z*w);
+        H[20 >> 2] = 1.0 - 2.0 * (x*x) - 2.0 * (z*z);
+        H[24 >> 2] = 2.0 * (z*y) + 2.0 * (x*w);
+        H[28 >> 2] = 0.0;
+
+        H[32 >> 2] = 2.0 * (x*z) + 2.0 * (y*w);
+        H[36 >> 2] = 2.0 * (z*y) - 2.0 * (x*w);
+        H[40 >> 2] = 1.0 - 2.0 * (x*x) - 2.0 * (y*y);
+        H[44 >> 2] = 0.0;
+
+        H[48 >> 2] = 0.0;
+        H[52 >> 2] = 0.0;
+        H[56 >> 2] = 0.0;
+        H[60 >> 2] = 1.0;
+
+        return (offset >> 2)|0;
+    }
+
+    return {
+        identity: identity,
+        rotation: rotation
+    };
+};
+
+var buffer = new ArrayBuffer(65536);
+var f32array = new Float32Array(buffer);
+var mat4 = Mat4(window, {}, buffer);
+
+// Quaternion functions
+
+Quaternion = (function() 
+{
+    function Quaternion() {}
+
+    Quaternion.fromEuler = function(x, y, z) 
+    {
+		var cx, cy, cz, sx, sy, sz;
+		sx = m.sin(x * 0.5);
+		cx = m.cos(x * 0.5);
+		sy = m.sin(y * 0.5);
+		cy = m.cos(y * 0.5);
+		sz = m.sin(z * 0.5);
+		cz = m.cos(z * 0.5);
+
+		return [
+			cx * cy * cz + sx * sy * sz, 
+			sx * cy * cz - cx * sy * sz, 
+			cx * sy * cz + sx * cy * sz, 
+			cx * cy * sz - sx * sy * cz
+		];
+    };
+
+    return Quaternion;
+
+})();
+
 // Vector functions
 
 Vec3 = (function() 
