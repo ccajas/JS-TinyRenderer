@@ -66,11 +66,9 @@ Buffer = (function()
 
 		triangle: function(verts, effect) 
 		{
-			this.points = [verts[0][0], verts[1][0], verts[2][0]];
-			var texUV   = [verts[0][1], verts[1][1], verts[2][1]];
-			var norm    = [verts[0][2], verts[1][2], verts[2][2]];
-
-			var points = this.points;
+			var points = [verts[0][0], verts[1][0], verts[2][0]];
+			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
+			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
 			// Create bounding box
 			var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];

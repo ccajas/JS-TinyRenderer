@@ -15,15 +15,15 @@
 	{
 		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
 		content.load('Model')('assets/obj/head/head.obj', 'test');
+		content.load('Texture')('assets/obj/diablo3/diablo3_pose_nm.png', 'model_nrm');
 		content.load('Texture')('assets/obj/diablo3/diablo3_pose_diffuse.png', 'model_diff');
-		content.load('Texture')('assets/obj/diablo3/diablo3_pose_diffuse_sm.png', 'model_diff_sm');
 
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 
 		// Call update after content is loaded
 		content.finishedLoading(
 		{
-		    callback: renderer.modelReady(content.contentCollection(), canvas)
+		    callback: renderer.modelReady(content.collection(), canvas)
 		});
 	}
 	else

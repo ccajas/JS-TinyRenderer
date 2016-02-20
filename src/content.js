@@ -47,7 +47,6 @@ ContentManager = (function()
 	function requestComplete() 
 	{
 		requestsCompleted++;
-		console.log('requests done:', requestsCompleted);
 
 		if (requestsCompleted == requestsToComplete) 
 		{

@@ -68,7 +68,7 @@
 			buffer.pixels = 0;
 
 			requestAnimationFrame(function() {
-				drawImage();
+				//drawImage();
 			});
 		}
 
@@ -89,10 +89,8 @@
 
 					// Create texture and effects
 					effect = new DefaultEffect();
-					var texture_nrm = content.model_diff;
-					var texture = content.model_nrm;
-
-					console.log(content);
+					var texture = content.model_diff;
+					var texture_nrm = content.model_nrm;
 
 					// Set context
 					var ctx = canvas.getContext('2d');
