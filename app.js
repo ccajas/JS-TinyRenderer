@@ -13,8 +13,8 @@
 
 	if (canvas.getContext)
 	{
-		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'test');
-		content.load('Model')('assets/obj/sphere/sphere.obj', 'model');
+		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
+		content.load('Model')('assets/obj/sphere/sphere.obj', 'test');
 		content.load('Effect')('assets/shaders/defaultEffect.js');
 
 		// Call update after content is loaded

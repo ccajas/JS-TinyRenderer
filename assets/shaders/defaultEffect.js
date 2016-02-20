@@ -12,6 +12,9 @@ DefaultEffect = (function()
 
 	DefaultEffect.prototype =
 	{
+		cam: [0, 0, 2],
+		l: [0, 1, -1],
+
 		vertex: function(vs_in)
 		{
 			var world = vs_in[0];
@@ -44,16 +47,14 @@ DefaultEffect = (function()
 			var n = ps_in[1];
 			var ambient = 0.15;
 			var intensity = Vec3.dot(n, Vec3.normalize([0, 1, 1]));
-			var t = [255, 255, 255]//this.texture.sample(null, ps_in[0]);
+			var t = this.texture.sample(null, ps_in[0]);
 
 			// Using Blinn for perofrmance over correctness
-			var cam = [0, 0, 2];
-			var l = [0.5, -1, -1];
-			var world = ps_in[2];
-			var view = Vec3.normalize([cam[0] - world[0], cam[1] - world[1], cam[2] - world[2]]);
+			//var world = ps_in[2];
+			var view = Vec3.normalize([this.cam[0], this.cam[1], this.cam[2]]);
 
-  			var r = Vec3.reflect(Vec3.normalize(l), n); // reflected light
-  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 100) * 200; // Last # is specular power
+  			var r = Vec3.reflect(Vec3.normalize(this.l), n); // reflected light
+  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 8) * 10; // Last # is specular intensity
 
 			intensity = m.max(intensity, 0) * (1-ambient) + ambient + spec;
 				

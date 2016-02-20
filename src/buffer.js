@@ -69,7 +69,7 @@ Buffer = (function()
 			this.points = [verts[0][0], verts[1][0], verts[2][0]];
 			var texUV   = [verts[0][1], verts[1][1], verts[2][1]];
 			var norm    = [verts[0][2], verts[1][2], verts[2][2]];
-			var world   = [verts[0][3], verts[1][3], verts[2][3]];
+			//var world   = [verts[0][3], verts[1][3], verts[2][3]];
 
 			var points = this.points;
 
@@ -141,9 +141,9 @@ Buffer = (function()
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
 							// Calculate world position
-							wx = bc[0] * world[0][0] + bc[1] * world[1][0] + bc[2] * world[2][0];
-							wy = bc[0] * world[0][1] + bc[1] * world[1][1] + bc[2] * world[2][1];
-							wz = bc[0] * world[0][2] + bc[1] * world[1][2] + bc[2] * world[2][2];
+							wx = 0;//bc[0] * world[0][0] + bc[1] * world[1][0] + bc[2] * world[2][0];
+							wy = 0;//bc[0] * world[0][1] + bc[1] * world[1][1] + bc[2] * world[2][1];
+							wz = 0;// bc[0] * world[0][2] + bc[1] * world[1][2] + bc[2] * world[2][2];
 
 							var discard = effect.fragment(
 								[[u, v], [nx, ny, nz], [wy, wx, wz]], color);

@@ -12,8 +12,8 @@ module.exports = function(grunt)
 		uglify: 
 		{
 			options: {
-				banner: '/*! <%= pkg.name %> - ver. <%= pkg.version %> */\r\n',
-				compress: { drop_console: true }
+				banner: '/*! <%= pkg.name %> - ver. <%= pkg.version %> */\r\n'
+				//compress: { drop_console: true }
 			},
 
 			js: {
