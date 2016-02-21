@@ -27,7 +27,7 @@ DefaultEffect = (function()
 
 			// Rotate vertex and normal
 
-			var q = Quaternion.fromEuler(0, -this.r, m.PI);
+			var q = Quaternion.fromEuler(0, this.r, 0);
 			var mat_r = Matrix.rotation(q);
 
 			var rt = [
@@ -50,31 +50,32 @@ DefaultEffect = (function()
 			//var n = Vec3.normalize(ps_in[1]);
 			var r = ps_in[2];
 			var ambient = 0.25;
+			var light = [];
+			var spcolor = [0.0, 0.25, 1];
 
 			// Sample diffuse and normal textures
 			var t = this.texture.sample(null, ps_in[0]);
 			var nt = this.texture_nrm.sample(null, ps_in[0]);
 
-			// Rotate normal
-			nz = nt[2] * m.cos(0) - nt[0] * m.sin(0);
-			nx = nt[2] * m.sin(0) + nt[0] * m.cos(0);
-			ny = nt[1];
-
+			// Set normal
 			nl = Vec3.normalize(this.l);
-			nnt = Vec3.normalize([nx, ny, nz]);
+			nnt = Vec3.normalize([nt[0], nt[1], nt[2]]);
 			var intensity = Vec3.dot(nnt, nl);
+			intensity = m.max(intensity, 0);
 
 			// Using Blinn reflection model
 			var view = Vec3.normalize(this.cam);
   			var r = Vec3.reflect(nl, nnt); // reflected light
-  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 8) * 5; // Last # is specular intensity
+  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 10) * 20;
 
-			intensity = m.max(intensity, 0) * (1-ambient) + ambient + spec;
+			light[0] = intensity + ambient + spec * spcolor[0];
+			light[1] = intensity + ambient + spec * spcolor[1];
+			light[2] = intensity + ambient + spec * spcolor[2];
 
 			// Output color	
-			color[0] = m.min(t[0] * intensity, 255);
-			color[1] = m.min(t[1] * intensity, 255);
-			color[2] = m.min(t[2] * intensity, 255);
+			color[0] = m.min(t[0] * light[0], 255);
+			color[1] = m.min(t[1] * light[1], 255);
+			color[2] = m.min(t[2] * light[2], 255);
 
 			return false;
 		}

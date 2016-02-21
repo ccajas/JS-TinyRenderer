@@ -12,9 +12,8 @@ Texture = (function()
 		{
 			var data = this.texData.data;
 
-			//tex = new Int32Array(2);
-			var x = m.floor(uv[0] * this.texData.width);
-			var y = m.floor(uv[1] * this.texData.height);
+			const x = m.round(uv[0] * this.texData.width);
+			const y = m.round(uv[1] * this.texData.height);
 
 			// Get starting index of texture data sample
 			i = ((this.texData.height - y) * this.texData.width + x);

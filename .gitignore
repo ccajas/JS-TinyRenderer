@@ -1,6 +1,7 @@
 *.o
 *.DS_Store
 node_modules/*
+_asmjs/*
 assets/obj/*
 assets/scenes/*
 media/*
