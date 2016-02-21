@@ -5,6 +5,9 @@
 	m = Math;
 	doc = document;
 	f32a = Float32Array;
+	f64a = Float64Array;
+
+	simdSupported = typeof SIMD !== 'undefined'
 
 	// Main function
 
@@ -15,14 +18,24 @@
 		// Internal variables
 
 		var buffer, effect, model;
-		var theta = 0;
+		var theta = m.PI;
+
+		if (simdSupported)
+		{
+			// Vertex arrays
+			var bc = new f32a(4);
+			var uv = new f32a(2);
+			var mi4  = new f32a(4);
+			var nxyz = new f32a(3);
+		}
 
 		// Draw model called in deferred request
 
 		drawImage = function()
 		{
-			buffer.clear([255, 255, 255]);
+			buffer.clear([0, 0, 0]);
 			start = new Date();
+			var count = 1;
 
 			effect.setParameters({
 				r: theta
@@ -31,8 +44,8 @@
 			// Transform geometry to screen space
 			for (var f = 0; f < model.faces.length; f++)
 			{
-				var face = model.faces[f];
 				var vs_out = [];
+				var face = model.faces[f];
 
 				for (var j = 0; j < 3; j++)
 				{
@@ -47,17 +60,20 @@
 					// world coords are transformed, tex coords are unchanged
 					var vs_in = [v, vt, vn];
 					var out = effect.vertex(vs_in);
+
 					vs_out.push(out);
 				}
-
-				// Draw triangle
-				buffer.triangle(vs_out, effect);
+				// Bin the triangles for checking
+				if (!simdSupported)
+					buffer.indexTriangle(vs_out, effect, count++);
+				else
+					buffer.indexTrianglex4(vs_out, effect, bc, uv, nxyz, mi4);
 			}
 
 			//img.postProc();
 			buffer.draw();
 
-			theta += (0.001 * (new Date().getTime() - start.getTime()));
+			theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 			var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 			var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;

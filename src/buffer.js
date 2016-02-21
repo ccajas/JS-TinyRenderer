@@ -20,9 +20,8 @@ Buffer = (function()
 		this.buf8 = new Uint8ClampedArray(this.buf);
 		this.buf32 = new Uint32Array(this.buf);
 
-		// Z-buffer and triangle buffer
+		// Z-buffer
 		this.zbuf = new Uint32Array(this.imgData.data.length);
-		this.tbuf = new Uint32Array(this.imgData.data.length);
 
 		// Per-frame vertex data
 		this.points = new Int32Array(3);
@@ -39,7 +38,7 @@ Buffer = (function()
 				{
 					var index = y * this.w + x;	
 					this.set(x, y, color);
-					this.zbuf[index] = this.tbuf[index] = 0;
+					this.zbuf[index] = 0;
 				}
 		},
 
@@ -63,8 +62,8 @@ Buffer = (function()
 		indexTriangle: function(verts, effect, count) 
 		{
 			var points = [verts[0][0], verts[1][0], verts[2][0]];
-			//var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
-			//var norm   = [verts[0][2], verts[1][2], verts[2][2]];
+			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
+			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
 			// Create bounding box
 			var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
@@ -83,6 +82,9 @@ Buffer = (function()
 			// Skip triangles that don't appear on the screen
 			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 				return;
+
+			var uv = new f32a(2);
+			var bc = new f32a(3);
 
 			// Triangle setup
 			var a01 = points[0][1] - points[1][1], b01 = points[1][0] - points[0][0];
@@ -103,12 +105,9 @@ Buffer = (function()
 			var edge_w1 = orient2d(points[2], points[0], boxMin);
 			var edge_w2 = orient2d(points[0], points[1], boxMin);
 
-			//var color = [0, 0, 0];
-			//var u, v, nx, ny, nz;
+			var color = [0, 0, 0];
+			var u, v, nx, ny, nz;
 			var z;
-
-			// Default barycentric coordinates
-			var bc = [0, 0, 0];
 
 			for (var py = boxMin[1]; py <= boxMax[1]; py++)  
 			{
@@ -122,6 +121,7 @@ Buffer = (function()
 					// Check if pixel is outsde of barycentric coords
 					if ((w[0] | w[1] | w[2]) > 0)
 					{
+						// Get normalized barycentric coordinates
 						bc[0] = w[0] * area2inv;
 						bc[1] = w[1] * area2inv;
 						bc[2] = w[2] * area2inv;
@@ -136,30 +136,29 @@ Buffer = (function()
 						
 						if (this.zbuf[index] < z)
 						{
-/*							var u, v, nx, ny, nz;
+							var nx, ny, nz;
 
 							// Calculate tex and normal coords
-							u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
-							v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
+							uv[0] = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
+							uv[1] = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
 
 							nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
 							ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
-							var discard = effect.fragment([[u, v], [nx, ny, nz]], color);
+							var discard = effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
 
 							b = count & 0xff;
 							g = (count >> 8) & 0xff;
 							r = (count >> 16) & 0xff;
-*/
-							//if (!discard)
-							//{
+
+							if (!discard)
+							{
 								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.tbuf[index] = count;
-								this.set(px, py, [d, d, d]); 
+								this.set(px, py, color); 
 								this.calls++;
-							//}
+							}
 						}
 					}
 
@@ -176,43 +175,123 @@ Buffer = (function()
 			}
 		},
 
-		// Draw a pixel on here
+		// Draw 4 triangles from 2D points
 
-		rasterize: function(x, y, verts, effect)
+		indexTrianglex4: function(verts, effect, bc, uv, nxyz, mi4) 
 		{
-			var index = y * this.w + x;
-			var id = this.tbuf[index];
+			points 	   = [verts[0][0], verts[1][0], verts[2][0]];
+			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
+			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
-			if (id > 0)
+			// Create bounding box
+			var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
+			var self = this;
+
+			// Find X and Y dimensions for each
+			for (var i = 0; i < points.length; i++)
 			{
-				// Offset vertex id
-				var o = (id - 1) * 3;
+				for (var j = 0; j < 2; j++) 
+				{
+					boxMin[j] = m.min(points[i][j], boxMin[j]);
+					boxMax[j] = m.max(points[i][j], boxMax[j]);
+				}
+			}
 
-				var points = [verts[o][0], verts[o+1][0], verts[o+2][0]];
-				var texUV  = [verts[o][1], verts[o+1][1], verts[o+2][1]];
-				var norm   = [verts[o][2], verts[o+1][2], verts[o+2][2]];
+			// Skip triangles that don't appear on the screen
+			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
+				return;
 
-				// Get barycentric coordinates
-				bc = barycentric(points, [x, y, 0]);
+			// Triangle setup
+			var a4 = SIMD.Float32x4(
+				points[1][1] - points[2][1], 
+				points[2][1] - points[0][1], 
+				points[0][1] - points[1][1], 0);
 
-				var u, v, nx, ny, nz;
+			var b4 = SIMD.Float32x4(
+				points[2][0] - points[1][0], 
+				points[0][0] - points[2][0], 
+				points[1][0] - points[0][0], 0);
 
-				// Calculate tex and normal coords
-				u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
-				v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
+			var c01 = points[1][1] - points[0][1];
+			var c12 = points[2][1] - points[1][1];
 
-				nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
-				ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
-				nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
+			//| b01 b12 |
+			//| c01 c12 |
 
-				light = Vec3.dot([nx, ny, nz], [0, 0, 1]);
-				var l = m.max(light * 255, light);
+			// Parallelogram area from determinant (inverse)
+			var area2inv = 1 / 
+				((points[1][0] - points[0][0]) * c12 -
+				 (points[2][0] - points[1][0]) * c01);
 
-				var color = [0, 0, 0];
-				var discard = effect.fragment([[u, v], [nx, ny, nz]], color);
+			// Get orientation to see where the triangle is facing
 
-				if (!discard)
-					this.set(x, y, color); 
+			// SIMD version
+			var edge4 = SIMD.Float32x4(
+				orient2d(points[1], points[2], boxMin), 
+				orient2d(points[2], points[0], boxMin), 
+				orient2d(points[0], points[1], boxMin), 0);
+
+			var zero4 = SIMD.Float32x4.splat(0);
+			var area4 = SIMD.Float32x4.splat(area2inv);
+
+			var color = [0, 0, 0];
+			var z;
+
+			for (var py = boxMin[1]; py <= boxMax[1]; py++)  
+			{
+				// Coordinates at start of row
+				var w4 = edge4;//SIMD.Int32x4(edge_w0, edge_w1, edge_w2, 0);
+
+				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
+				{
+					this.pixels++;	
+					SIMD.Float32x4.store(mi4, 0, w4);
+
+					// Check if pixel is outsde of barycentric coords
+					if ((mi4[0] | mi4[1] | mi4[2]) > 0)//mi4.signmask === 0x00)
+					{
+						// Get normalized barycentric coordinates
+						var b = SIMD.Float32x4.mul(w4, area4);
+						SIMD.Float32x4.store(bc, 0, b);
+
+						// Get pixel depth
+						z = 0;
+						for (var i = 0; i < 3; i++) 
+							z += points[i][2] * bc[i];
+
+						// Get buffer index and run fragment shader
+						var index = py * this.w + px;
+						
+						if (this.zbuf[index] < z)
+						{
+							//var u, v, nx, ny, nz;
+
+							// Calculate tex and normal coords
+							uv[0] = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
+							uv[1] = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
+
+							nxyz[0] = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
+							nxyz[1] = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
+							nxyz[2] = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
+
+							var discard = effect.fragment([uv, nxyz, verts[0][3]], color);
+
+							if (!discard)
+							{
+								var d = z >> 8;
+								this.zbuf[index] = z;
+								this.set(px, py, color); 
+								this.calls++;
+							}
+						}
+					}
+
+					// Step right
+					w4 = SIMD.Float32x4.add(w4, a4);
+				}
+
+				// One row step
+				edge4 = SIMD.Float32x4.add(edge4, b4);
 			}
 		},
 /*
