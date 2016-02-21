@@ -22,11 +22,17 @@
 
 		if (simdSupported)
 		{
-			// Vertex arrays
-			var bc = new f32a(4);
-			var uv = new f32a(2);
-			var mi4  = new f32a(4);
-			var nxyz = new f32a(3);
+			// Function aliases
+			add = SIMD.Float32x4.add;
+			mul = SIMD.Float32x4.mul;
+			splat = SIMD.Float32x4.splat;
+			store = SIMD.Float32x4.store;
+
+			// Temp buffer for triangle calculations
+			tbuf = new f32a(48);
+
+			doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
+				'<span class="midblue">&nbsp;SIMD optimized!</span>');
 		}
 
 		// Draw model called in deferred request
@@ -67,7 +73,7 @@
 				if (!simdSupported)
 					buffer.indexTriangle(vs_out, effect, count++);
 				else
-					buffer.indexTrianglex4(vs_out, effect, bc, uv, nxyz, mi4);
+					buffer.indexTrianglex4(vs_out, effect, tbuf);
 			}
 
 			//img.postProc();

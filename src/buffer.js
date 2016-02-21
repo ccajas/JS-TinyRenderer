@@ -147,11 +147,11 @@ Buffer = (function()
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
 							var discard = effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
-
+/*
 							b = count & 0xff;
 							g = (count >> 8) & 0xff;
 							r = (count >> 16) & 0xff;
-
+*/
 							if (!discard)
 							{
 								var d = z >> 8;
@@ -175,11 +175,11 @@ Buffer = (function()
 			}
 		},
 
-		// Draw 4 triangles from 2D points
+		// Draw triangles from 2D points (SIMD enabled)
 
-		indexTrianglex4: function(verts, effect, bc, uv, nxyz, mi4) 
+		indexTrianglex4: function(verts, effect, tbuf) 
 		{
-			points 	   = [verts[0][0], verts[1][0], verts[2][0]];
+			var pts    = [verts[0][0], verts[1][0], verts[2][0]];
 			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
 			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
@@ -188,12 +188,12 @@ Buffer = (function()
 			var self = this;
 
 			// Find X and Y dimensions for each
-			for (var i = 0; i < points.length; i++)
+			for (var i = 0; i < pts.length; i++)
 			{
 				for (var j = 0; j < 2; j++) 
 				{
-					boxMin[j] = m.min(points[i][j], boxMin[j]);
-					boxMax[j] = m.max(points[i][j], boxMax[j]);
+					boxMin[j] = m.min(pts[i][j], boxMin[j]);
+					boxMax[j] = m.max(pts[i][j], boxMax[j]);
 				}
 			}
 
@@ -203,78 +203,104 @@ Buffer = (function()
 
 			// Triangle setup
 			var a4 = SIMD.Float32x4(
-				points[1][1] - points[2][1], 
-				points[2][1] - points[0][1], 
-				points[0][1] - points[1][1], 0);
+				pts[1][1] - pts[2][1], 
+				pts[2][1] - pts[0][1], 
+				pts[0][1] - pts[1][1], 0);
 
 			var b4 = SIMD.Float32x4(
-				points[2][0] - points[1][0], 
-				points[0][0] - points[2][0], 
-				points[1][0] - points[0][0], 0);
+				pts[2][0] - pts[1][0], 
+				pts[0][0] - pts[2][0], 
+				pts[1][0] - pts[0][0], 0);
 
-			var c01 = points[1][1] - points[0][1];
-			var c12 = points[2][1] - points[1][1];
+			var zcoords = SIMD.Float32x4(pts[0][2], pts[1][2], pts[2][2], 0);
 
-			//| b01 b12 |
-			//| c01 c12 |
+			var c01 = pts[1][1] - pts[0][1];
+			var c12 = pts[2][1] - pts[1][1];
 
 			// Parallelogram area from determinant (inverse)
 			var area2inv = 1 / 
-				((points[1][0] - points[0][0]) * c12 -
-				 (points[2][0] - points[1][0]) * c01);
+				((pts[1][0] - pts[0][0]) * c12 -
+				 (pts[2][0] - pts[1][0]) * c01);
 
 			// Get orientation to see where the triangle is facing
-
-			// SIMD version
 			var edge4 = SIMD.Float32x4(
-				orient2d(points[1], points[2], boxMin), 
-				orient2d(points[2], points[0], boxMin), 
-				orient2d(points[0], points[1], boxMin), 0);
+				orient2d(pts[1], pts[2], boxMin), 
+				orient2d(pts[2], pts[0], boxMin), 
+				orient2d(pts[0], pts[1], boxMin), 0);
 
-			var zero4 = SIMD.Float32x4.splat(0);
-			var area4 = SIMD.Float32x4.splat(area2inv);
+			var zero4 = splat(0);
+			var area4 = splat(area2inv);
 
 			var color = [0, 0, 0];
 			var z;
 
+			// Texture and normals setup
+			var tx0 = SIMD.Float32x4(texUV[0][0], texUV[1][0], texUV[2][0], 0);
+			var tx1 = SIMD.Float32x4(texUV[0][1], texUV[1][1], texUV[2][1], 0);
+
+			var nx = SIMD.Float32x4(norm[0][0], norm[1][0], norm[2][0], 0);
+			var ny = SIMD.Float32x4(norm[0][1], norm[1][1], norm[2][1], 0);
+			var nz = SIMD.Float32x4(norm[0][2], norm[1][2], norm[2][2], 0);
+
 			for (var py = boxMin[1]; py <= boxMax[1]; py++)  
 			{
 				// Coordinates at start of row
-				var w4 = edge4;//SIMD.Int32x4(edge_w0, edge_w1, edge_w2, 0);
+				var w4 = edge4;
 
 				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 				{
-					this.pixels++;	
-					SIMD.Float32x4.store(mi4, 0, w4);
+					// Store triangle edge coords in position 4
+					store(tbuf, 4, w4);
+					this.pixels++;
 
-					// Check if pixel is outsde of barycentric coords
-					if ((mi4[0] | mi4[1] | mi4[2]) > 0)//mi4.signmask === 0x00)
+					// Check if pixel is outsde of edge coords
+					if ((tbuf[4] | tbuf[5] | tbuf[6]) > 0)
 					{
-						// Get normalized barycentric coordinates
-						var b = SIMD.Float32x4.mul(w4, area4);
-						SIMD.Float32x4.store(bc, 0, b);
+						// Get normalized barycentric coordinates and z totals
+						var bc = mul(w4, area4);
+						store(tbuf, 0, bc);
+						store(tbuf, 16, mul(zcoords, bc));
 
 						// Get pixel depth
 						z = 0;
 						for (var i = 0; i < 3; i++) 
-							z += points[i][2] * bc[i];
+							z += tbuf[16+i];
 
 						// Get buffer index and run fragment shader
 						var index = py * this.w + px;
 						
 						if (this.zbuf[index] < z)
 						{
-							//var u, v, nx, ny, nz;
-
 							// Calculate tex and normal coords
-							uv[0] = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
-							uv[1] = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
 
-							nxyz[0] = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
-							nxyz[1] = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
-							nxyz[2] = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
+							// Store interpolated coord components in positions 20 though 40
+							store(tbuf, 20, mul(tx0, bc));
+							store(tbuf, 24, mul(tx1, bc));
 
-							var discard = effect.fragment([uv, nxyz, verts[0][3]], color);
+							store(tbuf, 28, mul(nx, bc));
+							store(tbuf, 32, mul(ny, bc));
+							store(tbuf, 36, mul(nz, bc));
+
+							// Store products in new SIMD objects
+							var ta = SIMD.Float32x4(tbuf[20], tbuf[24], tbuf[28], tbuf[32]);
+							var tb = SIMD.Float32x4(tbuf[21], tbuf[25], tbuf[29], tbuf[33]);
+							var tc = SIMD.Float32x4(tbuf[22], tbuf[26], tbuf[30], tbuf[34]);
+
+							var td = SIMD.Float32x4(tbuf[35], 0, 0, 0);
+							var te = SIMD.Float32x4(tbuf[36], 0, 0, 0);
+							var tf = SIMD.Float32x4(tbuf[37], 0, 0, 0);
+
+							// Re-use buffer to store totals
+							tc = add(add(ta, tb), tc);
+							tf = add(add(td, te), tf);
+
+							store(tbuf, 20, tc);
+							store(tbuf, 24, tf);
+
+							// UV and normal coords
+							var discard = effect.fragment([
+								[tbuf[20], tbuf[21]], 
+								[tbuf[22], tbuf[23], tbuf[24]], verts[0][3]], color);
 
 							if (!discard)
 							{
@@ -287,11 +313,11 @@ Buffer = (function()
 					}
 
 					// Step right
-					w4 = SIMD.Float32x4.add(w4, a4);
+					w4 = add(w4, a4);
 				}
 
 				// One row step
-				edge4 = SIMD.Float32x4.add(edge4, b4);
+				edge4 = add(edge4, b4);
 			}
 		},
 /*
