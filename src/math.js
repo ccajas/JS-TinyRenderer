@@ -1,49 +1,4 @@
 
-// Camera functions
-/*
-viewport = function(x, y, w, h) 
-{
-	var vp = Matrix();
-	vp[0][3] = x + w/2;
-	vp[1][3] = y + h/2;
-	vp[2][3] = 1;
-	vp[0][0] = w/2;
-	vp[1][1] = h/2;
-	vp[2][2] = 0;
-
-	return vp;
-}
-
-projection = function(coeff) 
-{
-	var proj = Matrix();
-	proj[3][2] = coeff;
-
-	return proj;
-}
-
-// Camera lookat with three 3D vectors
-
-lookat = function(eye, center, up)
-{
-	var z = normalize(vecSub(eye, center));
-	var x = normalize(cross(up, z));
-	var y = normalize(cross(z,x));
-
-	var minv = Matrix();
-	var tr   = Matrix();
-
-	for (var i = 0; i < 3; i++) 
-	{
-		minv[0][i] = x[i];
-		minv[1][i] = y[i];
-		minv[2][i] = z[i];
-		tr[i][3] = -center[i];
-	}
-
-	ModelView = Minv * Tr;
-}
-*/
 // Matrix functions
 
 Matrix = (function()
@@ -72,95 +27,45 @@ Matrix = (function()
 		];
 	}
 
+	// Camera projection
+
+	Matrix.projection = function(fov, near, far) 
+	{
+		var proj = Matrix.identity();
+		proj[3][2] = coeff;
+
+		return proj;
+	}
+
+	// Camera lookat with three 3D vectors
+
+	Matrix.view = function(eye, lookat, up)
+	{
+		var forward = Vec3.normalize([eye[0] - lookat[0], 
+			eye[1] - lookat[1], eye[2] - lookat[2]]);
+
+		var right = Vec3.normalize(Vec3.cross(up, z));
+		var up = Vec3.normalize(Vec3.cross(forward, right));
+
+		var view = Matrix.identity();
+
+		for (var i = 0; i < 3; i++) 
+		{
+			view[0][i] = right[i];
+			view[1][i] = up[i];
+			view[2][i] = forward[i];
+		}
+
+		view[3][0] = -Vec3.dot(right, eye);
+		view[3][1] = -Vec3.dot(up, eye);
+		view[3][2] = -Vec3.dot(forward, eye);
+
+		return view;
+	}
+ 
 	return Matrix;
 
 })();
-
-// Experimental matrix
-function Mat4(stdlib, foreign, heap) 
-{
-    'use asm';
-
-    var H = new stdlib.Float32Array(heap);
-    var I = new stdlib.Uint8Array(heap);
-    var fr = stdlib.Math.fround;
-
-    var x2 = 0.0, y2 = 0.0, z2 = 0.0;
-    var f1 = fr(1.0), f2 = fr(2.0);
-    var db = 0.0;
-
-    function identity() 
-    {
-        var offset = 0;
-        offset = ((I[0]|0 + 16) << 6)|0;
-        I[0] = I[0]|0 + 1;
-
-        H[offset >> 2] = 1.0;
-        H[(offset + 4) >> 2] = 0.0;
-        H[(offset + 8) >> 2] = 0.0;
-        H[(offset + 12) >> 2] = 0.0;
-        H[(offset + 16) >> 2] = 0.0;
-        H[(offset + 20) >> 2] = 1.0;
-        H[(offset + 24) >> 2] = 0.0;
-        H[(offset + 28) >> 2] = 0.0;
-        H[(offset + 32) >> 2] = 0.0;
-        H[(offset + 36) >> 2] = 0.0;
-        H[(offset + 40) >> 2] = 1.0;
-        H[(offset + 44) >> 2] = 0.0;
-        H[(offset + 48) >> 2] = 0.0;
-        H[(offset + 52) >> 2] = 0.0;
-        H[(offset + 56) >> 2] = 0.0;
-        H[(offset + 60) >> 2] = 1.0;
-
-        return (offset >> 2)|0;
-    }
-
-    function rotation(x, y, z, w) 
-    {
-    	x = +x;
-    	y = +y;
-    	z = +z;
-    	w = +w;
-
-    	// Set buffers
-        var offset = 0;
-        //offset = ((I[0]|0 + 16) << 6)|0;
-        //I[0] = I[0]|0 + 1;
-
-        // Assign values
-        //db = (+f2) * +(y*y);
-        H[offset >> 2] = 1.0 - 2.0 * (y*y) - 2.0 * (z*z);
-        H[4 >> 2] = 2.0 * (x*y) + 2.0 * (z*w);
-        H[8 >> 2] = 2.0 * (x*z) - 2.0 * (y*w);
-        H[12 >> 2] = 0.0;
-
-        H[16 >> 2] = 2.0 * (x*y) - 2.0 * (z*w);
-        H[20 >> 2] = 1.0 - 2.0 * (x*x) - 2.0 * (z*z);
-        H[24 >> 2] = 2.0 * (z*y) + 2.0 * (x*w);
-        H[28 >> 2] = 0.0;
-
-        H[32 >> 2] = 2.0 * (x*z) + 2.0 * (y*w);
-        H[36 >> 2] = 2.0 * (z*y) - 2.0 * (x*w);
-        H[40 >> 2] = 1.0 - 2.0 * (x*x) - 2.0 * (y*y);
-        H[44 >> 2] = 0.0;
-
-        H[48 >> 2] = 0.0;
-        H[52 >> 2] = 0.0;
-        H[56 >> 2] = 0.0;
-        H[60 >> 2] = 1.0;
-
-        return (offset >> 2)|0;
-    }
-
-    return {
-        identity: identity,
-        rotation: rotation
-    };
-};
-
-var buffer = new ArrayBuffer(65536);
-var f32array = new Float32Array(buffer);
-var mat4 = Mat4(window, {}, buffer);
 
 // Quaternion functions
 
@@ -246,7 +151,7 @@ orient2d = function(p1, p2, b)
 }
 
 // Barycentric coordinates from three 2D points
-
+/*
 barycentric = function(pts, point)
 {
 	var pt0 = pts[0], pt1 = pts[1], pt2 = pts[2];
@@ -263,37 +168,7 @@ barycentric = function(pts, point)
 
 	return [u, v, w];
 }
-/*
-VecModule = function(stdlib, foreign, heap) 
-{
-    "use asm";
 
-    // Variable Declarations
-    var sqrt = stdlib.Math.sqrt;
-    var H = new stdlib.Float32Array(heap);
-    var I = new stdlib.Uint8Array(heap);
-
-    function dist(x, y) {
-        x = +x;
-        y = +y;
-        return +sqrt((x*x) + (y*y));
-    }
-
-    function mul(a, b)
-    {
-    	a = +a;
-    	b = +b;
-    	return a * b;
-    }
-
-	return { dist: dist, mul: mul };
-}
-
-var buf = new ArrayBuffer(65536);
-var array = new Float32Array(buf);
-var vecModule = VecModule(this, {}, buf);
-
-console.log(vecModule.dist(12, 11));
 
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
 

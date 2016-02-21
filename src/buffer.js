@@ -19,7 +19,10 @@ Buffer = (function()
 		this.buf = new ArrayBuffer(this.imgData.data.length);
 		this.buf8 = new Uint8ClampedArray(this.buf);
 		this.buf32 = new Uint32Array(this.buf);
+
+		// Z-buffer and triangle buffer
 		this.zbuf = new Uint32Array(this.imgData.data.length);
+		this.tbuf = new Uint32Array(this.imgData.data.length);
 
 		// Per-frame vertex data
 		this.points = new Int32Array(3);
@@ -34,17 +37,10 @@ Buffer = (function()
 			for (var y = 0; y <= this.h; y++)
 				for (var x = 0; x < this.w; x++)
 				{
-					var index = this.index(x, y);	
+					var index = y * this.w + x;	
 					this.set(x, y, color);
-					this.zbuf[index] = 0;
+					this.zbuf[index] = this.tbuf[index] = 0;
 				}
-		},
-
-		// Get pixel index
-
-		index: function(x, y)
-		{
-			return ((this.h - y) * this.w) + x;
 		},
 
 		// Set a pixel
@@ -52,23 +48,23 @@ Buffer = (function()
 		set: function(x, y, color)
 		{
 			var c = (color[0] & 0xff) | ((color[1] & 0xff) << 8) | ((color[2] & 0xff) << 16);
-			this.buf32[this.index(x, y)] = c | 0xff000000;
+			this.buf32[y * this.w + x] = c | 0xff000000;
 		},
 
 		// Get a pixel
 
 		get: function(x, y)
 		{
-			return this.buf32[this.index(x, y)];
+			return this.buf32[y * this.w + x];
 		},
 
 		// Draw a triangle from 2D points
 
-		triangle: function(verts, effect) 
+		indexTriangle: function(verts, effect, count) 
 		{
 			var points = [verts[0][0], verts[1][0], verts[2][0]];
-			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
-			var norm   = [verts[0][2], verts[1][2], verts[2][2]];
+			//var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
+			//var norm   = [verts[0][2], verts[1][2], verts[2][2]];
 
 			// Create bounding box
 			var boxMin = [this.w + 1, this.h + 1], boxMax = [-1, -1];
@@ -93,18 +89,30 @@ Buffer = (function()
 			var a12 = points[1][1] - points[2][1], b12 = points[2][0] - points[1][0];
 			var a20 = points[2][1] - points[0][1], b20 = points[0][0] - points[2][0];
 
+			var c01 = points[1][1] - points[0][1];
+			var c12 = points[2][1] - points[1][1];
+
+			//| b01 b12 |
+			//| c01 c12 |
+
+			// Parallelogram area from determinant (inverse)
+			var area2inv = 1 / ((b01 * c12) - (b12 * c01));
+
 			// Get orientation to see where the triangle is facing
 			var edge_w0 = orient2d(points[1], points[2], boxMin);
 			var edge_w1 = orient2d(points[2], points[0], boxMin);
 			var edge_w2 = orient2d(points[0], points[1], boxMin);
 
-			var color = [0, 0, 0];
-			var u, v, nx, ny, nz;
-			var z = 0;
+			//var color = [0, 0, 0];
+			//var u, v, nx, ny, nz;
+			var z;
+
+			// Default barycentric coordinates
+			var bc = [0, 0, 0];
 
 			for (var py = boxMin[1]; py <= boxMax[1]; py++)  
 			{
-				// Barycentric coordinates at start of row
+				// Coordinates at start of row
 				var w = [edge_w0, edge_w1, edge_w2];
 
 				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
@@ -114,20 +122,21 @@ Buffer = (function()
 					// Check if pixel is outsde of barycentric coords
 					if ((w[0] | w[1] | w[2]) > 0)
 					{
-						bc = //((px + py) % 2 == 0) ? 
-							barycentric(points, [px, py, z])// : [0.3333, 0.3333, 0.3333];
+						bc[0] = w[0] * area2inv;
+						bc[1] = w[1] * area2inv;
+						bc[2] = w[2] * area2inv;
 
 						// Get pixel depth
 						z = 0;
-						for (var i=0; i<3; i++) 
+						for (var i = 0; i < 3; i++) 
 							z += points[i][2] * bc[i];
 
 						// Get buffer index and run fragment shader
-						var index = this.index(px, py);
+						var index = py * this.w + px;
 						
 						if (this.zbuf[index] < z)
 						{
-							var u, v, nx, ny, nz;
+/*							var u, v, nx, ny, nz;
 
 							// Calculate tex and normal coords
 							u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
@@ -137,16 +146,20 @@ Buffer = (function()
 							ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
-							var discard = effect.fragment(
-								[[u, v], [nx, ny, nz]], color);
+							var discard = effect.fragment([[u, v], [nx, ny, nz]], color);
 
-							if (!discard)
-							{
-								var d = z >> 9;
+							b = count & 0xff;
+							g = (count >> 8) & 0xff;
+							r = (count >> 16) & 0xff;
+*/
+							//if (!discard)
+							//{
+								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.set(px, py, color); 
+								this.tbuf[index] = count;
+								this.set(px, py, [d, d, d]); 
 								this.calls++;
-							}
+							//}
 						}
 					}
 
@@ -160,6 +173,46 @@ Buffer = (function()
 				edge_w0 += b12;
 				edge_w1 += b20;
 				edge_w2 += b01;
+			}
+		},
+
+		// Draw a pixel on here
+
+		rasterize: function(x, y, verts, effect)
+		{
+			var index = y * this.w + x;
+			var id = this.tbuf[index];
+
+			if (id > 0)
+			{
+				// Offset vertex id
+				var o = (id - 1) * 3;
+
+				var points = [verts[o][0], verts[o+1][0], verts[o+2][0]];
+				var texUV  = [verts[o][1], verts[o+1][1], verts[o+2][1]];
+				var norm   = [verts[o][2], verts[o+1][2], verts[o+2][2]];
+
+				// Get barycentric coordinates
+				bc = barycentric(points, [x, y, 0]);
+
+				var u, v, nx, ny, nz;
+
+				// Calculate tex and normal coords
+				u = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
+				v = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
+
+				nx = bc[0] * norm[0][0] + bc[1] * norm[1][0] + bc[2] * norm[2][0];
+				ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
+				nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
+
+				light = Vec3.dot([nx, ny, nz], [0, 0, 1]);
+				var l = m.max(light * 255, light);
+
+				var color = [0, 0, 0];
+				var discard = effect.fragment([[u, v], [nx, ny, nz]], color);
+
+				if (!discard)
+					this.set(x, y, color); 
 			}
 		},
 /*
