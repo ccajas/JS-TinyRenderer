@@ -59,7 +59,7 @@ Buffer = (function()
 
 		// Draw a triangle from 2D points
 
-		drawTriangle: function(verts, effect, count) 
+		drawTriangle: function(verts, effect) 
 		{
 			var points = [verts[0][0], verts[1][0], verts[2][0]];
 			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
@@ -146,17 +146,13 @@ Buffer = (function()
 							ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
-							var discard = false;//effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
-/*
-							b = count & 0xff;
-							g = (count >> 8) & 0xff;
-							r = (count >> 16) & 0xff;
-*/
+							var discard = effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
+
 							if (!discard)
 							{
 								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.set(px, py, [d, d, d]); 
+								this.set(px, py, color); 
 								this.calls++;
 							}
 						}
@@ -201,21 +197,23 @@ Buffer = (function()
 			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 				return;
 
-			// Triangle setup
-			var a4 = SIMD.Float32x4(
-				pts[1][1] - pts[2][1], 
-				pts[2][1] - pts[0][1], 
-				pts[0][1] - pts[1][1], 0);
+			// Triangle vector subtraction
+			var pts1a = SIMD.Float32x4(pts[1][1], pts[2][1], pts[0][1], pts[2][0]);
+			var pts2a = SIMD.Float32x4(pts[0][0], pts[1][0], pts[1][1], pts[2][1]);
+			var pts1b = SIMD.Float32x4(pts[2][1], pts[0][1], pts[1][1], pts[1][0]);
+			var pts2b = SIMD.Float32x4(pts[2][0], pts[0][0], pts[0][1], pts[1][1]);
 
-			var b4 = SIMD.Float32x4(
-				pts[2][0] - pts[1][0], 
-				pts[0][0] - pts[2][0], 
-				pts[1][0] - pts[0][0], 0);
+			store(tbuf, 0, sub(pts1a, pts1b));
+			store(tbuf, 4, sub(pts2a, pts2b));
+
+			// Triangle setup
+			var a4 = SIMD.Float32x4(tbuf[0], tbuf[1], tbuf[2], 0);
+			var b4 = SIMD.Float32x4(tbuf[3], tbuf[4], tbuf[5], 0);
+
+			var c01 = tbuf[6];
+			var c12 = tbuf[7];
 
 			var zcoords = SIMD.Float32x4(pts[0][2], pts[1][2], pts[2][2], 0);
-
-			var c01 = pts[1][1] - pts[0][1];
-			var c12 = pts[2][1] - pts[1][1];
 
 			// Parallelogram area from determinant (inverse)
 			var area2inv = 1 / 
@@ -226,7 +224,7 @@ Buffer = (function()
 			var edge4 = SIMD.Float32x4(
 				orient2d(pts[1], pts[2], boxMin), 
 				orient2d(pts[2], pts[0], boxMin), 
-				orient2d(pts[0], pts[1], boxMin), 0);
+				orient2d(pts[0], pts[1], boxMin), -1);
 
 			var zero4 = splat(0);
 			var area4 = splat(area2inv);
@@ -286,9 +284,9 @@ Buffer = (function()
 							var tb = SIMD.Float32x4(tbuf[21], tbuf[25], tbuf[29], tbuf[33]);
 							var tc = SIMD.Float32x4(tbuf[22], tbuf[26], tbuf[30], tbuf[34]);
 
-							var td = SIMD.Float32x4(tbuf[35], 0, 0, 0);
-							var te = SIMD.Float32x4(tbuf[36], 0, 0, 0);
-							var tf = SIMD.Float32x4(tbuf[37], 0, 0, 0);
+							var td = SIMD.Float32x4(tbuf[36], 0, 0, 0);
+							var te = SIMD.Float32x4(tbuf[37], 0, 0, 0);
+							var tf = SIMD.Float32x4(tbuf[38], 0, 0, 0);
 
 							// Re-use buffer to store totals
 							tc = add(add(ta, tb), tc);
@@ -298,15 +296,15 @@ Buffer = (function()
 							store(tbuf, 24, tf);
 
 							// UV and normal coords
-							var discard = false; //effect.fragment([
-								//[tbuf[20], tbuf[21]], 
-								//[tbuf[22], tbuf[23], tbuf[24]], verts[0][3]], color);
+							var discard = effect.fragment([
+								[tbuf[20], tbuf[21]],
+								[tbuf[22], tbuf[23], tbuf[24]], verts[0][3]], color);
 
 							if (!discard)
 							{
 								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.set(px, py, [d, d, d]); 
+								this.set(px, py, color); 
 								this.calls++;
 							}
 						}
