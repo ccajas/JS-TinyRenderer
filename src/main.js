@@ -50,8 +50,18 @@
 			start = new Date();
 			var count = 1;
 
+			var quat = Quaternion.fromEuler(0, theta, 0);
+			var world = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+
+			console.log(quat, world);
+
+			var view = Matrix.view([0, 0, 1], [0, 0, -1], [0, 1, 0]);
+			var projection = Matrix.projection(m.PI/2, 16/9, 0.1, 100);
+
 			effect.setParameters({
-				r: theta
+				m_world: world,
+				m_view: view,
+				m_proj: projection
 			});
 
 			// Transform geometry to screen space
@@ -97,7 +107,7 @@
 			buffer.pixels = 0;
 
 			requestAnimationFrame(function() {
-				drawImage();
+				//drawImage();
 			});
 		}
 
@@ -139,7 +149,7 @@
 					// Begin render button
 					el.style.display = 'block';
 					el.onclick = function() 
-					{ 
+					{
 						console.log('Begin render!'); 
 						startProfile = new Date();
 						drawImage();

@@ -15,6 +15,31 @@ Matrix = (function()
 		];
 	}
 
+	Matrix.mul = function(l, r)
+	{
+		var mat = [];
+
+		for (var i = 0; i < 4; i++)
+			mat[i] = [ 
+				Vec4.dot(lh[i], [r[0][0], r[1][0], r[2][0], r[3][0]]), 
+				Vec4.dot(lh[i], [r[0][1], r[1][1], r[2][1], r[3][1]]), 
+				Vec4.dot(lh[i], [r[0][2], r[1][2], r[2][2], r[3][2]]),
+				Vec4.dot(lh[i], [r[0][3], r[1][3], r[2][3], r[3][3]])
+			];
+
+		return mat;
+	}
+
+	Matrix.scale = function(x, y, z)
+	{
+		return [
+			[x, 0, 0, 0],
+			[0, y, 0, 0],
+			[0, 0, z, 0],
+			[0, 0, 0, 1]
+		];
+	}
+
 	Matrix.rotation = function(q) 
 	{
 		var x = q[0], y = q[1], z = q[2], w = q[3];
@@ -27,16 +52,6 @@ Matrix = (function()
 		];
 	}
 
-	// Camera projection
-
-	Matrix.projection = function(fov, near, far) 
-	{
-		var proj = Matrix.identity();
-		proj[3][2] = coeff;
-
-		return proj;
-	}
-
 	// Camera lookat with three 3D vectors
 
 	Matrix.view = function(eye, lookat, up)
@@ -44,7 +59,7 @@ Matrix = (function()
 		var forward = Vec3.normalize([eye[0] - lookat[0], 
 			eye[1] - lookat[1], eye[2] - lookat[2]]);
 
-		var right = Vec3.normalize(Vec3.cross(up, z));
+		var right = Vec3.normalize(Vec3.cross(up, forward));
 		var up = Vec3.normalize(Vec3.cross(forward, right));
 
 		var view = Matrix.identity();
@@ -61,6 +76,29 @@ Matrix = (function()
 		view[3][2] = -Vec3.dot(forward, eye);
 
 		return view;
+	}
+
+	// Camera projection
+
+	Matrix.projection = function(fov, aspect, near, far) 
+	{
+		var proj = Matrix.identity();
+
+		// Invalid values found
+		if (aspect == 0 || fov <= 0)
+			return proj;
+
+		var depth = far - near;
+		var depthInv = 1 / depth;
+
+		proj[1][1] = 1 / m.tan(0.5 * fov);
+		proj[0][0] = proj[1][1] / aspect;
+		proj[2][2] = far * depthInv;
+		proj[3][2] = (-far * near) * depthInv;
+		proj[2][3] = 1;
+		proj[3][3] = 0;
+
+		return proj;
 	}
  
 	return Matrix;
@@ -95,7 +133,7 @@ Quaternion = (function()
 
 })();
 
-// Vector functions
+// 3D Vector functions
 
 Vec3 = (function() 
 {
@@ -142,6 +180,18 @@ Vec3 = (function()
 	return Vec3;
 
 })();
+
+// 4D Vector functions
+
+Vec4 = (function()
+{
+	Vec4.dot = function(a, b)
+	{
+		return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]);
+	}
+
+	return Vec4;
+})
 
 // Orientation on a side
 
