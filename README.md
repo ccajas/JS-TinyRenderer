@@ -1,8 +1,8 @@
 # JS TinyRenderer
-A small software renderer written in JavaScript. 
+A small software renderer written in JavaScript. (Now with SIMD support!*)
 
 It is based off Dmitry's [TinyRenderer](https://github.com/ssloy/tinyrenderer), using the same concepts and goal of keeping 
-the application small while still retaining the core features of a software renderer. Currently fits in less than 6k of code! I'll try to keep it small.
+the application small while still retaining the core features of a software renderer. Currently fits in less than 10k of code! I'll try to keep it small.
 
 ## How it works
 
@@ -40,3 +40,5 @@ npm install grunt-contrib-uglify --save-dev
 ```
 
 Run `grunt watch` to start watching the changes in the source code, which will bundle the files and `uglify` the code when a file is saved.
+
+*Participating browsers only. Download [Firefox Nightly](https://nightly.mozilla.org/) to get the benefits of SIMD!
