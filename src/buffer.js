@@ -1,5 +1,5 @@
 
-// Image drawing functions
+// Buffer drawing functions
 
 Buffer = (function()
 {

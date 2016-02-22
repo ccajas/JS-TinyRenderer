@@ -25,6 +25,7 @@
 		{
 			// Function aliases
 			add = SIMD.Float32x4.add;
+			sub = SIMD.Float32x4.sub;
 			mul = SIMD.Float32x4.mul;
 			splat = SIMD.Float32x4.splat;
 			store = SIMD.Float32x4.store;
@@ -33,6 +34,10 @@
 			tbuf = new f32a(48);
 
 			simdEnabled = true;
+			var simdToggle = doc.getElementById('simd_toggle');
+			simdToggle.innerText = 'SIMD is on!';	
+			simdToggle.disabled  = false;
+
 			doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
 				'<span class="midblue">&nbsp;SIMD optimized!</span>');
 		}
@@ -73,14 +78,14 @@
 				}
 				// Draw the triangle to the buffer
 				if (!simdSupported || !simdEnabled)
-					buffer.drawTriangle(vs_out, effect, count++);
+					buffer.drawTriangle(vs_out, effect);
 				else
 					buffer.drawTriangleSIMD(vs_out, effect, tbuf);
 			}
 
-			//img.postProc();
 			buffer.draw();
 
+			// Update rotation angle
 			theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 			var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
@@ -141,7 +146,6 @@
 					}
 
 					// Toggle SIMD button (supported browsers only)
-					simdToggle.innerText = 'SIMD is on!';
 					simdToggle.onclick = function()
 					{
 						if (simdSupported)
