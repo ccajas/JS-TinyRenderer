@@ -8,6 +8,7 @@
 	f64a = Float64Array;
 
 	simdSupported = typeof SIMD !== 'undefined'
+	simdEnabled = false;
 
 	// Main function
 
@@ -31,6 +32,7 @@
 			// Temp buffer for triangle calculations
 			tbuf = new f32a(48);
 
+			simdEnabled = true;
 			doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
 				'<span class="midblue">&nbsp;SIMD optimized!</span>');
 		}
@@ -69,11 +71,11 @@
 
 					vs_out.push(out);
 				}
-				// Bin the triangles for checking
-				if (!simdSupported)
-					buffer.indexTriangle(vs_out, effect, count++);
+				// Draw the triangle to the buffer
+				if (!simdSupported || !simdEnabled)
+					buffer.drawTriangle(vs_out, effect, count++);
 				else
-					buffer.indexTrianglex4(vs_out, effect, tbuf);
+					buffer.drawTriangleSIMD(vs_out, effect, tbuf);
 			}
 
 			//img.postProc();
@@ -117,6 +119,7 @@
 					// Set context
 					var ctx = canvas.getContext('2d');
 					var el = doc.getElementById('render_start');
+					var simdToggle = doc.getElementById('simd_toggle');
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 
@@ -126,14 +129,27 @@
 						scr_h: buffer.h,
 						texture: texture,
 						texture_nrm: texture_nrm
-					});			
+					});
 
+					// Begin render button
 					el.style.display = 'block';
 					el.onclick = function() 
 					{ 
 						console.log('Begin render!'); 
 						startProfile = new Date();
 						drawImage();
+					}
+
+					// Toggle SIMD button (supported browsers only)
+					simdToggle.innerText = 'SIMD is on!';
+					simdToggle.onclick = function()
+					{
+						if (simdSupported)
+						{
+							simdEnabled = !simdEnabled;
+							simdToggle.innerText = 'SIMD is ' +
+								((simdEnabled) ? 'on!' : 'off!');
+						}
 					}
 				}
 			},

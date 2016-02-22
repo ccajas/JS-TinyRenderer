@@ -59,7 +59,7 @@ Buffer = (function()
 
 		// Draw a triangle from 2D points
 
-		indexTriangle: function(verts, effect, count) 
+		drawTriangle: function(verts, effect, count) 
 		{
 			var points = [verts[0][0], verts[1][0], verts[2][0]];
 			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
@@ -146,7 +146,7 @@ Buffer = (function()
 							ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
 							nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
-							var discard = effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
+							var discard = false;//effect.fragment([uv, [nx, ny, nz], verts[0][3]], color);
 /*
 							b = count & 0xff;
 							g = (count >> 8) & 0xff;
@@ -156,7 +156,7 @@ Buffer = (function()
 							{
 								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.set(px, py, color); 
+								this.set(px, py, [d, d, d]); 
 								this.calls++;
 							}
 						}
@@ -177,7 +177,7 @@ Buffer = (function()
 
 		// Draw triangles from 2D points (SIMD enabled)
 
-		indexTrianglex4: function(verts, effect, tbuf) 
+		drawTriangleSIMD: function(verts, effect, tbuf) 
 		{
 			var pts    = [verts[0][0], verts[1][0], verts[2][0]];
 			var texUV  = [verts[0][1], verts[1][1], verts[2][1]];
@@ -298,15 +298,15 @@ Buffer = (function()
 							store(tbuf, 24, tf);
 
 							// UV and normal coords
-							var discard = effect.fragment([
-								[tbuf[20], tbuf[21]], 
-								[tbuf[22], tbuf[23], tbuf[24]], verts[0][3]], color);
+							var discard = false; //effect.fragment([
+								//[tbuf[20], tbuf[21]], 
+								//[tbuf[22], tbuf[23], tbuf[24]], verts[0][3]], color);
 
 							if (!discard)
 							{
 								var d = z >> 8;
 								this.zbuf[index] = z;
-								this.set(px, py, color); 
+								this.set(px, py, [d, d, d]); 
 								this.calls++;
 							}
 						}
