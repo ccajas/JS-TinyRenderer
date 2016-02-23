@@ -23,15 +23,9 @@ DefaultEffect = (function()
 			var ratio = this.scr_h / this.scr_w;
 
 			var nx, ny, nz;
-			console.log(world);
 
 			// Rotate vertex and normal
 			var mat_w = this.m_world;
-			/*var rt = [
-				mat_r[0][0] * world[0] + mat_r[0][1] * world[1] + mat_r[0][2] * world[2], 
-				mat_r[1][0] * world[0] + mat_r[1][1] * world[1] + mat_r[1][2] * world[2], 
-				mat_r[2][0] * world[0] + mat_r[2][1] * world[1] + mat_r[2][2] * world[2]
-			];*/
 			var rt = Matrix.mul(mat_w, world);
 
 			// Transform vertex to screen space
@@ -64,7 +58,7 @@ DefaultEffect = (function()
 			// Using Blinn reflection model
 			var view = Vec3.normalize(this.cam);
   			var r = Vec3.reflect(nl, nnt); // reflected light
-  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 10) * 20;
+  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 7) * 10;
 
 			light[0] = intensity + ambient + spec * spcolor[0];
 			light[1] = intensity + ambient + spec * spcolor[1];

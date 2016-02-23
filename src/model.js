@@ -1,11 +1,11 @@
 
-// OBJ Model functions
+// Model functions
 
-OBJmodel = (function()
+Model = (function()
 {
 	// OBJ properties
 
-	function OBJmodel()
+	function Model()
 	{ 
 		this.verts = [];
 		this.faces = [];
@@ -13,7 +13,7 @@ OBJmodel = (function()
 		this.texcoords = [];
 	}
 
-	OBJmodel.parse = function(lines, model)
+	Model.parseOBJ = function(lines, model)
 	{
 		var splitLine = function(i) { return lines[i].split(' ').splice(1, 3); }
 
@@ -58,6 +58,22 @@ OBJmodel = (function()
 		console.log('total faces: '+ model.faces.length);
 	}
 
-	return OBJmodel;
+	Model.prototype =
+	{
+		// Get vertex data from face
+
+		vert: function(f_index, v)
+		{
+			var face = model.faces[f_index];
+			var vert = model.verts[face[v][0]];
+			var vt = (model.texcoords.length > 0) ? model.texcoords[face[v][1]] : [0, 0];
+			var vn = (model.normals.length > 0)   ? model.normals[face[v][2]]   : [1, 0, 0];
+
+			// Return vertex data
+			return [vert, vt, vn];
+		}
+	}
+
+	return Model;
 
 })();

@@ -57,17 +57,17 @@ ContentManager = (function()
 
 	// Load OBJ model via AJAX
 
-	function loadOBJ(file, modelname)
+	function loadModel(file, modelname)
 	{
 		requestsToComplete++;
 		var success = function(response)
 		{
 			if (modelname == null) return;
 
-			var model = new OBJmodel();
+			var model = new Model();
 			var lines = response.split('\n');
 
-			OBJmodel.parse(lines, model);
+			Model.parseOBJ(lines, model);
 			
 			collection[modelname] = model;
 			requestComplete();
@@ -129,7 +129,7 @@ ContentManager = (function()
 				switch (contentType)
 				{
 					case 'Model':
-						return loadOBJ(file, func);
+						return loadModel(file, func);
 						break;
 					case 'Texture':
 						return loadTexture(file, func);

@@ -49,6 +49,16 @@
 				var self = this;
 				console.log('ready to render!');
 
+				if (simdSupported)
+				{
+					var simdToggle = doc.getElementById('simd_toggle');
+					simdToggle.innerText = 'SIMD is on!';	
+					simdToggle.disabled  = false;
+
+					doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
+						'<span class="midblue">&nbsp;SIMD optimized!</span>');
+				}
+
 				return function(content)
 				{
 					model = content.model;
@@ -86,12 +96,9 @@
 					// Toggle SIMD button (supported browsers only)
 					simdToggle.onclick = function()
 					{
-						if (simdSupported)
-						{
-							simdEnabled = !simdEnabled;
-							simdToggle.innerText = 'SIMD is ' +
-								((simdEnabled) ? 'on!' : 'off!');
-						}
+						simdEnabled = !simdEnabled;
+						simdToggle.innerText = 'SIMD is ' +
+							((simdEnabled) ? 'on!' : 'off!');
 					}
 				}
 			},
@@ -105,7 +112,10 @@
 				// Set up effect params
 				start = new Date();
 				var quat = Quaternion.fromEuler(0, theta, 0);
-				var world = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+				var rotate = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+				var scale = Matrix.scale(1, 1, 1);
+
+				var world = Matrix.mul(scale, rotate);
 
 				effect.setParameters({
 					m_world: world
@@ -117,6 +127,7 @@
 				// Update rotation angle
 				theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
+				// Display stats
 				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
 				doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;

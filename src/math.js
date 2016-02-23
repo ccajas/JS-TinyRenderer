@@ -89,29 +89,6 @@ Matrix = (function()
 
 		return view;
 	}
-
-	// Camera projection
-
-	Matrix.projection = function(fov, aspect, near, far) 
-	{
-		var proj = Matrix.identity();
-
-		// Invalid values found
-		if (aspect == 0 || fov <= 0)
-			return proj;
-
-		var depth = far - near;
-		var depthInv = 1 / depth;
-
-		proj[1][1] = 1 / m.tan(0.5 * fov);
-		proj[0][0] = proj[1][1] / aspect;
-		proj[2][2] = far * depthInv;
-		proj[3][2] = (-far * near) * depthInv;
-		proj[2][3] = 1;
-		proj[3][3] = 0;
-
-		return proj;
-	}
  
 	return Matrix;
 
@@ -215,26 +192,7 @@ orient2d = function(p1, p2, b)
 	return (p2[0]-p1[0]) * (b[1]-p1[1]) - (p2[1]-p1[1]) * (b[0]-p1[0]);
 }
 
-// Barycentric coordinates from three 2D points
 /*
-barycentric = function(pts, point)
-{
-	var pt0 = pts[0], pt1 = pts[1], pt2 = pts[2];
-
-	var v0 = [pt1[0] - pt0[0], pt1[1] - pt0[1], pt1[2] - pt0[2]],
-	v1 =     [pt2[0] - pt0[0], pt2[1] - pt0[1], pt2[2] - pt0[2]], 
-	v2 =     [point[0] - pt0[0], point[1] - pt0[1], point[2] - pt0[2]];
-
-	var dn1 = 1 / (v0[0] * v1[1] - v1[0] * v0[1]);
-
-	v = (v2[0] * v1[1] - v1[0] * v2[1]) * dn1;
-	w = (v0[0] * v2[1] - v2[0] * v0[1]) * dn1;
-	u = 1 - v - w;
-
-	return [u, v, w];
-}
-
-
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
 
 max_elevation_angle = function(zbuffer, index, p, dims, ray, width)
