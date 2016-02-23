@@ -318,6 +318,14 @@ Buffer = (function()
 				edge4 = add(edge4, b4);
 			}
 		},
+
+		// Put image data on the canvas
+
+		draw: function()
+		{
+			this.imgData.data.set(this.buf8);
+			this.ctx.putImageData(this.imgData, 0, 0);
+		}
 /*
 		// Post-processing (temporary, mostly SSAO)
 
@@ -356,14 +364,6 @@ Buffer = (function()
 					this.calls++;
 				};
 		},*/
-
-		// Put image data on the canvas
-
-		draw: function()
-		{
-			this.imgData.data.set(this.buf8);
-			this.ctx.putImageData(this.imgData, 0, 0);
-		}
 	}
 
 	return Buffer;

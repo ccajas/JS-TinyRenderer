@@ -4,25 +4,138 @@
 	startProfile = null;
 	frames = 0;
 
-	// Set canvas
-	var canvas = doc.getElementById('render');
+	// Application entry point
 
-	renderer = new Renderer();
-	content = new ContentManager();
-
-	if (canvas.getContext)
+	App = (function()
 	{
-		content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
-		content.load('Model')('assets/obj/head/head.obj', 'test');
-		content.load('Texture')('assets/obj/diablo3/diablo3_pose_nm.png', 'model_nrm');
-		content.load('Texture')('assets/obj/diablo3/diablo3_pose_diffuse.png', 'model_diff');
+		// Internal variables
+		theta = m.PI;
 
-		content.load('Effect')('assets/shaders/defaultEffect.js');
+		function App()
+		{
+			//this.renderer = null;			
+			this.init();
+		}
 
-		// Call update after content is loaded
-		content.finishedLoading(renderer.ready(canvas));
-	}
-	else
-		console.error("Canvas context not supported!");
+		App.prototype =
+		{
+			init: function()
+			{
+				// Set canvas
+				var canvas = doc.getElementById('render');
+
+				content = new ContentManager();
+
+				if (canvas.getContext)
+				{
+					content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
+					content.load('Model')('assets/obj/head/head.obj', 'test');
+					content.load('Texture')('assets/obj/diablo3/diablo3_pose_nm.png', 'model_nrm');
+					content.load('Texture')('assets/obj/diablo3/diablo3_pose_diffuse.png', 'model_diff');
+
+					content.load('Effect')('assets/shaders/defaultEffect.js');
+
+					// Call update after content is loaded
+					content.finishedLoading(this.ready(canvas));
+				}
+				else
+					console.error("Canvas context not supported!");
+			},
+
+			// Display render button
+
+			ready: function(canvas)
+			{
+				var self = this;
+				console.log('ready to render!');
+
+				return function(content)
+				{
+					model = content.model;
+
+					// Create texture and effects
+					effect = new DefaultEffect();
+					var texture = content.model_diff;
+					var texture_nrm = content.model_nrm;
+
+					// Set context
+					var ctx = canvas.getContext('2d');
+					var el = doc.getElementById('render_start');
+					var simdToggle = doc.getElementById('simd_toggle');
+
+					buffer = new Buffer(ctx, canvas.width, canvas.height);
+					self.renderer = new Renderer(content);
+
+					// Set shader parameters
+					effect.setParameters({
+						scr_w: buffer.w,
+						scr_h: buffer.h,
+						texture: texture,
+						texture_nrm: texture_nrm
+					});
+
+					// Begin render button
+					el.style.display = 'block';
+					el.onclick = function() 
+					{
+						console.log('Begin render!'); 
+						startProfile = new Date();
+						self.update(self.renderer);
+					}
+
+					// Toggle SIMD button (supported browsers only)
+					simdToggle.onclick = function()
+					{
+						if (simdSupported)
+						{
+							simdEnabled = !simdEnabled;
+							simdToggle.innerText = 'SIMD is ' +
+								((simdEnabled) ? 'on!' : 'off!');
+						}
+					}
+				}
+			},
+
+			// Update loop
+
+			update: function(renderer)
+			{
+				var self = this;
+
+				// Set up effect params
+				start = new Date();
+				var quat = Quaternion.fromEuler(0, theta, 0);
+				var world = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+
+				effect.setParameters({
+					m_world: world
+				});
+
+				// Render
+				renderer.drawImage();
+
+				// Update rotation angle
+				theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
+
+				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
+				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
+				doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+
+				// Reset stats
+				buffer.calls = 0;
+				buffer.pixels = 0;
+
+				requestAnimationFrame(function() {
+					self.update(renderer);
+				});
+			}
+		}
+
+		return App;
+
+	})();
+
+	// Start the application
+	var app = new App();
 
 }).call(this);

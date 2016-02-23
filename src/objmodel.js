@@ -24,7 +24,9 @@ OBJmodel = (function()
 			switch (lines[i].substr(0, 2))
 			{
 				case 'v ':
-					model.verts.push(new f32a(splitLine(i)));
+					var arr = splitLine(i);
+					arr.push(1); // Add w component
+					model.verts.push(new f32a(arr));
 					break;
 
 				// Find vertex normals
