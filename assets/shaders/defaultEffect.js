@@ -23,18 +23,16 @@ DefaultEffect = (function()
 			var ratio = this.scr_h / this.scr_w;
 
 			var nx, ny, nz;
-			world[3] = 0;
+			console.log(world);
 
 			// Rotate vertex and normal
-
-			var q = Quaternion.fromEuler(0, this.r, 0);
-			var mat_r = Matrix.rotation(q);
-
-			var rt = [
+			var mat_w = this.m_world;
+			/*var rt = [
 				mat_r[0][0] * world[0] + mat_r[0][1] * world[1] + mat_r[0][2] * world[2], 
 				mat_r[1][0] * world[0] + mat_r[1][1] * world[1] + mat_r[1][2] * world[2], 
 				mat_r[2][0] * world[0] + mat_r[2][1] * world[1] + mat_r[2][2] * world[2]
-			];
+			];*/
+			var rt = Matrix.mul(mat_w, world);
 
 			// Transform vertex to screen space
 

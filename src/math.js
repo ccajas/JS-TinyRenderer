@@ -15,9 +15,21 @@ Matrix = (function()
 		];
 	}
 
-	Matrix.mul = function(l, r)
+	Matrix.mul = function(lh, r)
 	{
 		var mat = [];
+
+		// If rhs is a vector instead of matrix
+		if (!Array.isArray(r[0]))
+		{
+			var vec = [
+				lh[0][0] * r[0] + lh[0][1] * r[1] + lh[0][2] * r[2] + lh[0][3] * r[3], 
+				lh[1][0] * r[0] + lh[1][1] * r[1] + lh[1][2] * r[2] + lh[1][3] * r[3],
+				lh[2][0] * r[0] + lh[2][1] * r[1] + lh[2][2] * r[2] + lh[2][3] * r[3] 
+			];
+			//console.log(r[0][3]);
+			return vec;
+		}
 
 		for (var i = 0; i < 4; i++)
 			mat[i] = [ 
@@ -185,13 +197,16 @@ Vec3 = (function()
 
 Vec4 = (function()
 {
+	function Vec4() { }
+
 	Vec4.dot = function(a, b)
 	{
 		return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]);
 	}
 
 	return Vec4;
-})
+
+})();
 
 // Orientation on a side
 
