@@ -25,7 +25,7 @@ As this is a software renderer, the entire application is CPU bound, but there i
 ##### Todo
 * Render to Texture
 * Perspective view camera
-* Asm.js optimization
+* Anti-aliasing using edge detection
 * Support multiple materials
 
 ## Installing
