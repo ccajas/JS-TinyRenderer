@@ -56,7 +56,7 @@ DefaultEffect = (function()
 			intensity = m.max(intensity, 0);
 
 			// Using Blinn reflection model
-			var view = Vec3.normalize(this.cam);
+			var view = this.cam;
   			var r = Vec3.reflect(nl, nnt); // reflected light
   			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 7) * 10;
 

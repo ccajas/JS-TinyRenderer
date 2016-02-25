@@ -2,6 +2,6 @@
 *.DS_Store
 node_modules/*
 _asmjs/*
-assets/obj/*
+assets/models/*
 assets/scenes/*
 media/*

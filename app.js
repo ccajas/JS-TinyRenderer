@@ -10,6 +10,7 @@
 	{
 		// Internal variables
 		theta = m.PI;
+		ctx = null;
 
 		function App()
 		{
@@ -28,10 +29,10 @@
 
 				if (canvas.getContext)
 				{
-					content.load('Model')('assets/obj/diablo3/diablo3.obj', 'model');
-					content.load('Model')('assets/obj/head/head.obj', 'test');
-					content.load('Texture')('assets/obj/diablo3/diablo3_pose_nm.png', 'model_nrm');
-					content.load('Texture')('assets/obj/diablo3/diablo3_pose_diffuse.png', 'model_diff');
+					content.load('Model')('assets/models/diablo3/diablo3.obj', 'model');
+					//content.load('Model')('assets/models/head/head.obj', 'test');
+					content.load('Texture')('assets/models/diablo3/diablo3_pose_nm.png', 'model_nrm');
+					content.load('Texture')('assets/models/diablo3/diablo3_pose_diffuse.png', 'model_diff');
 
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
@@ -69,12 +70,16 @@
 					var texture_nrm = content.model_nrm;
 
 					// Set context
-					var ctx = canvas.getContext('2d');
+					ctx = canvas.getContext('2d');
 					var el = doc.getElementById('render_start');
 					var simdToggle = doc.getElementById('simd_toggle');
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 					self.renderer = new Renderer(content);
+
+					// Font setup
+					ctx.fillStyle = '#888';
+					ctx.font = '16px Helvetica';
 
 					// Set shader parameters
 					effect.setParameters({
@@ -130,7 +135,9 @@
 				// Display stats
 				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
 				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
-				doc.getElementById('info').innerHTML = execTime +'<br/>'+ calls;
+
+				ctx.fillText(execTime, 4, buffer.h - 26);
+				ctx.fillText(calls, 4, buffer.h - 8);
 
 				// Reset stats
 				buffer.calls = 0;
