@@ -11,6 +11,7 @@
 		// Internal variables
 		theta = m.PI;
 		ctx = null;
+		simdToggle = doc.getElementById('simd-toggle');
 
 		function App()
 		{
@@ -52,7 +53,6 @@
 
 				if (simdSupported)
 				{
-					var simdToggle = doc.getElementById('simd_toggle');
 					simdToggle.innerText = 'SIMD is on!';	
 					simdToggle.disabled  = false;
 
@@ -71,8 +71,7 @@
 
 					// Set context
 					ctx = canvas.getContext('2d');
-					var el = doc.getElementById('render_start');
-					var simdToggle = doc.getElementById('simd_toggle');
+					var el = doc.getElementById('render-start');
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 					self.renderer = new Renderer(content);
@@ -90,7 +89,7 @@
 					});
 
 					// Begin render button
-					el.style.display = 'block';
+					el.style.display = 'inline';
 					el.onclick = function() 
 					{
 						console.log('Begin render!'); 
