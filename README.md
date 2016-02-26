@@ -21,9 +21,9 @@ As this is a software renderer, the entire application is CPU bound, but there i
 
 ##### Misc
 * Content loading and management
-..* Shaders (JavaScript)
-..* Models (.obj)
-..* Textures (Canvas supported types)
+  * Shaders (JavaScript)
+  * Models (.obj)
+  * Textures (Canvas supported types)
 
 ##### Todo
 * Render to Texture
