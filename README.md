@@ -20,7 +20,10 @@ As this is a software renderer, the entire application is CPU bound, but there i
 * Screen-space effects (SSAO included as an example)
 
 ##### Misc
-* Content loading and management (Shaders & models for now)
+* Content loading and management
+..* Shaders (JavaScript)
+..* Models (.obj)
+..* Textures (Canvas supported types)
 
 ##### Todo
 * Render to Texture
