@@ -17,7 +17,7 @@ DefaultEffect = (function()
 
 		vertex: function(vs_in)
 		{
-			var world = vs_in[0];
+			var world = [vs_in[0][0], vs_in[0][1], vs_in[0][2], 1];
 			var uv = vs_in[1];
 			var normal = vs_in[2];
 			var ratio = this.scr_h / this.scr_w;
@@ -39,8 +39,6 @@ DefaultEffect = (function()
 
 		fragment: function(ps_in, color)
 		{
-			//var n = Vec3.normalize(ps_in[1]);
-			var r = ps_in[2];
 			var ambient = 0.25;
 			var light = [];
 			var spcolor = [0.0, 0.25, 1];
@@ -50,10 +48,9 @@ DefaultEffect = (function()
 			var nt = this.texture_nrm.sample(null, ps_in[0]);
 
 			// Set normal
-			nl = Vec3.normalize(this.l);
-			nnt = Vec3.normalize([nt[0], nt[1], nt[2]]);
-			var intensity = Vec3.dot(nnt, nl);
-			intensity = m.max(intensity, 0);
+			var nl = Vec3.normalize(this.l);
+			var nnt = Vec3.normalize([nt[0], nt[1], nt[2]]);
+			var intensity = m.max(Vec3.dot(nnt, nl), 0);
 
 			// Using Blinn reflection model
 			var view = this.cam;

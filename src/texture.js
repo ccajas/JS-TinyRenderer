@@ -2,24 +2,24 @@
 
 Texture = (function()
 {
-	function Texture(src, data, buf)
+	function Texture(src, data)
 	{
-		this.texData = data;
-		this.buf32 = buf;
 		this.source = src;
+		this.texData = data;
 
 		this.sample = function(state, uv)
 		{
-			var data = this.texData.data;
-
-			var x = m.floor(uv[0] * this.texData.width);
-			var y = m.floor(uv[1] * this.texData.height);
-
 			// Get starting index of texture data sample
-			i = ((this.texData.height - y) * this.texData.width + x);
-			smp = this.buf32[i];
+			var idx = ((this.texData.height - 
+				m.ceil(uv[1] * this.texData.height)) * this.texData.width + 
+				m.ceil(uv[0] * this.texData.width))  * 4;
 
-			return [smp & 0xff, (smp >> 8) & 0xff, (smp >> 16) & 0xff, (smp >> 24) & 0xff];
+			return [
+				this.texData.data[idx], 
+				this.texData.data[idx + 1], 
+				this.texData.data[idx + 2], 
+				this.texData.data[idx + 3]
+			];
 		}
 	}
 
@@ -36,22 +36,10 @@ Texture = (function()
 		ctx.drawImage(img, 0, 0);
 		img.style.display = 'none';
 
+		// Set the buffer data
 		var texData = ctx.getImageData(0, 0, img.width, img.height);
 
-		var buf = new ArrayBuffer(texData.data.length);
-		var buf32 = new Uint32Array(buf);
-
-		// Set the buffer data
-
-		for (var i = 0; i < buf32.length; i++)
-		{
-			var data = texData.data;
-			var j = i << 2;
-			buf32[i] = 
-				data[j] | data[j + 1] << 8 | data[j + 2] << 16 | data[j + 3] << 24;
-		}
-
-		return new Texture(img.src, texData, buf32);
+		return new Texture(img.src, texData);
 	}
 
 	return Texture;

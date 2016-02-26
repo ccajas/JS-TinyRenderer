@@ -55,9 +55,8 @@
 				{
 					simdToggle.value = 'SIMD is on!';	
 					simdToggle.disabled  = false;
-
-					document.getElementById('top-info').insertAdjacentHTML('beforeend', 
-						'<span class="midblue">&nbsp;SIMD optimized!</span>');
+					simdToggle.style.background = '#07f';
+					simdToggle.style.color = '#fff';
 				}
 
 				return function(content)
@@ -89,7 +88,8 @@
 					});
 
 					// Begin render button
-					el.style.display = 'inline';
+					el.disabled = false;
+					el.value = 'Render';
 					el.onclick = function() 
 					{
 						console.log('Begin render!'); 
@@ -101,8 +101,9 @@
 					simdToggle.onclick = function()
 					{
 						simdEnabled = !simdEnabled;
-						simdToggle.value = 'SIMD is ' +
-							((simdEnabled) ? 'on!' : 'off!');
+						simdToggle.value = 'SIMD is ' + (simdEnabled ? 'on!' : 'off!');
+						simdToggle.style.background = simdEnabled ? '#07f' : '#ddd';
+						simdToggle.style.color      = simdEnabled ? '#fff' : '#333';
 					}
 				}
 			},

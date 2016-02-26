@@ -37,9 +37,22 @@ canvas {
 	float: left;
 }
 
-.input[type='button'] {
+.btn-container input[type='button'] {
 	position: relative;
+	padding: 4px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 16px;	
+	width: 150px;
+	border: 0px;
+	background: #ddd;
 }
 
-#render-start { display: none; }
+input[type='button']:active{
+	background: #aaa;
+}
+
+input[type='button']:disabled {
+	color: #999;
+}
+
 .midblue { color: #0077ff; }

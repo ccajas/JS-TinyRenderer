@@ -83,8 +83,11 @@ Buffer = (function()
 			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 				return;
 
-			var uv = new f32a(2);
-			var bc = new f32a(3);
+			if (boxMin[0] < 0) 		boxMin[0] = 0;
+			if (boxMax[0] > this.w) boxMax[0] = this.w;
+
+			var uv = [];
+			var bc = [];
 
 			// Triangle setup
 			var a01 = points[0][1] - points[1][1], b01 = points[1][0] - points[0][0];
@@ -196,6 +199,9 @@ Buffer = (function()
 			// Skip triangles that don't appear on the screen
 			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 				return;
+
+			if (boxMin[0] < 0) 		boxMin[0] = 0;
+			if (boxMax[0] > this.w) boxMax[0] = this.w;
 
 			// Triangle vector subtraction
 			var pts1a = SIMD.Float32x4(pts[1][1], pts[2][1], pts[0][1], pts[2][0]);
