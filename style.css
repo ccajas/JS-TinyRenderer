@@ -1,0 +1,45 @@
+
+html, body {
+	margin: 0px;
+	padding: 0px;
+}
+
+body { 
+	font-family: Helvetica, Arial, "Sans-Serif";
+}
+
+h1, h2, h3, h4 {
+	margin: 10px 0px;
+	color: #555;
+	text-align: center;
+}
+
+canvas {
+	margin: 0px auto;
+	border: 1px solid #ccc;
+}
+
+.container-fluid {
+	margin: 0px auto;
+	width: 80%;
+}
+
+#top-info, .btn-container {
+	text-align: center;
+}
+
+.btn-container {
+	position: relative;
+	overflow: auto;
+}
+
+.float-left {
+	float: left;
+}
+
+.input[type='button'] {
+	position: relative;
+}
+
+#render-start { display: none; }
+.midblue { color: #0077ff; }

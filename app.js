@@ -11,7 +11,7 @@
 		// Internal variables
 		theta = m.PI;
 		ctx = null;
-		simdToggle = doc.getElementById('simd-toggle');
+		simdToggle = document.getElementById('simd-toggle');
 
 		function App()
 		{
@@ -53,10 +53,10 @@
 
 				if (simdSupported)
 				{
-					simdToggle.innerText = 'SIMD is on!';	
+					simdToggle.value = 'SIMD is on!';	
 					simdToggle.disabled  = false;
 
-					doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
+					document.getElementById('top-info').insertAdjacentHTML('beforeend', 
 						'<span class="midblue">&nbsp;SIMD optimized!</span>');
 				}
 
@@ -71,7 +71,7 @@
 
 					// Set context
 					ctx = canvas.getContext('2d');
-					var el = doc.getElementById('render-start');
+					var el = document.getElementById('render-start');
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 					self.renderer = new Renderer(content);
@@ -101,7 +101,7 @@
 					simdToggle.onclick = function()
 					{
 						simdEnabled = !simdEnabled;
-						simdToggle.innerText = 'SIMD is ' +
+						simdToggle.value = 'SIMD is ' +
 							((simdEnabled) ? 'on!' : 'off!');
 					}
 				}
@@ -132,8 +132,8 @@
 				theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 				// Display stats
-				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
-				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
+				var execTime = "Frame time: "+ (new Date().getTime() - start.getTime()) +" ms";
+				var calls = "Pixels drawn/searched "+ buffer.calls +'/'+ buffer.pixels;
 
 				ctx.fillText(execTime, 4, buffer.h - 26);
 				ctx.fillText(calls, 4, buffer.h - 8);
