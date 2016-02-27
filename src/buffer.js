@@ -83,7 +83,8 @@ Buffer = (function()
 			if (boxMin[0] > this.w || boxMax[0] < 0 || boxMin[1] > this.h || boxMax[1] < 0)
 				return;
 
-			if (boxMin[0] < 0) 		boxMin[0] = 0;
+			// Limit box dimensions to edges of the screen to avoid render glitches
+			if (boxMin[0] < 0)      boxMin[0] = 0;
 			if (boxMax[0] > this.w) boxMax[0] = this.w;
 
 			var uv = [];
@@ -130,8 +131,7 @@ Buffer = (function()
 						bc[2] = w[2] * area2inv;
 
 						// Get pixel depth
-						z = 0;
-						for (var i = 0; i < 3; i++) 
+						for (var i = 0, z = 0; i < 3; i++) 
 							z += points[i][2] * bc[i];
 
 						// Get buffer index and run fragment shader
@@ -253,7 +253,7 @@ Buffer = (function()
 
 				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 				{
-					// Store triangle edge coords in position 4
+					// Store triangle edge coords at float position 4
 					store(tbuf, 4, w4);
 					this.pixels++;
 
@@ -277,7 +277,7 @@ Buffer = (function()
 						{
 							// Calculate tex and normal coords
 
-							// Store interpolated coord components in positions 20 though 40
+							// Store interpolated coord components at positions 20 though 40
 							store(tbuf, 20, mul(tx0, bc));
 							store(tbuf, 24, mul(tx1, bc));
 
@@ -294,7 +294,7 @@ Buffer = (function()
 							var te = SIMD.Float32x4(tbuf[37], 0, 0, 0);
 							var tf = SIMD.Float32x4(tbuf[38], 0, 0, 0);
 
-							// Re-use buffer to store totals
+							// Re-use float buffer to store totals at 20 and 24
 							tc = add(add(ta, tb), tc);
 							tf = add(add(td, te), tf);
 

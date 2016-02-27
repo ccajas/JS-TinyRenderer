@@ -9,14 +9,54 @@
 	App = (function()
 	{
 		// Internal variables
-		theta = m.PI;
-		ctx = null;
-		simdToggle = document.getElementById('simd-toggle');
+		var thetaX = 0;
+		var thetaY = m.PI;
+		var ctx = null;
+		var simdToggle = doc.getElementById('simd-toggle');
+
+		var mouseDown = false;
+		var mouseMoved = false;
+		var lastMouseX = 0;
+		var lastMouseY = 0;
 
 		function App()
 		{
 			//this.renderer = null;			
 			this.init();
+		}
+
+		// Mouse event handling
+
+		App.handleMouseEvents = function(canvas)
+		{
+			canvas.onmousedown = App.onMouseDown;
+    		document.onmouseup = App.onMouseUp;
+    		document.onmousemove = App.onMouseMove;
+		}
+
+		App.onMouseDown = function(event) 
+		{
+			mouseDown = true;
+    		lastMouseX = event.clientX;
+    		lastMouseY = event.clientY;
+		}
+
+		App.onMouseUp = function(event) 
+		{
+			mouseDown = false;
+		}
+
+		// Only detect mouse movement when button is pressed
+
+		App.onMouseMove = function(event) 
+		{
+			if (!mouseDown) return;
+
+			var newX = event.clientX;
+			var newY = event.clientY;
+
+			thetaX += (newY - lastMouseY) / (-m.PI * 60);
+			thetaY += (newX - lastMouseX) / (-m.PI * 90);
 		}
 
 		App.prototype =
@@ -53,10 +93,11 @@
 
 				if (simdSupported)
 				{
-					simdToggle.value = 'SIMD is on!';	
+					simdToggle.innerText = 'SIMD is on!';	
 					simdToggle.disabled  = false;
-					simdToggle.style.background = '#07f';
-					simdToggle.style.color = '#fff';
+
+					doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
+						'<span class="midblue">&nbsp;SIMD optimized!</span>');
 				}
 
 				return function(content)
@@ -70,10 +111,11 @@
 
 					// Set context
 					ctx = canvas.getContext('2d');
-					var el = document.getElementById('render-start');
+					var el = doc.getElementById('render-start');
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 					self.renderer = new Renderer(content);
+					App.handleMouseEvents(canvas);
 
 					// Font setup
 					ctx.fillStyle = '#888';
@@ -88,8 +130,9 @@
 					});
 
 					// Begin render button
+					el.style.display = 'inline';
 					el.disabled = false;
-					el.value = 'Render';
+					el.value = "Render";
 					el.onclick = function() 
 					{
 						console.log('Begin render!'); 
@@ -101,9 +144,8 @@
 					simdToggle.onclick = function()
 					{
 						simdEnabled = !simdEnabled;
-						simdToggle.value = 'SIMD is ' + (simdEnabled ? 'on!' : 'off!');
-						simdToggle.style.background = simdEnabled ? '#07f' : '#ddd';
-						simdToggle.style.color      = simdEnabled ? '#fff' : '#333';
+						simdToggle.innerText = 'SIMD is ' +
+							((simdEnabled) ? 'on!' : 'off!');
 					}
 				}
 			},
@@ -116,8 +158,7 @@
 
 				// Set up effect params
 				start = new Date();
-				var quat = Quaternion.fromEuler(0, theta, 0);
-				var rotate = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+				var rotate = Matrix.rotation(Quaternion.fromEuler(thetaX, thetaY, 0));
 				var scale = Matrix.scale(1, 1, 1);
 
 				var world = Matrix.mul(scale, rotate);
@@ -130,11 +171,11 @@
 				renderer.drawImage();
 
 				// Update rotation angle
-				theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
+				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 				// Display stats
-				var execTime = "Frame time: "+ (new Date().getTime() - start.getTime()) +" ms";
-				var calls = "Pixels drawn/searched "+ buffer.calls +'/'+ buffer.pixels;
+				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
+				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
 
 				ctx.fillText(execTime, 4, buffer.h - 26);
 				ctx.fillText(calls, 4, buffer.h - 8);
