@@ -10,7 +10,7 @@
 	{
 		// Internal variables
 		var thetaX = 0;
-		var thetaY = m.PI;
+		var thetaY = 0;
 		var ctx = null;
 		var simdToggle = doc.getElementById('simd-toggle');
 
@@ -55,8 +55,11 @@
 			var newX = event.clientX;
 			var newY = event.clientY;
 
-			thetaX += (newY - lastMouseY) / (-m.PI * 60);
-			thetaY += (newX - lastMouseX) / (-m.PI * 90);
+			thetaX += (newX - lastMouseX) / (m.PI * 90);
+			thetaY += (newY - lastMouseY) / (m.PI * 60);
+
+			lastMouseX = newX;
+			lastMouseY = newY;
 		}
 
 		App.prototype =
@@ -158,10 +161,12 @@
 
 				// Set up effect params
 				start = new Date();
-				var rotate = Matrix.rotation(Quaternion.fromEuler(thetaX, thetaY, 0));
+
+				var rotateX = Matrix.rotation(Quaternion.fromAxisAngle(1, 0, 0, thetaY));
+				var rotateY = Matrix.rotation(Quaternion.fromAxisAngle(0, 1, 0, thetaX));
 				var scale = Matrix.scale(1, 1, 1);
 
-				var world = Matrix.mul(scale, rotate);
+				var world = Matrix.mul(rotateX, rotateY);
 
 				effect.setParameters({
 					m_world: world

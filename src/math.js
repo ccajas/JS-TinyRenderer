@@ -116,7 +116,19 @@ Quaternion = (function()
 			cx * sy * cz + sx * cy * sz, 
 			cx * cy * sz - sx * sy * cz
 		];
-    };
+    }
+
+    Quaternion.fromAxisAngle = function(x, y, z, angle)
+    {
+		var s = m.sin(angle / 2);
+
+		return [
+			x * s,
+			y * s,
+			z * s,
+			m.cos(angle / 2)
+		];
+    }
 
     return Quaternion;
 

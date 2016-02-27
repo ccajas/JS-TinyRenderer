@@ -30,9 +30,9 @@ DefaultEffect = (function()
 
 			// Transform vertex to screen space
 
-			var x = m.floor((rt[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
-			var y = m.floor((rt[1] / 2 + 0.5) * this.scr_h);
-			var z = m.floor((rt[2] / 2 + 0.5) * 65536);
+			var x = m.floor((rt[0] / 4 + 0.5 / ratio) * this.scr_w * ratio); 
+			var y = m.floor((rt[1] / 4 + 0.5) * this.scr_h);
+			var z = m.floor((rt[2] / 4 + 0.5) * 65536);
 
 			return [[x, y, z], vs_in[1], normal, this.r];
 		},
