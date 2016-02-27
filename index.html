@@ -3,53 +3,8 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Software render test</title>
-	<style>
-		html, body {
-			margin: 0px;
-			padding: 0px;
-		}
-
-		body { 
-			font-family: Helvetica, Arial, "Sans-Serif";
-		}
-
-		h1, h2, h3, h4 {
-			margin: 10px 0px;
-			color: #555;
-			text-align: center;
-		}
-
-		canvas {
-			margin: 0px auto;
-			border: 1px solid #ccc;
-		}
-
-		.container-fluid {
-			margin: 0px auto;
-			width: 80%;
-		}
-
-		#top-info, .btn-container {
-			text-align: center;
-		}
-
-		.btn-container {
-			position: relative;
-			overflow: auto;
-		}
-
-		.float-left {
-			float: left;
-		}
-		
-		.input[type='button'] {
-			position: relative;
-		}
-
-		#render-start { display: none; }
-		.midblue { color: #0077ff; }
-	</style>
+	<title>JS TinyRenderer</title>
+	<link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
 </head>
 <body>
 	<div class="container-fluid">
@@ -57,8 +12,9 @@
 		<div id="top-info">
 			<canvas id="render" width="640" height="360"></canvas>
 			<div class="btn-container">
-				<input type="button" id="render-start" value="Render"/>
+				<input type="button" id="render-start" value="Loading content..." disabled/>
 				<input type="button" id="simd-toggle" value="SIMD is off!" disabled/>
+				<br/>
 			</div>
 		</div>
 	</div>

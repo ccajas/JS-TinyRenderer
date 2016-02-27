@@ -1,6 +1,5 @@
 (function() 
 {
-	// Globals
 	startProfile = null;
 	frames = 0;
 
@@ -9,14 +8,57 @@
 	App = (function()
 	{
 		// Internal variables
-		theta = m.PI;
-		ctx = null;
-		simdToggle = doc.getElementById('simd-toggle');
+		var thetaX = m.PI;
+		var thetaY = m.PI;
+		var ctx = null;
+		var simdToggle = doc.getElementById('simd-toggle');
+
+		var mouseDown = false;
+		var mouseMoved = false;
+		var lastMouseX = 0;
+		var lastMouseY = 0;
 
 		function App()
 		{
 			//this.renderer = null;			
 			this.init();
+		}
+
+		// Mouse event handling
+
+		App.handleMouseEvents = function(canvas)
+		{
+			canvas.onmousedown = App.onMouseDown;
+    		document.onmouseup = App.onMouseUp;
+    		document.onmousemove = App.onMouseMove;
+		}
+
+		App.onMouseDown = function(event) 
+		{
+			mouseDown = true;
+    		lastMouseX = event.clientX;
+    		lastMouseY = event.clientY;
+		}
+
+		App.onMouseUp = function(event) 
+		{
+			mouseDown = false;
+		}
+
+		// Only detect mouse movement when button is pressed
+
+		App.onMouseMove = function(event) 
+		{
+			if (!mouseDown) return;
+
+			var newX = event.clientX;
+			var newY = event.clientY;
+
+			thetaX += (newY - lastMouseY) / (m.PI * 60);
+			thetaY += (newX - lastMouseX) / (m.PI * 90);
+
+			lastMouseX = newX;
+			lastMouseY = newY;
 		}
 
 		App.prototype =
@@ -30,11 +72,9 @@
 
 				if (canvas.getContext)
 				{
-					content.load('Model')('assets/models/diablo3/diablo3.obj', 'model');
-					//content.load('Model')('assets/models/head/head.obj', 'test');
-					content.load('Texture')('assets/models/diablo3/diablo3_pose_nm.png', 'model_nrm');
-					content.load('Texture')('assets/models/diablo3/diablo3_pose_diffuse.png', 'model_diff');
-
+					content.load('Model')('assets/models/testmodel/model.obj', 'model');
+					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
+					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
 					// Call update after content is loaded
@@ -53,11 +93,8 @@
 
 				if (simdSupported)
 				{
-					simdToggle.innerText = 'SIMD is on!';	
+					simdToggle.value = 'SIMD is on!';	
 					simdToggle.disabled  = false;
-
-					doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
-						'<span class="midblue">&nbsp;SIMD optimized!</span>');
 				}
 
 				return function(content)
@@ -75,6 +112,7 @@
 
 					buffer = new Buffer(ctx, canvas.width, canvas.height);
 					self.renderer = new Renderer(content);
+					App.handleMouseEvents(canvas);
 
 					// Font setup
 					ctx.fillStyle = '#888';
@@ -90,6 +128,8 @@
 
 					// Begin render button
 					el.style.display = 'inline';
+					el.disabled = false;
+					el.value = "Render";
 					el.onclick = function() 
 					{
 						console.log('Begin render!'); 
@@ -101,7 +141,7 @@
 					simdToggle.onclick = function()
 					{
 						simdEnabled = !simdEnabled;
-						simdToggle.innerText = 'SIMD is ' +
+						simdToggle.value = 'SIMD is ' +
 							((simdEnabled) ? 'on!' : 'off!');
 					}
 				}
@@ -115,11 +155,12 @@
 
 				// Set up effect params
 				start = new Date();
-				var quat = Quaternion.fromEuler(0, theta, 0);
-				var rotate = Matrix.rotation(Quaternion.fromEuler(0, theta, 0));
+
+				var rotateX = Matrix.rotation(Quaternion.fromAxisAngle(1, 0, 0, thetaX));
+				var rotateY = Matrix.rotation(Quaternion.fromAxisAngle(0, 1, 0, thetaY));
 				var scale = Matrix.scale(1, 1, 1);
 
-				var world = Matrix.mul(scale, rotate);
+				var world = Matrix.mul(rotateX, rotateY);
 
 				effect.setParameters({
 					m_world: world
@@ -129,7 +170,7 @@
 				renderer.drawImage();
 
 				// Update rotation angle
-				theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
+				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 				// Display stats
 				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
