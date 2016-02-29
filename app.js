@@ -12,8 +12,10 @@
 		var thetaX = 0;
 		var thetaY = 0;
 		var ctx = null;
-		var simdToggle = doc.getElementById('simd-toggle');
+		var ssaoToggle = doc.getElementById('ssao-toggle');
+		var ssaoEnabled = false;
 
+		// Mouse control
 		var mouseDown = false;
 		var mouseMoved = false;
 		var lastMouseX = 0;
@@ -74,9 +76,8 @@
 				if (canvas.getContext)
 				{
 					content.load('Model')('assets/models/diablo3/diablo3.obj', 'model');
-					//content.load('Model')('assets/models/head/head.obj', 'test');
-					content.load('Texture')('assets/models/diablo3/diablo3_pose_nm.png', 'model_nrm');
 					content.load('Texture')('assets/models/diablo3/diablo3_pose_diffuse.png', 'model_diff');
+					content.load('Texture')('assets/models/diablo3/diablo3_pose_nm.png', 'model_nrm');
 
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
@@ -94,14 +95,14 @@
 				var self = this;
 				console.log('ready to render!');
 
-				if (simdSupported)
+				/*if (simdSupported)
 				{
-					simdToggle.innerText = 'SIMD is on!';	
+					simdToggle.value = 'SIMD is on!';	
 					simdToggle.disabled  = false;
 
-					doc.getElementById('top_info').insertAdjacentHTML('beforeend', 
+					doc.getElementById('top-info').insertAdjacentHTML('beforeend', 
 						'<span class="midblue">&nbsp;SIMD optimized!</span>');
-				}
+				}*/
 
 				return function(content)
 				{
@@ -144,11 +145,12 @@
 					}
 
 					// Toggle SIMD button (supported browsers only)
-					simdToggle.onclick = function()
+					ssaoToggle.onclick = function()
 					{
-						simdEnabled = !simdEnabled;
-						simdToggle.innerText = 'SIMD is ' +
-							((simdEnabled) ? 'on!' : 'off!');
+						//simdEnabled = !simdEnabled;
+						ssaoEnabled = !ssaoEnabled;
+						ssaoToggle.value = 'SSAO is ' +
+							((ssaoEnabled) ? 'on' : 'off');
 					}
 				}
 			},
@@ -173,7 +175,11 @@
 				});
 
 				// Render
+				buffer.clear(ssaoEnabled ? [255, 255, 255] : [5, 5, 5]);
 				renderer.drawImage();
+
+				if (ssaoEnabled) buffer.postProc();
+				buffer.draw();
 
 				// Update rotation angle
 				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);

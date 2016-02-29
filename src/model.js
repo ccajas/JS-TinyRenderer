@@ -15,45 +15,37 @@ Model = (function()
 
 	Model.parseOBJ = function(lines, model)
 	{
-		var splitLine = function(i) { return lines[i].split(' ').splice(1, 3); }
+		var splitLn = function(i) { return lines[i].split(' ').splice(1, 3); }
 
 		// Read each line
 		for (var i = 0; i < lines.length; i++)
 		{
 			// Find vertex positions
-			switch (lines[i].substr(0, 2))
-			{
-				case 'v ':
-					model.verts.push(new f32a(splitLine(i)));
-					break;
 
-				// Find vertex normals
-				case 'vn':
-					model.normals.push(new f32a(splitLine(i)));
-					break;
+			var mtype = lines[i].substr(0, 2);
+			var mdata = (mtype == 'v ') ? model.verts : 
+				 		(mtype == 'vn') ? model.normals : 
+				 		(mtype == 'vt') ? model.texcoords : null;
 
-				// Find texture coordinates
-				case 'vt':
-					model.texcoords.push(new f32a(splitLine(i)));
-					break;
-
-				// Find face indices
-				case 'f ':
-					var indices = splitLine(i);
-					
-					for (var j = 0; j < 3; j++)
-						indices[j] = indices[j].split('/').map(function(i) {
-							return parseInt(i - 1);
-						});
-
-					model.faces.push(indices);
-					break;
-			}
+			// Otherwise, add vertex data as normal
+			if (mdata)
+				mdata.push(new f32a(splitLn(i)));
 		}
 
-		console.log('total verts: '+ model.verts.length);
-		console.log('total normals: '+ model.normals.length);
-		console.log('total faces: '+ model.faces.length);
+		// Read again for face data
+		for (var i = 0; i < lines.length; i++)
+		{
+			// Special case for parsing face indices
+			if (lines[i].substr(0, 2) == 'f ')
+			{
+				idx = splitLn(i);						
+				for (j = 0; j < 3; j++)
+					idx[j] = idx[j].split('/')
+						.map(function(i) { return parseInt(i - 1) });
+
+				model.faces.push(idx);
+			}
+		}
 	}
 
 	Model.prototype =

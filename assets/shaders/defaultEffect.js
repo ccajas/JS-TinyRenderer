@@ -30,18 +30,18 @@ DefaultEffect = (function()
 
 			// Transform vertex to screen space
 
-			var x = m.floor((rt[0] / 4 + 0.5 / ratio) * this.scr_w * ratio); 
-			var y = m.floor((rt[1] / 4 + 0.5) * this.scr_h);
-			var z = m.floor((rt[2] / 4 + 0.5) * 65536);
+			var x = m.floor((rt[0] / 2 + 0.5 / ratio) * this.scr_w * ratio); 
+			var y = m.floor((rt[1] / 2 + 0.5) * this.scr_h);
+			var z = m.floor((rt[2] / 2 + 0.5) * 65536);
 
 			return [[x, y, z], vs_in[1], normal, this.r];
 		},
 
 		fragment: function(ps_in, color)
 		{
-			var ambient = 0.25;
+			var ambient = 0.35;
 			var light = [];
-			var spcolor = [0.0, 0.25, 1];
+			var spcolor = [0.2, 0.25, 0.35];
 
 			// Sample diffuse and normal textures
 			var t = this.texture.sample(null, ps_in[0]);

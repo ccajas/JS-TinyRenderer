@@ -204,28 +204,29 @@ orient2d = function(p1, p2, b)
 	return (p2[0]-p1[0]) * (b[1]-p1[1]) - (p2[1]-p1[1]) * (b[0]-p1[0]);
 }
 
-/*
+
 // Get the max elevation angle from a point in the z-buffer (as a heightmap)
 
-max_elevation_angle = function(zbuffer, index, p, dims, ray, width)
+max_elevation_angle = function(zbuf, index, p, dims, ray, width)
 {
 	var maxangle = 0;
-	for (var t = 1; t < 40; t += 3) 
+	for (var t = 0; t < width/30; t += width/360) 
 	{
 		// Current position of the ray traveled, and check for out of bounds
 		var cur = [p[0] + ray[0] * t, p[1] + ray[1] * t];
-		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) return maxangle;
+
+		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) 
+			return maxangle;
 
 		var distance = Vec3.dist([p[0] - cur[0], p[1] - cur[1]]);
 		if (distance < 1) continue;
 
 		// buffer index
-		var curIndex = ((dims[1] - m.floor(cur[1])) * width) + m.floor(cur[0]);
-		var elevation = (zbuffer[curIndex] - zbuffer[index]) * 0.002; // 1/500
+		var curIndex = (m.floor(cur[1]) * width) + m.floor(cur[0]);
+		var elevation = (zbuf[curIndex] - zbuf[index]) * 0.002; // 1/500
 
 		maxangle = m.max(maxangle, elevation / distance);
 	}
 
 	return maxangle;
 }
-*/

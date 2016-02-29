@@ -44,8 +44,6 @@
 
 			drawImage: function()
 			{
-				buffer.clear([0, 0, 0]);
-
 				// Transform geometry to screen space
 				for (var f = 0; f < model.faces.length; f++)
 				{
@@ -60,8 +58,6 @@
 					else
 						buffer.drawTriangleSIMD(vs_out, effect, tbuf);
 				}
-
-				buffer.draw();
 			}
 		}
 
