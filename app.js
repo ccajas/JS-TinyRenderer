@@ -1,5 +1,6 @@
 (function() 
 {
+	// Globals
 	startProfile = null;
 	frames = 0;
 
@@ -11,8 +12,10 @@
 		var thetaX = m.PI;
 		var thetaY = m.PI;
 		var ctx = null;
-		var simdToggle = doc.getElementById('simd-toggle');
+		var ssaoToggle = doc.getElementById('ssao-toggle');
+		var ssaoEnabled = false;
 
+		// Mouse control
 		var mouseDown = false;
 		var mouseMoved = false;
 		var lastMouseX = 0;
@@ -54,8 +57,8 @@
 			var newX = event.clientX;
 			var newY = event.clientY;
 
-			thetaX += (newY - lastMouseY) / (m.PI * 60);
-			thetaY += (newX - lastMouseX) / (m.PI * 90);
+			thetaX += (newX - lastMouseX) / (m.PI * 90);
+			thetaY += (newY - lastMouseY) / (m.PI * 60);
 
 			lastMouseX = newX;
 			lastMouseY = newY;
@@ -73,8 +76,9 @@
 				if (canvas.getContext)
 				{
 					content.load('Model')('assets/models/testmodel/model.obj', 'model');
-					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
+					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
+
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
 					// Call update after content is loaded
@@ -90,12 +94,6 @@
 			{
 				var self = this;
 				console.log('ready to render!');
-
-				if (simdSupported)
-				{
-					simdToggle.value = 'SIMD is on!';	
-					simdToggle.disabled  = false;
-				}
 
 				return function(content)
 				{
@@ -138,11 +136,12 @@
 					}
 
 					// Toggle SIMD button (supported browsers only)
-					simdToggle.onclick = function()
+					ssaoToggle.onclick = function()
 					{
-						simdEnabled = !simdEnabled;
-						simdToggle.value = 'SIMD is ' +
-							((simdEnabled) ? 'on!' : 'off!');
+						//simdEnabled = !simdEnabled;
+						ssaoEnabled = !ssaoEnabled;
+						ssaoToggle.value = 'SSAO is ' +
+							((ssaoEnabled) ? 'on' : 'off');
 					}
 				}
 			},
@@ -156,8 +155,8 @@
 				// Set up effect params
 				start = new Date();
 
-				var rotateX = Matrix.rotation(Quaternion.fromAxisAngle(1, 0, 0, thetaX));
-				var rotateY = Matrix.rotation(Quaternion.fromAxisAngle(0, 1, 0, thetaY));
+				var rotateX = Matrix.rotation(Quaternion.fromAxisAngle(1, 0, 0, thetaY));
+				var rotateY = Matrix.rotation(Quaternion.fromAxisAngle(0, 1, 0, thetaX));
 				var scale = Matrix.scale(1, 1, 1);
 
 				var world = Matrix.mul(rotateX, rotateY);
@@ -167,7 +166,11 @@
 				});
 
 				// Render
+				buffer.clear(ssaoEnabled ? [255, 255, 255] : [5, 5, 5]);
 				renderer.drawImage();
+
+				if (ssaoEnabled) buffer.postProc();
+				buffer.draw();
 
 				// Update rotation angle
 				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);

@@ -41,7 +41,7 @@ DefaultEffect = (function()
 		{
 			var ambient = 0.25;
 			var light = [];
-			var spcolor = [0.0, 0.25, 1];
+			var spcolor = [1, 1, 1];
 
 			// Sample diffuse and normal textures
 			var t = this.texture.sample(null, ps_in[0]);
@@ -55,7 +55,7 @@ DefaultEffect = (function()
 			// Using Blinn reflection model
 			var view = this.cam;
   			var r = Vec3.reflect(nl, nnt); // reflected light
-  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 7) * 10;
+  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 5) * 4;
 
 			light[0] = intensity + ambient + spec * spcolor[0];
 			light[1] = intensity + ambient + spec * spcolor[1];
