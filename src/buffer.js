@@ -192,7 +192,7 @@ Buffer = (function()
 					// Calculate ray vectors
 					var rays = [];
 
-					for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / (m.random() * (6 - 3) + 3))
+					for (var a = 0; a < m.PI * 2-1e-4; a += m.PI / (m.random() * (4 - 1) + 1))
 						rays.push([m.sin(a), m.cos(a)]);			
 
 					// Get buffer index

@@ -9,8 +9,8 @@
 	App = (function()
 	{
 		// Internal variables
-		var thetaX = 0;
-		var thetaY = 0;
+		var thetaX = m.PI;
+		var thetaY = m.PI;
 		var ctx = null;
 		var ssaoToggle = doc.getElementById('ssao-toggle');
 		var ssaoEnabled = false;
