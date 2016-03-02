@@ -75,9 +75,9 @@
 
 				if (canvas.getContext)
 				{
-					content.load('Model')('assets/models/diablo3/diablo3.obj', 'model');
-					content.load('Texture')('assets/models/diablo3/diablo3_pose_diffuse.png', 'model_diff');
-					content.load('Texture')('assets/models/diablo3/diablo3_pose_nm.png', 'model_nrm');
+					content.load('Model')('assets/models/testmodel/model.obj', 'model');
+					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
+					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
@@ -94,15 +94,6 @@
 			{
 				var self = this;
 				console.log('ready to render!');
-
-				/*if (simdSupported)
-				{
-					simdToggle.value = 'SIMD is on!';	
-					simdToggle.disabled  = false;
-
-					doc.getElementById('top-info').insertAdjacentHTML('beforeend', 
-						'<span class="midblue">&nbsp;SIMD optimized!</span>');
-				}*/
 
 				return function(content)
 				{

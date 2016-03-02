@@ -23,7 +23,6 @@ module.exports = function(grunt)
 					'src/buffer.js',
 					'src/effect.js',
 					'src/texture.js',
-					'src/content.js',
 					'src/main.js'
 				]}
 			}

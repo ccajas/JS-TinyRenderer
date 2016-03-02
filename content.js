@@ -15,7 +15,7 @@ ContentManager = (function()
 
 	var collection = { }
 
-	// General AJAX request function
+	// General AJAX request function, nothing extensive
 
 	function request(file)
 	{
