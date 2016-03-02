@@ -54,7 +54,7 @@ Buffer = (function()
 
 		get: function(x, y)
 		{
-			return this.buf32[y * this.w + x];
+			return this.buf32[(y * this.w + x) << 2];
 		},
 
 		// Draw a triangle from 2D points
