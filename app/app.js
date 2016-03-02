@@ -75,9 +75,9 @@
 
 				if (canvas.getContext)
 				{
-					content.load('Model')('assets/models/testmodel/model.obj', 'model');
-					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
-					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
+					content.load('Model')('assets/models/tank1/tank1.obj', 'model');
+					content.load('Texture')('assets/models/tank1/engine_diff_tex_small.png', 'model_diff');
+					//content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 
 					content.load('Effect')('assets/shaders/defaultEffect.js');
 
@@ -130,7 +130,9 @@
 					el.value = "Render";
 					el.onclick = function() 
 					{
-						console.log('Begin render!'); 
+						console.log('Begin render!');
+						el.disabled = true;
+						el.value = "Rendering";
 						startProfile = new Date();
 						self.update(self.renderer);
 					}
@@ -176,8 +178,8 @@
 				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
 				// Display stats
-				var execTime = "Frame took "+ (new Date().getTime() - start.getTime()) +" ms";
-				var calls = "Pixels drawn/found "+ buffer.calls +'/'+ buffer.pixels;
+				var execTime = "Frame time: "+ (new Date().getTime() - start.getTime()) +" ms";
+				var calls = "Pixels drawn/searched: "+ buffer.calls +'/'+ buffer.pixels;
 
 				ctx.fillText(execTime, 4, buffer.h - 26);
 				ctx.fillText(calls, 4, buffer.h - 8);
