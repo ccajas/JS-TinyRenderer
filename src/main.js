@@ -7,7 +7,7 @@
 	f32a = Float32Array;
 	f64a = Float64Array;
 
-	simdSupported = typeof SIMD !== 'undefined'
+	simdSupported = false;// typeof SIMD !== 'undefined'
 	simdEnabled = false;
 
 	// Main function

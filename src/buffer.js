@@ -13,7 +13,6 @@ Buffer = (function()
 		this.pixels = 0;
 
 		// create buffers for data manipulation
-
 		this.imgData = ctx.createImageData(this.w, this.h);
 
 		this.buf = new ArrayBuffer(this.imgData.data.length);
@@ -22,9 +21,6 @@ Buffer = (function()
 
 		// Z-buffer
 		this.zbuf = new Uint32Array(this.imgData.data.length);
-
-		// Per-frame vertex data
-		this.points = new Int32Array(3);
 	}
 
 	Buffer.prototype =
@@ -54,7 +50,7 @@ Buffer = (function()
 
 		get: function(x, y)
 		{
-			return this.buf32[(y * this.w + x) << 2];
+			return this.buf32[y * this.w + x];
 		},
 
 		// Draw a triangle from 2D points
@@ -121,7 +117,7 @@ Buffer = (function()
 				for (var px = boxMin[0]; px <= boxMax[0]; px++) 
 				{
 					this.pixels++;	
-
+					
 					// Check if pixel is outsde of barycentric coords
 					if ((w[0] | w[1] | w[2]) > 0)
 					{

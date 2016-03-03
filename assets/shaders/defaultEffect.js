@@ -39,7 +39,7 @@ DefaultEffect = (function()
 
 		fragment: function(ps_in, color)
 		{
-			var ambient = 0.45;
+			var ambient = 0.65;
 			var light = [];
 			var spcolor = [0.2, 0.25, 0.35];
 
@@ -55,7 +55,7 @@ DefaultEffect = (function()
 			// Using Blinn reflection model
 			var view = this.cam;
   			var r = Vec3.reflect(nl, nnt); // reflected light
-  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 7) * 10;
+  			var spec = m.pow(m.max(Vec3.dot(r, view), 0), 10) * 10;
 
 			light[0] = intensity + ambient + spec * spcolor[0];
 			light[1] = intensity + ambient + spec * spcolor[1];
