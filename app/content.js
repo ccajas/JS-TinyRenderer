@@ -39,7 +39,7 @@ ContentManager = (function()
 
 	function loadError(response)
 	{
-		console.error("request failed!");	
+		console.error("request failed!", response);	
 	}
 
 	// Add total completed content load requests
