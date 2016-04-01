@@ -32,15 +32,15 @@
 		App.handleMouseEvents = function(canvas)
 		{
 			canvas.onmousedown = App.onMouseDown;
-    		document.onmouseup = App.onMouseUp;
-    		document.onmousemove = App.onMouseMove;
+			document.onmouseup = App.onMouseUp;
+			document.onmousemove = App.onMouseMove;
 		}
 
 		App.onMouseDown = function(event) 
 		{
 			mouseDown = true;
-    		lastMouseX = event.clientX;
-    		lastMouseY = event.clientY;
+			lastMouseX = event.clientX;
+			lastMouseY = event.clientY;
 		}
 
 		App.onMouseUp = function(event) 
@@ -75,7 +75,7 @@
 
 				if (canvas.getContext)
 				{
-					content.load('Model')('assets/models/tank1/Tank1.obj', 'model');
+					content.load('Model')('assets/models/tank1/tank1.obj', 'model');
 					content.load('Texture')('assets/models/tank1/engine_diff_tex_small.png', 'model_diff');
 					//content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 
@@ -137,7 +137,7 @@
 						self.update(self.renderer);
 					}
 
-					// Toggle SIMD button (supported browsers only)
+					// Toggle SSAO button
 					ssaoToggle.onclick = function()
 					{
 						//simdEnabled = !simdEnabled;
@@ -169,7 +169,7 @@
 
 				// Render
 				buffer.clear(ssaoEnabled ? [255, 255, 255] : [5, 5, 5]);
-				renderer.drawImage();
+				renderer.drawGeometry(buffer);
 
 				if (ssaoEnabled) buffer.postProc();
 				buffer.draw();
