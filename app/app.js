@@ -32,15 +32,15 @@
 		App.handleMouseEvents = function(canvas)
 		{
 			canvas.onmousedown = App.onMouseDown;
-    		document.onmouseup = App.onMouseUp;
-    		document.onmousemove = App.onMouseMove;
+			document.onmouseup = App.onMouseUp;
+			document.onmousemove = App.onMouseMove;
 		}
 
 		App.onMouseDown = function(event) 
 		{
 			mouseDown = true;
-    		lastMouseX = event.clientX;
-    		lastMouseY = event.clientY;
+			lastMouseX = event.clientX;
+			lastMouseY = event.clientY;
 		}
 
 		App.onMouseUp = function(event) 
@@ -137,7 +137,7 @@
 						self.update(self.renderer);
 					}
 
-					// Toggle SIMD button (supported browsers only)
+					// Toggle SSAO button
 					ssaoToggle.onclick = function()
 					{
 						//simdEnabled = !simdEnabled;
@@ -169,7 +169,7 @@
 
 				// Render
 				buffer.clear(ssaoEnabled ? [255, 255, 255] : [5, 5, 5]);
-				renderer.drawImage();
+				renderer.drawGeometry(buffer);
 
 				if (ssaoEnabled) buffer.postProc();
 				buffer.draw();

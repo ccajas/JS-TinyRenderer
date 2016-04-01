@@ -42,7 +42,7 @@
 
 			// Draw model called in deferred request
 
-			drawImage: function()
+			drawGeometry: function(buffer)
 			{
 				// Transform geometry to screen space
 				for (var f = 0; f < model.faces.length; f++)

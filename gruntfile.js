@@ -37,6 +37,5 @@ module.exports = function(grunt)
 	});
 
 	grunt.renameTask('watch', 'watchfiles');
-
 	grunt.registerTask('watch', ['watchfiles']); 
-};
+}
