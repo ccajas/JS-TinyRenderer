@@ -1,5 +1,7 @@
 # JS TinyRenderer
-A small software renderer written in JavaScript. (Now with SIMD support!*)
+A small software renderer written in JavaScript.
+
+![Screen-Space Ambient Occlusion rendering](http://ccajas.github.io/JS-TinyRenderer/jstr-sample.png)
 
 It is based off Dmitry's [TinyRenderer](https://github.com/ssloy/tinyrenderer), using the same concepts and goal of keeping 
 the application small while still retaining the core features of a software renderer. Currently fits in less than 10k of code! I'll try to keep it small.
@@ -25,7 +27,7 @@ As this is a software renderer, the entire application is CPU bound, but there i
   * Models (.obj)
   * Textures (Canvas supported types)
 
-##### Todo
+### Todo
 * Render to Texture
 * Perspective view camera
 * Anti-aliasing using edge detection
@@ -43,5 +45,3 @@ npm install grunt-contrib-uglify --save-dev
 ```
 
 Run `grunt watch` to start watching the changes in the source code, which will bundle the files and `uglify` the code when a file is saved.
-
-*Participating browsers only. Download [Firefox Nightly](https://nightly.mozilla.org/) to get the benefits of SIMD!
