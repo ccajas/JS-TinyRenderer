@@ -17,6 +17,16 @@ h1, h2, h3, h4 {
 canvas {
 	margin: 0px auto;
 	border: 1px solid #ccc;
+	cursor: move;
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
+}
+
+canvas:active { 
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
 }
 
 .container-fluid {
@@ -45,6 +55,13 @@ canvas {
 	width: 150px;
 	border: 0px;
 	background: #ddd;
+	color: #444;
+}
+
+#info {
+	padding: 20px;
+	text-align: center;
+	color: #444;
 }
 
 input[type='button']:active{

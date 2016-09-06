@@ -177,10 +177,12 @@
 				// Update rotation angle
 				//theta += m.max((0.001 * (new Date().getTime() - start.getTime())), 1/60);
 
-				// Display stats
+				// Display stats and info
 				var execTime = "Frame time: "+ (new Date().getTime() - start.getTime()) +" ms";
+				var infoText = "Drag mouse to rotate";
 				var calls = "Pixels drawn/searched: "+ buffer.calls +'/'+ buffer.pixels;
 
+				ctx.fillText(infoText, 4, buffer.h - 44);
 				ctx.fillText(execTime, 4, buffer.h - 26);
 				ctx.fillText(calls, 4, buffer.h - 8);
 
