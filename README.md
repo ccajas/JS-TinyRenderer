@@ -25,8 +25,8 @@ the application small while still retaining the core features of a software rend
     * Barycentric coordinates for texel, depth and color interpolation
     * Z-buffer for depth checking
  * Float32 typed array for storing model coordinates provides faster performance
- * Uint8 and Uint32 for framebuffer storage
- * OBJ model parser that supports texture and normal coordinates
+ * Uint8 and Uint32 arrays for framebuffer storage
+ * OBJ model parser that supports vertex, texture, and normal coordinates
  * Texture loader and nearest-neighbor sampler using an "off-screen" Canvas image
 * Boilerplate code
  * Mouse functions for rotating model
