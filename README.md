@@ -3,29 +3,42 @@ A small software renderer written in JavaScript.
 
 ![Screen-Space Ambient Occlusion rendering](http://ccajas.github.io/JS-TinyRenderer/jstr-sample.png)
 
-It is based off Dmitry's [TinyRenderer](https://github.com/ssloy/tinyrenderer), using the same concepts and goal of keeping 
+This renderer is based off Dmitry's [TinyRenderer](https://github.com/ssloy/tinyrenderer), using the same concepts and goal of keeping 
 the application small while still retaining the core features of a software renderer. Currently fits in less than 10k of code! I'll try to keep it small.
-
-## How it works
-
-JS TinyRenderer emulates the basic steps of a hardware renderer, by reading geometric data from an array source, transforming triangle vertices to screen space, and rasterization of those triangles. It does this using the HTML5 Canvas element to represent the backbuffer, using only the ImageData interface and pixel setting/getting functions to render an image. No built-in Canvas functions for drawing lines or shapes are used. Of course, WebGL is not used either.
-
-As this is a software renderer, the entire application is CPU bound, but there is a lot of potential to add more features. It is currently a single threaded application, and might be difficult to add multithreading support due to the language, but it's something I would still consider.
 
 ## Current Features
 
-##### Renderer
-* Triangle drawing using barycentric coordinates
+* Triangle drawing with scanline algorithm
 * 3D transformations
 * Z-buffer for depth checking
 * Custom shader support with external scripts
 * Screen-space effects (SSAO included as an example)
 
-##### Misc
-* Content loading and management
-  * Shaders (JavaScript)
-  * Models (.obj)
-  * Textures (Canvas supported types)
+## Implementation
+
+* Renderer
+ * Programmable pipeline using Effect objects with vertex and fragment operations
+   * Effect parameters are mapped from object keys
+ * Math library with common vector, matrix, and quaternion operations 
+ * Triangle rasterization algorithm
+   * Edge function for testing points that lie inside a triangle
+    * Barycentric coordinates for texel, depth and color interpolation
+    * Z-buffer for depth checking
+ * Float32 typed array for storing model coordinates provides faster performance
+ * Uint8 and Uint32 for framebuffer storage
+ * OBJ model parser that supports texture and normal coordinates
+ * Texture loader and nearest-neighbor sampler using an "off-screen" Canvas image
+* Boilerplate code
+ * Mouse functions for rotating model
+ * Content manager
+   * Asynchronous loading for content
+   * Dynamically returns the appropriate loading function for each content type
+
+## Overview
+
+JS TinyRenderer emulates the basic steps of a hardware renderer, by reading geometric data from an array source, transforming triangle vertices to screen space, and rasterization of those triangles. It does this using the HTML5 Canvas element to represent the backbuffer, using only the ImageData interface and pixel setting/getting functions to render an image. No built-in Canvas functions for drawing lines or shapes are used. Of course, WebGL is not used either.
+
+As this is a software renderer, the entire application is CPU bound, but there is a lot of potential to add more features. It is currently a single threaded application, and might be difficult to add multithreading support due to the language, but it's something I would still consider.
 
 ### Todo
 * Render to Texture
