@@ -9,9 +9,9 @@ the application small while still retaining the core features of a software rend
 ## Current Features
 
 * Triangle drawing with scanline algorithm
-* 3D transformations
-* Z-buffer for depth checking
+* 3D transformations and Z-buffer
 * Custom shader support with external scripts
+* Loading different content types (models, textures, shaders)
 * Screen-space effects (SSAO included as an example)
 
 ## Implementation
