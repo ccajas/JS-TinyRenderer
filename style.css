@@ -64,6 +64,15 @@ canvas:active {
 	color: #444;
 }
 
+#info a {
+	color: #555;
+}
+
+#info em {
+	font-size: 14px;
+	color: #777;
+}
+
 input[type='button']:active{
 	background: #aaa;
 }
