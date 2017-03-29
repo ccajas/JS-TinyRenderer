@@ -39,12 +39,12 @@ DefaultEffect = (function()
 
 		fragment: function(ps_in, color)
 		{
-			var ambient = 0.25;
+			var ambient = 0.35;
 			var light = [];
 			var spcolor = [0.1, 0.125, 0.175];
 
 			// Sample diffuse and normal textures
-			var t = [255, 225, 235];//this.texture.sample(null, ps_in[0]);
+			var t = [235, 235, 235];//this.texture.sample(null, ps_in[0]);
 			var nt = ps_in[1];//this.texture_nrm.sample(null, ps_in[0]);
 
 			// Set normal
