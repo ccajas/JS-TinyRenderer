@@ -77,7 +77,7 @@
 				{
 					//content.load('Model')('assets/models/tank1/Tank1.obj', 'model');
 					//content.load('Texture')('assets/models/tank1/engine_diff_tex_small.png', 'model_diff');
-					content.load('Model')('assets/models/testmodel/model.obj', 'model');
+					content.load('Model')('assets/models/roman/roman.obj', 'model');
 					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
 					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 
