@@ -77,7 +77,7 @@
 				{
 					//content.load('Model')('assets/models/tank1/Tank1.obj', 'model');
 					//content.load('Texture')('assets/models/tank1/engine_diff_tex_small.png', 'model_diff');
-					content.load('Model')('assets/models/roman/roman.obj', 'model');
+					content.load('Model')('assets/models/roman/roman1.obj', 'model');
 					content.load('Texture')('assets/models/testmodel/model_pose_diffuse.png', 'model_diff');
 					content.load('Texture')('assets/models/testmodel/model_pose_nm.png', 'model_nrm');
 
@@ -142,10 +142,8 @@
 					// Toggle SSAO button
 					ssaoToggle.onclick = function()
 					{
-						//simdEnabled = !simdEnabled;
 						ssaoEnabled = !ssaoEnabled;
-						ssaoToggle.value = 'SSAO is ' +
-							((ssaoEnabled) ? 'on' : 'off');
+						ssaoToggle.value = ((ssaoEnabled) ? 'Disable ' : 'Enable ') + 'SSAO';
 					}
 				}
 			},
@@ -162,7 +160,6 @@
 				var rotateX = Matrix.rotation(Quaternion.fromAxisAngle(1, 0, 0, thetaY));
 				var rotateY = Matrix.rotation(Quaternion.fromAxisAngle(0, 1, 0, thetaX));
 				var scale = Matrix.scale(1, 1, 1);
-
 				var world = Matrix.mul(rotateX, rotateY);
 
 				effect.setParameters({
@@ -170,7 +167,7 @@
 				});
 
 				// Render
-				buffer.clear(ssaoEnabled ? [255, 255, 255] : [5, 5, 5]);
+				buffer.clear(ssaoEnabled ? [51, 51, 51] : [5, 5, 5]);
 				renderer.drawGeometry(buffer);
 
 				if (ssaoEnabled) buffer.postProc();
