@@ -17,13 +17,12 @@ module.exports = function(grunt)
 			},
 
 			js: {
-				files: { 'renderer.js': [
-					'src/model.js',
-					'src/math.js',
-					'src/buffer.js',
-					'src/effect.js',
-					'src/texture.js',
-					'src/main.js'
+				files: { 
+					'renderer.js': [
+					'src/*.js'
+				],
+					'website/renderer.js': [
+					'src/*.js'
 				]}
 			}
 		},
