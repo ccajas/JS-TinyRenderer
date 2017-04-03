@@ -39,7 +39,7 @@ Model = (function()
 			}
 
 			// Otherwise, add vertex data as normal
-			if (mdata)
+			else if (mdata)
 				mdata.push(new f32a(splitLn(i)));
 		}
 	}

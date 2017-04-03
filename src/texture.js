@@ -9,10 +9,15 @@ Texture = (function()
 
 		this.sample = function(state, uv)
 		{
+			var u = uv[0];
+			var v = uv[1];
+			if (u < 0) u = 1 + u;
+			if (v < 0) v = 1 + v;
+
 			// Get starting index of texture data sample
 			var idx = ((this.texData.height - 
-				m.ceil(uv[1] * this.texData.height)) * this.texData.width + 
-				m.ceil(uv[0] * this.texData.width))  * 4;
+				(v * this.texData.height)|0) * this.texData.width + 
+				(u * this.texData.width)|0)  * 4;
 
 			return [
 				this.texData.data[idx], 

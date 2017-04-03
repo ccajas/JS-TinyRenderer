@@ -23,6 +23,7 @@
 			drawGeometry: function(buffer)
 			{
 				// Transform geometry to screen space
+				
 				for (var f = 0; f < model.f.length; f++)
 				{
 					var vs_out = [];
