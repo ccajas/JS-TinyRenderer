@@ -4,7 +4,7 @@ A small software renderer written in JavaScript.
 ![Screen-Space Ambient Occlusion rendering](http://ccajas.github.io/JS-TinyRenderer/jstr-sample.png)
 
 This renderer is based off Dmitry's [TinyRenderer](https://github.com/ssloy/tinyrenderer), using the same concepts and goal of keeping 
-the application small while still retaining the core features of a software renderer. Currently fits in less than 10k of code! I'll try to keep it small.
+the application small while still retaining the core features of a software renderer. Currently fits in less than 8k of code! I'll try to keep it small. For technical info on how it's implemented, see [Scratchapixel's article on rasterization](https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage). 
 
 ## Current Features
 
