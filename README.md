@@ -16,7 +16,7 @@ the application small while still retaining the core features of a software rend
 
 ## Implementation
 
-* Renderer
+### Renderer
  * Programmable pipeline using Effect objects with vertex and fragment operations
    * Effect parameters are mapped from object keys
  * Math library with common vector, matrix, and quaternion operations 
@@ -28,7 +28,7 @@ the application small while still retaining the core features of a software rend
  * Uint8 and Uint32 arrays for framebuffer storage
  * OBJ model parser that supports vertex, texture, and normal coordinates
  * Texture loader and nearest-neighbor sampler using an "off-screen" Canvas image
-* Boilerplate code
+### Boilerplate code
  * Mouse functions for rotating model
  * Content manager
    * Asynchronous loading for content
