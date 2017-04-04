@@ -209,25 +209,29 @@ orient2d = function(p1, p2, b)
 max_elevation_angle = function(zbuf, index, p, dims, ray)
 {
 	var maxangle = 0;
-	for (var t = 0; t < 10; t++) 
+	var steps = 6;
+
+	for (var t = 0; t < steps; t++) 
 	{
 		var v = t * .003 * dims[0];
 		// Current position of the ray traveled, and check for out of bounds
 		var cur = [p[0] + ray[0] * v, p[1] + ray[1] * v];
 
 		// Return if the ray exceeds bounds
-		if (cur[0] >= dims[0] || cur[1] >= dims[1] || cur[0] < 0 || cur[1] < 0) 
-			return maxangle;
+		//if (cur[0] > dims[0] || cur[1] > dims[1] || cur[0] < 0 || cur[1] < 0) 
+		//	return maxangle;
 
-		var distance = Vec3.dist([p[0] - cur[0], p[1] - cur[1]]);
-		if (distance < 1) continue;
+		var dx = p[0] - cur[0];
+		var dy = p[1] - cur[1];
+		var dist2 = (dx * dx) + (dy * dy);
+		if (dist2 < 1) continue;
 
 		// buffer index
 		var curIndex = ((cur[1]|0) * dims[0]) + (cur[0]|0);
-		var angle = ((zbuf[curIndex] - zbuf[index]) * 0.008) / distance; // 1/125
+		var angle = ((zbuf[curIndex] - zbuf[index]) * 0.012); // 1/125
 		//var angle = elevation / distance;
 
-		if (maxangle < angle) maxangle = angle;
+		if (maxangle * dist2 < angle) maxangle = angle / dist2;
 	}
 
 	return maxangle;

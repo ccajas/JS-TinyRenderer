@@ -60,7 +60,7 @@
 
 				// Limit box dimensions to edges of the screen to avoid render glitches
 				if (boxMin[0] < 0)      boxMin[0] = 0;
-				if (boxMax[0] > buf.w) boxMax[0] = buf.w;
+				if (boxMax[0] > buf.w) 	boxMax[0] = buf.w;
 
 				var uv = [];
 				var bc = [];
@@ -86,6 +86,7 @@
 
 				var color = [0, 0, 0];
 				var nx, ny, nz;
+				var discard = true;
 				var z;
 
 				for (var py = boxMin[1]; py++ <= boxMax[1];)  
@@ -95,9 +96,9 @@
 
 					for (var px = boxMin[0]; px++ <= boxMax[0];) 
 					{
-						buf.pixels++;	
+						buf.pixels++;
 						
-						// Check if pixel is outsde of barycentric coords
+						// Check if pixel is inside of barycentric coords
 						if ((w[0] | w[1] | w[2]) > 0)
 						{
 							// Get normalized barycentric coordinates
@@ -114,8 +115,6 @@
 							
 							if (buf.zbuf[index] < z)
 							{
-								var nx, ny, nz;
-
 								// Calculate tex and normal coords
 								uv[0] = bc[0] * texUV[0][0] + bc[1] * texUV[1][0] + bc[2] * texUV[2][0];
 								uv[1] = bc[0] * texUV[0][1] + bc[1] * texUV[1][1] + bc[2] * texUV[2][1];
@@ -124,9 +123,8 @@
 								ny = bc[0] * norm[0][1] + bc[1] * norm[1][1] + bc[2] * norm[2][1];
 								nz = bc[0] * norm[0][2] + bc[1] * norm[1][2] + bc[2] * norm[2][2];
 
-								var discard = effect.fragment([uv, [nx, ny, nz]], color);
-
-								if (!discard)
+								// If pixel is not discarded, save the color
+								if (effect.fragment([uv, [nx, ny, nz]], color))
 								{
 									buf.zbuf[index] = z;
 									buf.set(index, color); 
