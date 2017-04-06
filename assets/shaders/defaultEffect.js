@@ -38,7 +38,7 @@ DefaultEffect = (function()
 			var y = ((rt[1] * 0.5 + 0.97) * this.scr_h)|0;
 			var z = ((rt[2] * 0.5 + 0.5) * 65536)|0;
 
-			return [[x, y, z], vs_in[1], normal, this.r];
+			return [[x, y, z], vs_in[1], normal];
 		},
 
 		fragment: function(ps_in, color)
@@ -69,7 +69,7 @@ DefaultEffect = (function()
 			color[1] = m.min(t[1] * light[1], 255);
 			color[2] = m.min(t[2] * light[2], 255);
 
-			return false;
+			return true;
 		}
 	}
 
