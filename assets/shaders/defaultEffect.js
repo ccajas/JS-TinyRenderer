@@ -66,7 +66,7 @@ DefaultEffect = (function()
 			color[1] = m.min(t[1] * light[1], 255);
 			color[2] = m.min(t[2] * light[2], 255);
 
-			return false;
+			return true;
 		}
 	}
 
