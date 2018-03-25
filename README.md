@@ -32,6 +32,7 @@ the application small while still retaining the core features of a software rend
  * Mouse functions for rotating model
  * Content manager
    * Asynchronous loading for content
+   * Currying as a generic loader for various types eg. `content.load('type')('path_to_content','handle')`
    * Dynamically returns the appropriate loading function for each content type
 
 ## Overview
